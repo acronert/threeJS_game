@@ -33,14 +33,15 @@ export function createGyroControls(camera, domElement) {
   window.addEventListener("deviceorientation", (event) => {
     yaw = (event.alpha ?? 0) * degToRad; // z-axis 0 to 360 degrees     yaw
     pitch  = (event.beta  ?? 0) * degToRad; // x-axis -180 to 180 degrees  pitch
-    roll = (event.gamma ?? 0) * degToRad; // y-axis -90 to 90 degrees    roll
+    // roll = (event.gamma ?? 0) * degToRad; // y-axis -90 to 90 degrees    roll
+    roll = 0;
   });
 
 
   function update() {
-    // const euler = new THREE.Euler(pitch, roll, yaw, "XYZ");
-    // camera.setRotationFromEuler(euler);
-    camera.rotation.set(pitch - Math.PI / 2, yaw, roll);
+    const euler = new THREE.Euler(pitch - Math.PI / 2, yaw, roll, "XYZ");
+    camera.setRotationFromEuler(euler);
+    // camera.rotation.set(pitch - Math.PI / 2, yaw, roll);
   }
 
   return { update }
