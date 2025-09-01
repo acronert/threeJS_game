@@ -2,80 +2,81 @@ import * as THREE from "https://unpkg.com/three@0.164.1/build/three.module.js";
 
 export function createCameraControls(camera, domElement) {
   // Movement state
-  const keys = { forward:false, backward:false, left:false, right:false };
-  let yaw = 0, pitch = 0;
-  const speed = 0.05;
+  const keys = { forward:false, backward:false, left:false, right:false,
+                  up: false, down: false,
+                  pitch_up:false, pitch_down: false, yaw_left:false, yaw_right:false };
 
-  // --- Desktop Keyboard ---
+  let yaw = 0, pitch = 0;
+  const speed = 0.06;
+  const rotation_speed = 0.03; // in radians
+
+  // Keyboard
   document.addEventListener('keydown', e => {
+    //   if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
+    // e.preventDefault(); // stop page from scrolling
+    // }
+
     if(e.code==="KeyW") keys.forward=true;
     if(e.code==="KeyS") keys.backward=true;
     if(e.code==="KeyA") keys.left=true;
     if(e.code==="KeyD") keys.right=true;
+
+    if(e.code==="KeyQ") keys.up=true;
+    if(e.code==="KeyE") keys.down=true;
+
+    if(e.code==="ArrowUp") keys.pitch_up=true;
+    if(e.code==="ArrowDown") keys.pitch_down=true;
+    if(e.code==="ArrowLeft") keys.yaw_left=true;
+    if(e.code==="ArrowRight") keys.yaw_right=true;
+    if(e.code==="ArrowRight") keys.yaw_right=true;
   });
   document.addEventListener('keyup', e => {
     if(e.code==="KeyW") keys.forward=false;
     if(e.code==="KeyS") keys.backward=false;
     if(e.code==="KeyA") keys.left=false;
     if(e.code==="KeyD") keys.right=false;
+
+    if(e.code==="KeyQ") keys.up=false;
+    if(e.code==="KeyE") keys.down=false;
+
+    if(e.code==="ArrowUp") keys.pitch_up=false;
+    if(e.code==="ArrowDown") keys.pitch_down=false;
+    if(e.code==="ArrowLeft") keys.yaw_left=false;
+    if(e.code==="ArrowRight") keys.yaw_right=false;
   });
-
-  // --- Desktop Mouse ---
-  if (!('ontouchstart' in window)) {
-    domElement.addEventListener('mousemove', e => {
-      const sensitivity = 0.002;
-      yaw   -= e.movementX * sensitivity;
-      pitch -= e.movementY * sensitivity;
-      pitch = Math.max(-Math.PI/2, Math.min(Math.PI/2, pitch));
-    });
-
-    domElement.addEventListener('click', () => domElement.requestPointerLock());
-  }
-
-  // --- Mobile Touch ---
-  let touchStartX = 0, touchStartY = 0;
-  domElement.addEventListener('touchstart', e => {
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-  });
-  domElement.addEventListener('touchmove', e => {
-    const deltaX = e.touches[0].clientX - touchStartX;
-    const deltaY = e.touches[0].clientY - touchStartY;
-    const sensitivity = 0.002;
-    yaw   -= deltaX * sensitivity;
-    pitch -= deltaY * sensitivity;
-    pitch = Math.max(-Math.PI/2, Math.min(Math.PI/2, pitch));
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-  });
-
-  // --- Optional: Device Orientation ---
-  if ('DeviceOrientationEvent' in window) {
-    window.addEventListener('deviceorientation', e => {
-      // Only use alpha/beta for horizontal/vertical rotation
-      // Adjust as needed depending on device orientation
-      // yaw = THREE.MathUtils.degToRad(e.alpha || 0);
-      // pitch = THREE.MathUtils.degToRad(e.beta || 0) - Math.PI/2;
-    });
-  }
 
   // Update function (call in animate loop)
     function update() {
-        // Direction the camera is looking in the XZ plane
-        const direction = new THREE.Vector3(
-            -Math.sin(yaw), // flip sign for correct forward/back
-            0,
-            -Math.cos(yaw)  // flip sign for correct forward/back
-        ).normalize();
+      if(keys.pitch_up)   pitch += rotation_speed;
+      if(keys.pitch_down) pitch -= rotation_speed;
+      if(keys.yaw_left)   yaw += rotation_speed;
+      if(keys.yaw_right)  yaw -= rotation_speed;
 
-        const right = new THREE.Vector3().crossVectors(direction, new THREE.Vector3(0,1,0)).normalize();
+      // clamp rotation
+      pitch = Math.max(Math.min(pitch, Math.PI / 2), -Math.PI / 2);
 
-        if(keys.forward)  camera.position.addScaledVector(direction, speed);
-        if(keys.backward) camera.position.addScaledVector(direction, -speed);
-        if(keys.left)     camera.position.addScaledVector(right, -speed);
-        if(keys.right)    camera.position.addScaledVector(right, speed);
+      camera.rotation.order = "YXZ";
+      camera.rotation.set(pitch, yaw, 0);
 
-        // camera.rotation.set(pitch, yaw, 0);
+      // Direction the camera is looking in the XZ plane
+      const direction = new THREE.Vector3(
+          -Math.sin(yaw), // flip sign for correct forward/back
+          0,
+          -Math.cos(yaw)  // flip sign for correct forward/back
+      ).normalize();
+
+      const right = new THREE.Vector3().crossVectors(direction, new THREE.Vector3(0,1,0)).normalize();
+
+      const up = new THREE.Vector3(0, 1, 0);
+
+
+      if(keys.forward)  camera.position.addScaledVector(direction, speed);
+      if(keys.backward) camera.position.addScaledVector(direction, -speed);
+      if(keys.left)     camera.position.addScaledVector(right, -speed);
+      if(keys.right)    camera.position.addScaledVector(right, speed);
+
+      if(keys.up)    camera.position.addScaledVector(up, speed);
+      if(keys.down)    camera.position.addScaledVector(up, -speed);
     }
 
 
