@@ -31,7 +31,7 @@ export function createGyroControls(camera, domElement) {
     quaternion.setFromEuler(euler);
 
     // On applique la transformation du monde et de l'écran
-    screenTransform.copy(getScreenTr());
+    screenTransform.copy(getScreenTransform());
     worldTransform.setFromAxisAngle(new THREE.Vector3(1,0,0), -Math.PI/2); // ajustement axe x
     tempQuaternion.copy(quaternion).multiply(worldTransform).multiply(screenTransform);
 

@@ -18,36 +18,36 @@ document.body.appendChild(renderer.domElement);
 
 
 
-// Fullscreen
-function requestFullscreen() {
-  const el = document.body; // or renderer.domElement
-  if (el.requestFullscreen) {
-    el.requestFullscreen();
-  } else if (el.webkitRequestFullscreen) { // Safari / iOS
-    el.webkitRequestFullscreen();
-  } else if (el.msRequestFullscreen) { // old IE/Edge
-    el.msRequestFullscreen();
-  }
-}
+// // Fullscreen
+// function requestFullscreen() {
+//   const el = document.body; // or renderer.domElement
+//   if (el.requestFullscreen) {
+//     el.requestFullscreen();
+//   } else if (el.webkitRequestFullscreen) { // Safari / iOS
+//     el.webkitRequestFullscreen();
+//   } else if (el.msRequestFullscreen) { // old IE/Edge
+//     el.msRequestFullscreen();
+//   }
+// }
 
-// Toggle fullscreen
-function toggleFullscreen() {
-  if (!document.fullscreenElement) {
-    requestFullscreen();
-  } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    } else if (document.msExitFullscreen) {
-      document.msExitFullscreen();
-    }
-  }
-}
+// // Toggle fullscreen
+// function toggleFullscreen() {
+//   if (!document.fullscreenElement) {
+//     requestFullscreen();
+//   } else {
+//     if (document.exitFullscreen) {
+//       document.exitFullscreen();
+//     } else if (document.webkitExitFullscreen) {
+//       document.webkitExitFullscreen();
+//     } else if (document.msExitFullscreen) {
+//       document.msExitFullscreen();
+//     }
+//   }
+// }
 
-// Enter fullscreen on first touch or click
-document.addEventListener("touchstart", toggleFullscreen, { once: true });
-document.addEventListener("mousedown", toggleFullscreen, { once: true });
+// // Enter fullscreen on first touch or click
+// document.addEventListener("touchstart", toggleFullscreen, { once: true });
+// document.addEventListener("mousedown", toggleFullscreen, { once: true });
 
 
 
@@ -59,7 +59,7 @@ const gyroControls = createGyroControls(camera, renderer.domElement);
 function animate() {
   requestAnimationFrame(animate);
   // controls.update();
-  gyroControls.update();
+  // gyroControls.update();
   renderer.render(scene, camera);
 }
 animate();
