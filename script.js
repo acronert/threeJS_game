@@ -15,7 +15,8 @@ camera.position.set(0, 1.6, 0);
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
-
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap; // nice soft shadows
 
 
 // Fullscreen
@@ -68,7 +69,7 @@ function updateFOV() {
     camera.fov = 60;
   } else {
     // Portrait → normal FOV
-    camera.fov = 75;
+    camera.fov = 80;
   }
   camera.updateProjectionMatrix();
 }
