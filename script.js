@@ -15,7 +15,7 @@ camera.position.set(0, 1.6, 0);
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
-renderer.setSize(800, 600);  
+// renderer.setSize(800, 600);  
 
 // Controls
 // const controls = createCameraControls(camera, renderer.domElement);

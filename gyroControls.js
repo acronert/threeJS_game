@@ -16,9 +16,7 @@ export function createGyroControls(camera, domElement) {
   });
   
   function update() {
-      // Create quaternion from device orientation
-    const euler = new THREE.Euler(pitch, yaw, -roll, 'ZYX');
-    // const euler = new THREE.Euler(pitch, roll, yaw, 'XYZ'); 
+    const euler = new THREE.Euler(pitch, yaw, -roll, 'ZXY');
     camera.setRotationFromEuler(euler);
     }
 
