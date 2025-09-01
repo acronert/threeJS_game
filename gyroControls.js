@@ -9,6 +9,8 @@ export function createGyroControls(camera, domElement) {
   const worldTransform = new THREE.Quaternion();
   const tempQuaternion = new THREE.Quaternion();
 
+  let yawOffset = 0;
+
   // On ajuste la rotation selon l'orientation du téléphone (portrait)
   function getScreenTransform() {
     switch (window.orientation || 0) {
@@ -21,7 +23,7 @@ export function createGyroControls(camera, domElement) {
   }
 
   window.addEventListener("deviceorientation", (event) => {
-    const alpha = (event.alpha ?? 0) * degToRad; // z
+    const alpha = (event.alpha ?? 0) * degToRad + yawOffset; // z
     const beta  = (event.beta  ?? 0) * degToRad; // x
     const gamma = (event.gamma ?? 0) * degToRad; // y
 
@@ -40,6 +42,7 @@ export function createGyroControls(camera, domElement) {
   
   const keys = { forward:false, backward:false, left:false, right:false };
   const speed = 0.05;
+  const rotSpeed = 0.02;
 
   // Touch to walk
   domElement.addEventListener("touchstart", (e) => {
@@ -72,8 +75,8 @@ export function createGyroControls(camera, domElement) {
 
     if (keys.forward)  camera.position.addScaledVector(forward, speed);
     if (keys.backward)  camera.position.addScaledVector(forward, -speed);
-    if (keys.left)  camera.position.addScaledVector(right, -speed);
-    if (keys.right)  camera.position.addScaledVector(right, speed);
+    if (keys.left)  yawOffset += rotSpeed;
+    if (keys.right)  yawOffset -= rotSpeed;
   }
   
   return { update }
