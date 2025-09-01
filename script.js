@@ -35,12 +35,32 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// Display gyroscope data
-const gyroDiv = document.getElementById("gyroData");
+if (window.DeviceOrientationEvent) {
+  window.addEventListener(
+    "deviceorientation",
+    (event) => {
+      const alpha = event.alpha; // alpha: rotation around z-axis
+      const gamma = event.gamma; // gamma: left to right
+      const beta = event.beta; // beta: front back motion
 
-window.addEventListener("deviceorientation", (event) => {
-  const alpha = event.alpha?.toFixed(2) ?? 0; // z rotation
-  const beta  = event.beta?.toFixed(2) ?? 0;  // x tilt
-  const gamma = event.gamma?.toFixed(2) ?? 0; // y tilt
-  gyroDiv.innerHTML = `Alpha: ${alpha}<br>Beta: ${beta}<br>Gamma: ${gamma}`;
-});
+      handleOrientationEvent(beta, gamma, alpha);
+    },
+    true,
+  );
+}
+
+const handleOrientationEvent = (beta, gamma, alpha) => {
+  console.log("alpha = ", alpha);
+  console.log("beta = ", beta);
+  console.log("gamma = ", gamma);
+};
+
+// // Display gyroscope data
+// const gyroDiv = document.getElementById("gyroData");
+
+// window.addEventListener("deviceorientation", (event) => {
+//   const alpha = event.alpha?.toFixed(2) ?? 0; // z rotation
+//   const beta  = event.beta?.toFixed(2) ?? 0;  // x tilt
+//   const gamma = event.gamma?.toFixed(2) ?? 0; // y tilt
+//   gyroDiv.innerHTML = `Alpha: ${alpha}<br>Beta: ${beta}<br>Gamma: ${gamma}`;
+// });
