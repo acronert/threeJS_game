@@ -18,6 +18,59 @@ document.body.appendChild(renderer.domElement);
 
 
 
+// Fullscreen
+function requestFullscreen() {
+  const el = document.body; // or renderer.domElement
+  if (el.requestFullscreen) {
+    el.requestFullscreen();
+  } else if (el.webkitRequestFullscreen) { // Safari / iOS
+    el.webkitRequestFullscreen();
+  } else if (el.msRequestFullscreen) { // old IE/Edge
+    el.msRequestFullscreen();
+  }
+}
+
+// Toggle fullscreen
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    requestFullscreen();
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  }
+}
+
+// Enter fullscreen on first touch or click
+document.addEventListener("touchstart", toggleFullscreen, { once: true });
+document.addEventListener("mousedown", toggleFullscreen, { once: true });
+
+
+
+// Controls
+// const controls = createCameraControls(camera, renderer.domElement);
+const gyroControls = createGyroControls(camera, renderer.domElement);
+
+// Animation
+function animate() {
+  requestAnimationFrame(animate);
+  // controls.update();
+  gyroControls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+// Responsive resize
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
 // // Fullscreen
 // function requestFullscreen() {
 //   const el = document.body; // or renderer.domElement
@@ -50,23 +103,3 @@ document.body.appendChild(renderer.domElement);
 // document.addEventListener("mousedown", toggleFullscreen, { once: true });
 
 
-
-// Controls
-// const controls = createCameraControls(camera, renderer.domElement);
-const gyroControls = createGyroControls(camera, renderer.domElement);
-
-// Animation
-function animate() {
-  requestAnimationFrame(animate);
-  // controls.update();
-  // gyroControls.update();
-  renderer.render(scene, camera);
-}
-animate();
-
-// Responsive resize
-window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth/window.innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
-});
