@@ -79,6 +79,5 @@ export function createCameraControls(camera, domElement) {
       if(keys.down)    camera.position.addScaledVector(up, -speed);
     }
 
-
   return { update };
 }
