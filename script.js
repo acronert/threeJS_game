@@ -38,9 +38,9 @@ window.addEventListener('resize', () => {
 // Display gyroscope data
 const gyroDiv = document.getElementById("gyroData");
 
-window.addEventListener("devicemotion", (event) => {
-  const alpha = event.alpha;
-  const beta = event.beta;
-  const gamma = event.gamma;
-  gyroDiv.innerHTML = `Alpha: $(alpha)<br>Beta: $(beta)<br>Gamma: $(gamma)`;
+window.addEventListener("deviceorientation", (event) => {
+  const alpha = event.alpha?.toFixed(2) ?? 0; // z rotation
+  const beta  = event.beta?.toFixed(2) ?? 0;  // x tilt
+  const gamma = event.gamma?.toFixed(2) ?? 0; // y tilt
+  gyroDiv.innerHTML = `Alpha: ${alpha}<br>Beta: ${beta}<br>Gamma: ${gamma}`;
 });
