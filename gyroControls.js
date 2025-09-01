@@ -52,7 +52,7 @@ export function createGyroControls(camera, domElement) {
     console.log("width:", rect.width, "height:", rect.height);
     if (touch.clientX < rect.width / 4)   keys.left = true;
     else if (touch.clientX > 3 * rect.width / 4)   keys.right = true;
-    else if (touch.clientY > 7 * rect.height / 8)  keys.backward = true;
+    else if (touch.clientY > 3 * rect.height / 4)  keys.backward = true;
     else    keys.forward = true;
   });
 
