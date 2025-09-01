@@ -158,7 +158,7 @@ export function createScene() {
     scene.add(cube);
 
     // Lights
-    const ambientLight = new THREE.AmbientLight(0x404040, 1.2);
+    const ambientLight = new THREE.AmbientLight(0x404040, 2);
     scene.add(ambientLight);
 
     const pointLight = new THREE.PointLight(0xffffaa, 1, 10);

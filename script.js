@@ -16,23 +16,40 @@ const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
+
+
 // Fullscreen
-function goFullscreen() {
-  if (renderer.domElement.requestFullscreen) {
-    renderer.domElement.requestFullscreen();
+function requestFullscreen() {
+  const el = document.body; // or renderer.domElement
+  if (el.requestFullscreen) {
+    el.requestFullscreen();
+  } else if (el.webkitRequestFullscreen) { // Safari / iOS
+    el.webkitRequestFullscreen();
+  } else if (el.msRequestFullscreen) { // old IE/Edge
+    el.msRequestFullscreen();
   }
 }
 
-// Run once, on first touch
-function enableFullscreenOnce() {
-  goFullscreen();
-  document.removeEventListener("touchstart", enableFullscreenOnce);
-  document.removeEventListener("mousedown", enableFullscreenOnce); // desktop fallback
+// Toggle fullscreen
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    requestFullscreen();
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  }
 }
 
-// Attach listeners
-document.addEventListener("touchstart", enableFullscreenOnce, { once: true });
-document.addEventListener("mousedown", enableFullscreenOnce, { once: true });
+// Enter fullscreen on first touch or click
+document.addEventListener("touchstart", toggleFullscreen, { once: true });
+document.addEventListener("mousedown", toggleFullscreen, { once: true });
+
+
 
 // Controls
 // const controls = createCameraControls(camera, renderer.domElement);
