@@ -8,7 +8,7 @@ const scene = new THREE.Scene();
 scene.add(createScene());
 
 // Camera
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth/(window.innerHeight), 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(85, window.innerWidth/window.innerHeight, 0.1, 1000);
 camera.position.set(0, 1.6, 0);
 
 // Renderer
@@ -19,12 +19,13 @@ document.body.appendChild(renderer.domElement);
 
 // Controls
 // const controls = createCameraControls(camera, renderer.domElement);
-const controls = createGyroControls(camera, renderer.domElement);
+const gyroControls = createGyroControls(camera, renderer.domElement);
 
 // Animation
 function animate() {
   requestAnimationFrame(animate);
-  controls.update();
+  // controls.update();
+  gyroControls.update();
   renderer.render(scene, camera);
 }
 animate();
