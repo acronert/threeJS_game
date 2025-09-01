@@ -15,7 +15,24 @@ camera.position.set(0, 1.6, 0);
 const renderer = new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
-// renderer.setSize(800, 600);  
+
+// Fullscreen
+function goFullscreen() {
+  if (renderer.domElement.requestFullscreen) {
+    renderer.domElement.requestFullscreen();
+  }
+}
+
+// Run once, on first touch
+function enableFullscreenOnce() {
+  goFullscreen();
+  document.removeEventListener("touchstart", enableFullscreenOnce);
+  document.removeEventListener("mousedown", enableFullscreenOnce); // desktop fallback
+}
+
+// Attach listeners
+document.addEventListener("touchstart", enableFullscreenOnce, { once: true });
+document.addEventListener("mousedown", enableFullscreenOnce, { once: true });
 
 // Controls
 // const controls = createCameraControls(camera, renderer.domElement);
