@@ -1,6 +1,6 @@
 // import * as THREE from "https://unpkg.com/three@0.179.1/build/three.module.js";
 
-// export function createScene() {
+// export function createRoom() {
 //     const scene = new THREE.Group();
 
 //     // Floor
@@ -46,7 +46,7 @@
 
 import * as THREE from "https://unpkg.com/three@0.179.1/build/three.module.js";
 
-export function createScene() {
+export function createRoom() {
     const scene = new THREE.Group();
 
     // Floor (checkered)
