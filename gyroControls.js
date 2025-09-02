@@ -29,7 +29,6 @@ export function createGyroControls(camera, domElement) {
     beta  = (event.beta  ?? 0) * degToRad; // x
     gamma = (event.gamma ?? 0) * degToRad; // y
   });
-
   
   const keys = { forward:false, backward:false, left:false, right:false };
   const speed = 0.05;
@@ -73,7 +72,6 @@ export function createGyroControls(camera, domElement) {
     if (keys.backward)  camera.position.addScaledVector(forward, -speed);
 
     // Rotations
-
     euler.set(beta, alpha + yawOffset, -gamma, "YXZ"); // ordre YXZ pour éviter gimbal lock
     // phone gyro
     quaternion.setFromEuler(euler);
@@ -86,7 +84,12 @@ export function createGyroControls(camera, domElement) {
 
     tempQuaternion.copy(quaternion).multiply(worldTransform).multiply(screenTransform);
 
-    camera.quaternion.copy(tempQuaternion);
+
+    // camera.quaternion.copy(tempQuaternion);
+
+    // slerping
+    const slerpFactor = 0.5;
+    camera.quaternion.slerp(tempQuaternion, slerpFactor);
 
     if (keys.left)  yawOffset += rotSpeed;
     if (keys.right)  yawOffset -= rotSpeed;
