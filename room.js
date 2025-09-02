@@ -112,7 +112,7 @@ export function createRoom() {
     scene.add(cube);
 
     // Lights
-    const ambientLight = new THREE.AmbientLight(0x404040, 4);
+    const ambientLight = new THREE.AmbientLight(0x404040, 0.2);
     scene.add(ambientLight);
 
     const pointLight = new THREE.PointLight(0xffffaa, 1.5, 20);
