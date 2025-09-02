@@ -64,21 +64,38 @@ export function createGyroControls(camera, domElement) {
 
     if (keys.forward)  camera.position.addScaledVector(forward, speed);
     if (keys.backward)  camera.position.addScaledVector(forward, -speed);
-    if (keys.left)      yawOffset += rotSpeed;
-    if (keys.right)  yawOffset -= rotSpeed;
+    if (keys.left)      yawOffset -= rotSpeed;
+    if (keys.right)  yawOffset += rotSpeed;
 
-    // modify view
+    // Apply modifiers
     // phone orientation (portrait / landscape)
     screenTransform.copy(getScreenTransform());
     // x axis correction (to look front instead of down)
     worldTransform.setFromAxisAngle(new THREE.Vector3(1,0,0), -Math.PI/2); // ajustement axe x
     // yaw offset, from touch move
-    const yawQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), yawOffset);
+    const yawQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), yawOffset);
+    
+    tempQuaternion.copy(quaternion);
+    tempQuaternion.multiply(yawQuat);
 
+    
     // multiply all modifiers
-    tempQuaternion.copy(quaternion).multiply(worldTransform).multiply(screenTransform).multiply(yawQuat);
-
+      tempQuaternion.multiply(worldTransform).multiply(screenTransform);
+    
+    
     camera.quaternion.copy(tempQuaternion);
+
+
+    // tempQuaternion.multiply(yawQuat);
+
+
+    // // multiply all modifiers
+    // tempQuaternion.copy(quaternion)
+    //   .multiply(worldTransform)
+    //   .multiply(screenTransform);
+    
+    
+    // camera.quaternion.copy(tempQuaternion);
   }
   
   return { update }
