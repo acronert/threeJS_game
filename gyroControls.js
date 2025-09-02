@@ -8,6 +8,11 @@ export function createGyroControls(camera, domElement) {
   const screenTransform = new THREE.Quaternion();
   const worldTransform = new THREE.Quaternion();
   const tempQuaternion = new THREE.Quaternion();
+  
+  const alpha = 0;
+  const beta = 0;
+  const gamma = 0;
+
 
   let yawOffset = 0;
 
@@ -22,20 +27,9 @@ export function createGyroControls(camera, domElement) {
   }
 
   window.addEventListener("deviceorientation", (event) => {
-    const alpha = (event.alpha ?? 0) * degToRad + yawOffset; // z
-    const beta  = (event.beta  ?? 0) * degToRad; // x
-    const gamma = (event.gamma ?? 0) * degToRad; // y
-
-    // On convertit l'orientation du téléphone en quaternion
-    euler.set(beta, alpha, -gamma, "YXZ"); // ordre YXZ pour éviter gimbal lock
-    quaternion.setFromEuler(euler);
-
-    // On applique la transformation du monde et de l'écran
-    screenTransform.copy(getScreenTransform());
-    worldTransform.setFromAxisAngle(new THREE.Vector3(1,0,0), -Math.PI/2); // ajustement axe x
-    tempQuaternion.copy(quaternion).multiply(worldTransform).multiply(screenTransform);
-
-    camera.quaternion.copy(tempQuaternion);
+    alpha = (event.alpha ?? 0) * degToRad; // z
+    beta  = (event.beta  ?? 0) * degToRad; // x
+    gamma = (event.gamma ?? 0) * degToRad; // y
   });
 
   
@@ -63,17 +57,32 @@ export function createGyroControls(camera, domElement) {
   });
 
   function update() {
+    // Translations
     // forward direction in local space is (0, 0, -1)
     const forward = new THREE.Vector3(0, 0, -1);
     forward.applyQuaternion(camera.quaternion);
     forward.y = 0; // keep movement on ground plane
     forward.normalize();
 
-    // right direction is perpendicular to forward & up
-    const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
-
     if (keys.forward)  camera.position.addScaledVector(forward, speed);
     if (keys.backward)  camera.position.addScaledVector(forward, -speed);
+
+    // Rotations
+
+    euler.set(beta, alpha + yawOffset, -gamma, "YXZ"); // ordre YXZ pour éviter gimbal lock
+    // phone gyro
+    quaternion.setFromEuler(euler);
+
+    // correction according to phone orientation
+    screenTransform.copy(getScreenTransform());
+
+    // x correction to look forward instead of down
+    worldTransform.setFromAxisAngle(new THREE.Vector3(1,0,0), -Math.PI/2);
+
+    tempQuaternion.copy(quaternion).multiply(worldTransform).multiply(screenTransform);
+
+    camera.quaternion.copy(tempQuaternion);
+
     if (keys.left)  yawOffset += rotSpeed;
     if (keys.right)  yawOffset -= rotSpeed;
   }
