@@ -1,23 +1,20 @@
-import * as THREE from "https://unpkg.com/three@0.179.1/build/three.module.js";
-import { EffectComposer } from "https://unpkg.com/three@0.179.1/examples/jsm/postprocessing/EffectComposer.js?module";
-import { RenderPass } from "https://unpkg.com/three@0.179.1/examples/jsm/postprocessing/RenderPass.js?module";
-// import { AfterimagePass } from "https://unpkg.com/three@0.179.1/examples/jsm/postprocessing/AfterimagePass.js?module";
-import { FilmPass } from "https://unpkg.com/three@0.164.1/examples/jsm/postprocessing/FilmPass.js?module";
-import { OutputPass } from "https://unpkg.com/three@0.179.1/examples/jsm/postprocessing/OutputPass.js?module";
-import { ShaderPass } from "https://unpkg.com/three@0.179.1/examples/jsm/postprocessing/ShaderPass.js?module";
+import * as THREE from "three";
+import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
+import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
+// import { AfterimagePass } from "three/examples/jsm/postprocessing/AfterimagePass.js";
+import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
+import { FilmPass } from "three/examples/jsm/postprocessing/FilmPass.js";
+import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
+import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
 
 export function createRenderer() {
-
-    // Create Renderer
     const renderer = new THREE.WebGLRenderer({antialias:true});
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
     return (renderer);
 }
-
 
 // Postprocessing
 export function createComposer(renderer, scene, camera) {
@@ -42,7 +39,11 @@ export function createComposer(renderer, scene, camera) {
     const outputPass = new OutputPass();
     composer.addPass( outputPass );
 
-
+    // FXAA
+    const fxaaPass = new ShaderPass(FXAAShader);
+    fxaaPass.material.uniforms['resolution'].value.x = 1 / window.innerWidth;
+    fxaaPass.material.uniforms['resolution'].value.y = 1 / window.innerHeight;
+    composer.addPass(fxaaPass);
 
     
     return (composer);
@@ -81,14 +82,3 @@ const ChromaticAberrationShader = {
 
   `
 };
-
-
-// export function createRenderer() {
-//     const renderer = new THREE.WebGLRenderer({antialias:true});
-//     renderer.setSize(window.innerWidth, window.innerHeight);
-//     document.body.appendChild(renderer.domElement);
-//     renderer.shadowMap.enabled = true;
-//     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-//     return (renderer);
-// }

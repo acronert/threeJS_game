@@ -1,4 +1,4 @@
-import * as THREE from "https://unpkg.com/three@0.179.1/build/three.module.js";
+import * as THREE from "three";
 
 // export function createTerrainMesh() {
 //     const geometry = new THREE.PlaneGeometry(100, 100, 256, 256); // width, height, width segments, height segments
