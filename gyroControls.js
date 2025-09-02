@@ -49,7 +49,14 @@ export function createGyroControls(camera, domElement) {
     else    keys.forward = true;
   });
 
-  domElement.addEventListener("touchend", (e) => {
+  domElement.addEventListener("touchend", () => {
+    keys.forward = false;
+    keys.backward = false;
+    keys.left = false;
+    keys.right = false;
+  });
+
+  window.addEventListener("touchcancel", () => {
     keys.forward = false;
     keys.backward = false;
     keys.left = false;
