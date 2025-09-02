@@ -86,7 +86,7 @@ function animate() {
     if (terrainHeight != null)
         camera.position.y = terrainHeight + 1.6;
 
-    console.log("camera pos: x:", camera.position.x, ", y:", camera.position.y, ", z:", camera.position.z)
+    // console.log("camera pos: x:", camera.position.x, ", y:", camera.position.y, ", z:", camera.position.z)
     // renderer.render(scene, camera);
     composer.render();
 }
