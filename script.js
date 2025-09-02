@@ -1,7 +1,9 @@
-import * as THREE from "https://unpkg.com/three@0.164.1/build/three.module.js";
+import * as THREE from "https://unpkg.com/three@0.179.1/build/three.module.js";
 import { createScene } from "./scene.js";
 import { createCameraControls } from "./controls.js";
 import { createGyroControls } from "./gyroControls.js";
+import { createRenderer } from "./renderer.js";
+import { createComposer } from "./renderer.js";
 
 // Scene
 const scene = new THREE.Scene();
@@ -12,12 +14,14 @@ const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHei
 camera.position.set(0, 1.6, 0);
 
 // Renderer
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap; // nice soft shadows
+// const renderer = new THREE.WebGLRenderer({antialias:true});
+// renderer.setSize(window.innerWidth, window.innerHeight);
+// document.body.appendChild(renderer.domElement);
+// renderer.shadowMap.enabled = true;
+// renderer.shadowMap.type = THREE.PCFSoftShadowMap; // nice soft shadows
+const renderer = createRenderer(scene, camera);
 
+const composer = createComposer(renderer, scene, camera);
 
 // Fullscreen
 function requestFullscreen() {
@@ -59,7 +63,8 @@ function animate() {
   requestAnimationFrame(animate);
   // controls.update();
   gyroControls.update();
-  renderer.render(scene, camera);
+  // renderer.render(scene, camera);
+  composer.render();
 }
 animate();
 

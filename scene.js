@@ -1,4 +1,4 @@
-// import * as THREE from "https://unpkg.com/three@0.164.1/build/three.module.js";
+// import * as THREE from "https://unpkg.com/three@0.179.1/build/three.module.js";
 
 // export function createScene() {
 //     const scene = new THREE.Group();
@@ -44,7 +44,7 @@
 //     return scene;
 // }
 
-import * as THREE from "https://unpkg.com/three@0.164.1/build/three.module.js";
+import * as THREE from "https://unpkg.com/three@0.179.1/build/three.module.js";
 
 export function createScene() {
     const scene = new THREE.Group();
@@ -158,7 +158,7 @@ export function createScene() {
     scene.add(cube);
 
     // Lights
-    const ambientLight = new THREE.AmbientLight(0x404040, 2);
+    const ambientLight = new THREE.AmbientLight(0x404040, 4);
     scene.add(ambientLight);
 
     const pointLight = new THREE.PointLight(0xffffaa, 1.5, 20);

@@ -1,4 +1,4 @@
-import * as THREE from "https://unpkg.com/three@0.164.1/build/three.module.js";
+import * as THREE from "https://unpkg.com/three@0.179.1/build/three.module.js";
 
 export function createGyroControls(camera, domElement) {
 
@@ -72,20 +72,15 @@ export function createGyroControls(camera, domElement) {
     if (keys.backward)  camera.position.addScaledVector(forward, -speed);
 
     // Rotations
-    euler.set(beta, alpha + yawOffset, -gamma, "YXZ"); // ordre YXZ pour éviter gimbal lock
+    euler.set(beta, alpha + yawOffset, -gamma, "YXZ"); // YXZ to avoid gimbal lock
     // phone gyro
     quaternion.setFromEuler(euler);
-
     // correction according to phone orientation
     screenTransform.copy(getScreenTransform());
-
     // x correction to look forward instead of down
     worldTransform.setFromAxisAngle(new THREE.Vector3(1,0,0), -Math.PI/2);
 
     tempQuaternion.copy(quaternion).multiply(worldTransform).multiply(screenTransform);
-
-
-    // camera.quaternion.copy(tempQuaternion);
 
     // slerping
     const slerpFactor = 0.5;
