@@ -9,11 +9,9 @@ export function createGyroControls(camera, domElement) {
   const worldTransform = new THREE.Quaternion();
   const tempQuaternion = new THREE.Quaternion();
   
-  const alpha = 0;
-  const beta = 0;
-  const gamma = 0;
-
-
+  let alpha = 0;
+  let beta = 0;
+  let gamma = 0;
   let yawOffset = 0;
 
   function getScreenTransform() {
