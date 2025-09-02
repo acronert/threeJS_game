@@ -11,7 +11,7 @@ export function createGyroControls(camera, domElement) {
 
   let yawOffset = 0;
 
-  // On ajuste la rotation selon l'orientation du téléphone (portrait)
+  // Set rotation according to phone orientation (landscape / portrait)
   function getScreenTransform() {
     switch (window.orientation || 0) {
       case 0: return new THREE.Quaternion(); // portrait
@@ -23,23 +23,15 @@ export function createGyroControls(camera, domElement) {
   }
 
   window.addEventListener("deviceorientation", (event) => {
-    const alpha = (event.alpha ?? 0) * degToRad + yawOffset; // z
+    const alpha = (event.alpha ?? 0) * degToRad; // z
     const beta  = (event.beta  ?? 0) * degToRad; // x
     const gamma = (event.gamma ?? 0) * degToRad; // y
 
-    // On convertit l'orientation du téléphone en quaternion
-    euler.set(beta, alpha, -gamma, "YXZ"); // ordre YXZ pour éviter gimbal lock
+    // convert phone orientation to quaternion
+    euler.set(beta, alpha, -gamma, "YXZ"); // YXZ to avoid gimbal lock
     quaternion.setFromEuler(euler);
-
-    // On applique la transformation du monde et de l'écran
-    screenTransform.copy(getScreenTransform());
-    worldTransform.setFromAxisAngle(new THREE.Vector3(1,0,0), -Math.PI/2); // ajustement axe x
-    tempQuaternion.copy(quaternion).multiply(worldTransform).multiply(screenTransform);
-
-    camera.quaternion.copy(tempQuaternion);
   });
 
-  
   const keys = { forward:false, backward:false, left:false, right:false };
   const speed = 0.05;
   const rotSpeed = 0.02;
@@ -70,13 +62,23 @@ export function createGyroControls(camera, domElement) {
     forward.y = 0; // keep movement on ground plane
     forward.normalize();
 
-    // right direction is perpendicular to forward & up
-    const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
-
     if (keys.forward)  camera.position.addScaledVector(forward, speed);
     if (keys.backward)  camera.position.addScaledVector(forward, -speed);
-    if (keys.left)  yawOffset += rotSpeed;
+    if (keys.left)      yawOffset += rotSpeed;
     if (keys.right)  yawOffset -= rotSpeed;
+
+    // modify view
+    // phone orientation (portrait / landscape)
+    screenTransform.copy(getScreenTransform());
+    // x axis correction (to look front instead of down)
+    worldTransform.setFromAxisAngle(new THREE.Vector3(1,0,0), -Math.PI/2); // ajustement axe x
+    // yaw offset, from touch move
+    const yawQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), yawOffset);
+
+    // multiply all modifiers
+    tempQuaternion.copy(quaternion).multiply(worldTransform).multiply(screenTransform).multiply(yawQuat);
+
+    camera.quaternion.copy(tempQuaternion);
   }
   
   return { update }
