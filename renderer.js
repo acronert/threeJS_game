@@ -24,7 +24,7 @@ export function createComposer(renderer, scene, camera) {
 
     // FilmPass: adds film grain
     const filmPass = new FilmPass(
-        0.50, // noise intensity
+        0.65, // noise intensity
         0.25, // scanline intensity
         1024,   // scanline count
         false  // grayscale (true = black & white)
@@ -54,7 +54,7 @@ export function createComposer(renderer, scene, camera) {
 const ChromaticAberrationShader = {
   uniforms: {
     "tDiffuse": { value: null },
-    "amount": { value: 0.006 }, // intensity of the shift
+    "amount": { value: 0.008 }, // intensity of the shift
   },
   vertexShader: `
     varying vec2 vUv;

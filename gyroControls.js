@@ -46,7 +46,7 @@ export function createGyroControls(camera, inputManager) {
     tempQuaternion.copy(quaternion).multiply(worldTransform).multiply(screenTransform);
 
     // slerping
-    const slerpFactor = 0.5;
+    const slerpFactor = 0.35;
     camera.quaternion.slerp(tempQuaternion, slerpFactor);
   }
   
