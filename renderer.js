@@ -54,7 +54,7 @@ export function createComposer(renderer, scene, camera) {
 const ChromaticAberrationShader = {
   uniforms: {
     "tDiffuse": { value: null },
-    "amount": { value: 0.008 }, // intensity of the shift
+    "amount": { value: 0.006 }, // intensity of the shift
   },
   vertexShader: `
     varying vec2 vUv;

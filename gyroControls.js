@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-export function createGyroControls(camera, inputManager) {
+export function createControls(camera, inputManager) {
   const quaternion = new THREE.Quaternion();
   const euler = new THREE.Euler();
   const screenTransform = new THREE.Quaternion();
@@ -10,6 +10,13 @@ export function createGyroControls(camera, inputManager) {
   let yawOffset = 0;
   const speed = 0.05;
   const rotSpeed = 0.02;
+
+  // // Check if user on mobile or desktop
+  // let userIsMobile = 0;
+  // if (navigator.userAgentData) {
+  //   userIsMobile = navigator.userAgentData.mobile;
+  // }
+
 
   // Screen orientation
   function getScreenTransform() {
@@ -31,10 +38,9 @@ export function createGyroControls(camera, inputManager) {
     if (inputManager.keys.forward)   camera.position.addScaledVector(forward, speed);
     if (inputManager.keys.backward)  camera.position.addScaledVector(forward, -speed);
 
-    if (inputManager.keys.left)  yawOffset += rotSpeed;
-    if (inputManager.keys.right)  yawOffset -= rotSpeed;
-  
     // Rotations
+    if (inputManager.keys.yaw_left)  yawOffset += rotSpeed;
+    if (inputManager.keys.yaw_right)  yawOffset -= rotSpeed;
     euler.set(inputManager.gyro.beta,
               inputManager.gyro.alpha + yawOffset,
               -inputManager.gyro.gamma,

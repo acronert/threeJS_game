@@ -10,40 +10,7 @@ export function createCameraControls(camera, domElement) {
   const speed = 0.06;
   const rotation_speed = 0.03; // in radians
 
-  // Keyboard
-  document.addEventListener('keydown', e => {
-    //   if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.code)) {
-    // e.preventDefault(); // stop page from scrolling
-    // }
 
-    if(e.code==="KeyW") keys.forward=true;
-    if(e.code==="KeyS") keys.backward=true;
-    if(e.code==="KeyA") keys.left=true;
-    if(e.code==="KeyD") keys.right=true;
-
-    if(e.code==="KeyQ") keys.up=true;
-    if(e.code==="KeyE") keys.down=true;
-
-    if(e.code==="ArrowUp") keys.pitch_up=true;
-    if(e.code==="ArrowDown") keys.pitch_down=true;
-    if(e.code==="ArrowLeft") keys.yaw_left=true;
-    if(e.code==="ArrowRight") keys.yaw_right=true;
-    if(e.code==="ArrowRight") keys.yaw_right=true;
-  });
-  document.addEventListener('keyup', e => {
-    if(e.code==="KeyW") keys.forward=false;
-    if(e.code==="KeyS") keys.backward=false;
-    if(e.code==="KeyA") keys.left=false;
-    if(e.code==="KeyD") keys.right=false;
-
-    if(e.code==="KeyQ") keys.up=false;
-    if(e.code==="KeyE") keys.down=false;
-
-    if(e.code==="ArrowUp") keys.pitch_up=false;
-    if(e.code==="ArrowDown") keys.pitch_down=false;
-    if(e.code==="ArrowLeft") keys.yaw_left=false;
-    if(e.code==="ArrowRight") keys.yaw_right=false;
-  });
 
   // Update function (call in animate loop)
     function update() {
