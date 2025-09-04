@@ -27,6 +27,7 @@ function dotGridGradient(ix, iy, x, y) {
     return dx * grad.x + dy * grad.y;
 }
 
+// return from -1 to 1
 export function perlin_get(x, y) {
     // Cell coordinates
     let x0 = Math.floor(x);
