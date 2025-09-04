@@ -1,50 +1,63 @@
 import * as THREE from "three";
 
-export function createCameraControls(camera, domElement) {
-  // Movement state
-  const keys = { forward:false, backward:false, left:false, right:false,
-                  up: false, down: false,
-                  pitch_up:false, pitch_down: false, yaw_left:false, yaw_right:false };
+export function createControls(camera, inputManager) {
+  const quaternion = new THREE.Quaternion();
+  const euler = new THREE.Euler();
+  const screenTransform = new THREE.Quaternion();
+  const worldTransform = new THREE.Quaternion();
+  const tempQuaternion = new THREE.Quaternion();
+  
+  let yawOffset = 0;
+  const speed = 0.1;
+  const rotSpeed = 0.02;
 
-  let yaw = 0, pitch = 0;
-  const speed = 0.06;
-  const rotation_speed = 0.03; // in radians
-
-
-
-  // Update function (call in animate loop)
-    function update() {
-      if(keys.pitch_up)   pitch += rotation_speed;
-      if(keys.pitch_down) pitch -= rotation_speed;
-      if(keys.yaw_left)   yaw += rotation_speed;
-      if(keys.yaw_right)  yaw -= rotation_speed;
-
-      // clamp rotation
-      pitch = Math.max(Math.min(pitch, Math.PI / 2), -Math.PI / 2);
-
-      camera.rotation.order = "YXZ";
-      camera.rotation.set(pitch, yaw, 0);
-
-      // Direction the camera is looking in the XZ plane
-      const direction = new THREE.Vector3(
-          -Math.sin(yaw), // flip sign for correct forward/back
-          0,
-          -Math.cos(yaw)  // flip sign for correct forward/back
-      ).normalize();
-
-      const right = new THREE.Vector3().crossVectors(direction, new THREE.Vector3(0,1,0)).normalize();
-
-      const up = new THREE.Vector3(0, 1, 0);
-
-
-      if(keys.forward)  camera.position.addScaledVector(direction, speed);
-      if(keys.backward) camera.position.addScaledVector(direction, -speed);
-      if(keys.left)     camera.position.addScaledVector(right, -speed);
-      if(keys.right)    camera.position.addScaledVector(right, speed);
-
-      if(keys.up)    camera.position.addScaledVector(up, speed);
-      if(keys.down)    camera.position.addScaledVector(up, -speed);
+  // Screen orientation
+  function getScreenTransform() {
+    switch (window.orientation || 0) {
+      case 0: return new THREE.Quaternion(); // portrait
+      case 90: return new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1), -Math.PI/2);
+      case -90: return new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1), Math.PI/2);
+      case 180: return new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1), Math.PI);
+      default: return new THREE.Quaternion();
     }
+  }
 
-  return { update };
+  function update() {
+    // Move
+    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+    forward.y = 0; // keep movement on ground plane
+    forward.normalize();
+
+    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+    right.y = 0; // keep horizontal
+    right.normalize();
+
+    const up = new THREE.Vector3(0, 1, 0); // world up, or rotate with camera if you prefer
+  
+    if (inputManager.keys.forward)   camera.position.addScaledVector(forward, speed);
+    if (inputManager.keys.backward)  camera.position.addScaledVector(forward, -speed);
+    if (inputManager.keys.right)   camera.position.addScaledVector(right, speed);
+    if (inputManager.keys.left)  camera.position.addScaledVector(right, -speed);
+    if (inputManager.keys.up)   camera.position.addScaledVector(up, speed);
+    if (inputManager.keys.down)  camera.position.addScaledVector(up, -speed);
+
+    // Rotations
+    if (inputManager.keys.yaw_left)  yawOffset += rotSpeed;
+    if (inputManager.keys.yaw_right)  yawOffset -= rotSpeed;
+    euler.set(inputManager.gyro.beta,
+              inputManager.gyro.alpha + yawOffset,
+              -inputManager.gyro.gamma,
+              "YXZ"); // YXZ to avoid gimbal lock
+    quaternion.setFromEuler(euler); // phone gyro
+    screenTransform.copy(getScreenTransform()); // correction according to phone orientation
+    worldTransform.setFromAxisAngle(new THREE.Vector3(1,0,0), -Math.PI/2); // x correction to look forward instead of down
+
+    tempQuaternion.copy(quaternion).multiply(worldTransform).multiply(screenTransform);
+
+    // slerping
+    const slerpFactor = 0.35;
+    camera.quaternion.slerp(tempQuaternion, slerpFactor);
+  }
+  
+  return { update }
 }

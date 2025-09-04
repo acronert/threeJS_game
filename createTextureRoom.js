@@ -1,5 +1,6 @@
 import * as THREE from "three";
 
+let cube_1, cube_2, cube_3, cube_4, cube_5;
 
 function createCubes() {
     const loader = new THREE.TextureLoader();
@@ -9,7 +10,6 @@ function createCubes() {
     const rock_roughness = loader.load('Rock058_1K-JPG/Rock058_1K-JPG_Roughness.jpg');
     const rock_ambientOcclusion = loader.load('Rock058_1K-JPG/Rock058_1K-JPG_AmbientOcclusion.jpg');
 
-    let cube_1, cube_2, cube_3, cube_4, cube_5;
     
     {
         // Color
@@ -213,5 +213,18 @@ export function createTextureRoom() {
     pointLight3.position.set(-9, 5, 9);
     group.add(pointLight3);
 
-    return { group, parts: { cube_1, cube_2, cube_3, cube_4, cube_5 } };
+    return { group };
+}
+
+export function updateRoom() {
+    cube_1.rotation.x += 0.005;
+    cube_1.rotation.y += 0.005;
+    cube_2.rotation.x += 0.005;
+    cube_2.rotation.y += 0.005;
+    cube_3.rotation.x += 0.005;
+    cube_3.rotation.y += 0.005;
+    cube_4.rotation.x += 0.005;
+    cube_4.rotation.y += 0.005;
+    cube_5.rotation.x += 0.005;
+    cube_5.rotation.y += 0.005;
 }

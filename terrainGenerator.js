@@ -1,67 +1,9 @@
 import * as THREE from "three";
 
-const chunkSize = 20;
-const resolution = 50; // vertices per axis
+import { perlin_get } from "./perlinNoise.js";
 
-
-function random_vector(ix, iy) {
-    // Hash function → repeatable pseudo-random angle
-    let seed = Math.sin(ix * 374761393 + iy * 668265263) * 43758.5453;
-    let angle = seed - Math.floor(seed); // 0..1
-    angle *= Math.PI * 2;
-    return { x: Math.cos(angle), y: Math.sin(angle) };
-}
-
-function fade(t) {
-    //smooth
-    return t * t * t * (t * (t * 6 - 15) + 10);
-}
-
-    // linear interpolation
-function lerp(a, b, t) {
-    return a + t * (b - a);
-}
-
-function dotGridGradient(ix, iy, x, y) {
-    // Distance vector
-    let dx = x - ix;
-    let dy = y - iy;
-
-    // Gradient
-    let grad = random_vector(ix, iy);
-    // Dot product
-    return dx * grad.x + dy * grad.y;
-}
-
-function perlin_get(x, y) {
-    // Cell coordinates
-    let x0 = Math.floor(x);
-    let x1 = x0 + 1;
-    let y0 = Math.floor(y);
-    let y1 = y0 + 1;
-
-    // Local coordinates inside cell
-    let sx = x - x0;
-    let sy = y - y0;
-
-    // Dot products at 4 corners
-    let n0 = dotGridGradient(x0, y0, x, y);
-    let n1 = dotGridGradient(x1, y0, x, y);
-    let ix0 = lerp(n0, n1, fade(sx));
-
-    n0 = dotGridGradient(x0, y1, x, y);
-    n1 = dotGridGradient(x1, y1, x, y);
-    let ix1 = lerp(n0, n1, fade(sx));
-
-    // Final interpolate between ix0 and ix1
-    let value = lerp(ix0, ix1, fade(sy));
-
-    return value;
-}
-
-
-export function generateChunk(chunkX, chunkY) {
-    const geometry = new THREE.PlaneGeometry(chunkSize, chunkSize, resolution, resolution);
+function generateChunkGeometry(chunkX, chunkY, size, resolution) {
+    const geometry = new THREE.PlaneGeometry(size, size, resolution, resolution);
 
     // list of all vertices in the plane
     let vertices = geometry.attributes.position;
@@ -70,17 +12,19 @@ export function generateChunk(chunkX, chunkY) {
     for (let i = 0; i < vertices.count; i++) {
         let x = vertices.getX(i);
         let y = vertices.getY(i);
-
-        let perlinX = (chunkX * chunkSize + x) * scale;
-        let perlinY = (chunkY * chunkSize + y) * scale;
-    
-        let h = perlin_get(perlinX, perlinY) * 2; // between -1..1
-
+        let perlinX = (chunkX * size + x) * scale;
+        let perlinY = (-chunkY * size + y) * scale;
+        let h = perlin_get(perlinX, perlinY) * 5; // between -1..1
         vertices.setZ(i, h); // displace vertex
     }
-
     geometry.computeVertexNormals();
 
+    return (geometry);
+}
+
+export function createChunk(chunkX, chunkY, size, resolution) {
+
+    const geometry = generateChunkGeometry(chunkX, chunkY, size, resolution);
     // texture
     const loader = new THREE.TextureLoader();
     const ground_color = loader.load('Ground054_1K-JPG/Ground054_1K-JPG_Color.jpg');
@@ -91,7 +35,7 @@ export function generateChunk(chunkX, chunkY) {
    
     [ground_color, ground_normal, ground_roughness, ground_ambientOcclusion].forEach(tex => {
         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-        tex.repeat.set(chunkSize / 5, chunkSize / 5); 
+        tex.repeat.set(size / 5, size / 5); 
     });
 
     const material = new THREE.MeshStandardMaterial({
@@ -106,5 +50,52 @@ export function generateChunk(chunkX, chunkY) {
     });
     const mesh = new THREE.Mesh(geometry, material);
     mesh.rotation.x = -Math.PI / 2;
+
+    // align mesh
+    // mesh.position.set(chunkX * size + size / 2, chunkY * size + size / 2, 0);
+    mesh.position.set(chunkX * size + size / 2, 0, chunkY * size + size / 2);
+
     return (mesh);
+}
+
+const rendered = new Map(); // chunks that are already rendered
+
+export function updateChunks(camera, scene) {
+    const size = 20;        // chunk size
+    const resolution = 25;  // vertices per axis
+    const distance = 2;     // chunk render distance
+
+    let needed = new Set(); // chunks that needs to be rendered
+
+    // determine the list of chunks that needs to be generated
+        // get camera position in chunk coordinated
+    let cx = Math.floor(camera.position.x / size);
+    let cy = Math.floor(camera.position.z / size);
+
+        // add all chunk coordinates in range to the set
+    for (let x = -distance; x <= distance; x++) {
+        for (let y = -distance; y <= distance; y++) {
+            let key = `${cx + x}, ${cy + y}`;
+            needed.add(key);
+
+            if (!rendered.has(key)) {
+                // generate the chunk
+                let mesh = createChunk(cx + x, cy + y, size, resolution);
+                // align mesh
+                // mesh.position.set((cx + x) * size + size / 2, 0, (cy + y) * size + size / 2);
+
+                scene.add(mesh);
+                rendered.set(key, mesh);
+            }
+        }
+    }
+
+    // remove non needed chunks
+    for (let key of rendered.keys()) {
+        if (!needed.has(key)) {
+            let mesh = rendered.get(key);
+            scene.remove(mesh);
+            rendered.delete(key);
+        }
+    }
 }
