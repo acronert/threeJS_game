@@ -93,7 +93,7 @@ function createFloor() {
 
     [plank_color, plank_normal, plank_roughness, plank_ambientOcclusion].forEach(tex => {
         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-        tex.repeat.set(size / 8, size / 8);
+        tex.repeat.set(size / 4, size / 4);
     });
 
     const floorGeometry = new THREE.PlaneGeometry(size, size);
@@ -134,14 +134,14 @@ function createWalls() {
         map: tile_color,
         normalMap: tile_normal,
         normalScale: new THREE.Vector2(1, 1),
-        displacementMap: tile_displacement,
-        displacementScale: 0.05,
-        displacementBias: 0,
+        // displacementMap: tile_displacement,
+        // displacementScale: 0.05,
+        // displacementBias: 0,
         roughnessMap: tile_roughness,
         aoMap: tile_ambientOcclusion
     });
-    // const wallGeometry = new THREE.BoxGeometry(wallWidth, wallHeight, wallThickness, 1000, 250, 1);
-    const wallGeometry = new THREE.PlaneGeometry(wallWidth, wallHeight, 1000, 250);
+    const wallGeometry = new THREE.PlaneGeometry(wallWidth, wallHeight);
+    // const wallGeometry = new THREE.PlaneGeometry(wallWidth, wallHeight, 1000, 250);
 
     // Back wall
     const wallBack = new THREE.Mesh(wallGeometry, wallMaterial);

@@ -22,19 +22,19 @@ export function createComposer(renderer, scene, camera) {
 
     composer.addPass( new RenderPass( scene, camera ));
 
-    // FilmPass: adds film grain
-    const filmPass = new FilmPass(
-        0.65, // noise intensity
-        0.25, // scanline intensity
-        1024,   // scanline count
-        false  // grayscale (true = black & white)
-    );
-    composer.addPass( filmPass );
-    filmPass.enabled = true;
+    // // FilmPass: adds film grain
+    // const filmPass = new FilmPass(
+    //     0.65, // noise intensity
+    //     0.25, // scanline intensity
+    //     1024,   // scanline count
+    //     false  // grayscale (true = black & white)
+    // );
+    // composer.addPass( filmPass );
+    // filmPass.enabled = true;
 
-    // Chromatic Aberration (shader)
-    const chromaPass = new ShaderPass(ChromaticAberrationShader);
-    composer.addPass(chromaPass);
+    // // Chromatic Aberration (shader)
+    // const chromaPass = new ShaderPass(ChromaticAberrationShader);
+    // composer.addPass(chromaPass);
 
     const outputPass = new OutputPass();
     composer.addPass( outputPass );

@@ -7,6 +7,7 @@ export function createInputManager(domElement) {
 
     const gyro = { alpha:0, beta:0, gamma:0 };
 
+    //////////// DESKTOP ////////////
     // Keyboard
     document.addEventListener('keydown', e => {
         if(e.code==="KeyW") keys.forward=true;
@@ -39,6 +40,21 @@ export function createInputManager(domElement) {
         if(e.code==="ArrowRight") keys.yaw_right=false;
     });
 
+    // Mouse
+        // get the pointer lock
+    const canvas = document.querySelector("canvas");
+    canvas.addEventListener("click", () => {
+        canvas.requestPointerLock();
+        console.log("click");
+    });
+    document.addEventListener('mousemove', e => {
+        const sensitivity = 0.002;
+
+        gyro.alpha -= e.movementX * sensitivity;
+        gyro.beta -= e.movementY * sensitivity;
+    });
+
+    //////////// MOBILE ////////////
     // Touch
     domElement.addEventListener("touchstart", (e) => {
         const rect = domElement.getBoundingClientRect();  // get canvas size
@@ -63,8 +79,6 @@ export function createInputManager(domElement) {
         keys.yaw_left = false;
         keys.yaw_right = false;
     });
-
-
 
     // Gyroscope
     const degToRad = Math.PI / 180;

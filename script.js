@@ -8,7 +8,9 @@ import { createCameraControls } from "./controls.js";
 import { createRoom } from "./room.js";
 import { createTerrainMesh } from "./heightmap.js";
 import { createTextureRoom } from "./createTextureRoom.js";
-// import { create360Environment } from "./environment.js";
+import { create360Environment } from "./environment.js";
+
+import { generateChunk } from "./terrainGenerator.js";
 
 // Scene
 const scene = new THREE.Scene();
@@ -16,6 +18,8 @@ const scene = new THREE.Scene();
 const { group, parts } = createTextureRoom();
 scene.add(group);
 // scene.add(create360Environment(scene));
+
+scene.add(generateChunk(0, 0));
 
 // Camera
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -77,6 +81,8 @@ function animate() {
     parts.cube_4.rotation.y += 0.005;
     parts.cube_5.rotation.x += 0.005;
     parts.cube_5.rotation.y += 0.005;
+
+  
     // const terrainHeight = getTerrainHeight(camera, terrainMesh);
     // if (terrainHeight != null)
     //     camera.position.y = terrainHeight + 1.6;

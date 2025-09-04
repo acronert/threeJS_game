@@ -8,7 +8,7 @@ export function createControls(camera, inputManager) {
   const tempQuaternion = new THREE.Quaternion();
   
   let yawOffset = 0;
-  const speed = 0.05;
+  const speed = 0.1;
   const rotSpeed = 0.02;
 
   // // Check if user on mobile or desktop
@@ -35,8 +35,18 @@ export function createControls(camera, inputManager) {
     forward.y = 0; // keep movement on ground plane
     forward.normalize();
 
+    const right = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+    right.y = 0; // keep horizontal
+    right.normalize();
+
+    const up = new THREE.Vector3(0, 1, 0); // world up, or rotate with camera if you prefer
+  
     if (inputManager.keys.forward)   camera.position.addScaledVector(forward, speed);
     if (inputManager.keys.backward)  camera.position.addScaledVector(forward, -speed);
+    if (inputManager.keys.right)   camera.position.addScaledVector(right, speed);
+    if (inputManager.keys.left)  camera.position.addScaledVector(right, -speed);
+    if (inputManager.keys.up)   camera.position.addScaledVector(up, speed);
+    if (inputManager.keys.down)  camera.position.addScaledVector(up, -speed);
 
     // Rotations
     if (inputManager.keys.yaw_left)  yawOffset += rotSpeed;
