@@ -213,7 +213,7 @@ export function createTextureRoom() {
     pointLight3.position.set(-9, 5, 9);
     group.add(pointLight3);
 
-    return { group };
+    return ( group );
 }
 
 export function updateRoom() {
