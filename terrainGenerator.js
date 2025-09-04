@@ -2,19 +2,45 @@ import * as THREE from "three";
 
 import { perlin_get } from "./perlinNoise.js";
 
+
+
+// export function getTerrainHeightAt(x, y) {
+//     const scale = 0.05;      // high for lots of peaks, low for smooth
+//     const amplitude = 10;    // peaks height
+//     return (perlin_get(x * scale, y * scale) * amplitude);
+// }
+
+export function getTerrainHeightAt(x, y) {
+    let n1 = 0;
+    let n2 = 0;
+    let n3 = 0;
+
+    let scale1 = 0.007;     // lower frequency = larger features
+    let amp1   = 10;        // higher amplitude = taller hills
+    n1 = perlin_get(x * scale1, y * scale1) * amp1;
+
+    let scale2 = 0.1;
+    let amp2   = 3;      
+    n2 = perlin_get(x * scale2, y * scale2) * amp2;
+
+    // let scale3 = 0.01;
+    // let amp3   = 1;
+    // n3 = perlin_get(x * scale3, y * scale3) * amp3;
+
+    return n1**2 + n2 + n3;
+}
+
 function generateChunkGeometry(chunkX, chunkY, size, resolution) {
     const geometry = new THREE.PlaneGeometry(size, size, resolution, resolution);
 
     // list of all vertices in the plane
     let vertices = geometry.attributes.position;
-    let scale = 0.1;
 
     for (let i = 0; i < vertices.count; i++) {
         let x = vertices.getX(i);
-        let y = vertices.getY(i);
-        let perlinX = (chunkX * size + x) * scale;
-        let perlinY = (-chunkY * size + y) * scale;
-        let h = perlin_get(perlinX, perlinY) * 5; // between -1..1
+        let y = -vertices.getY(i);  // !!!! MINUS !!!!! to account for the rotation from the xz plane
+
+        let h = getTerrainHeightAt(chunkX * size + x, chunkY * size + y);
         vertices.setZ(i, h); // displace vertex
     }
     geometry.computeVertexNormals();
@@ -49,11 +75,10 @@ export function createChunk(chunkX, chunkY, size, resolution) {
         aoMap: ground_ambientOcclusion
     });
     const mesh = new THREE.Mesh(geometry, material);
+    
+    // rotate and align mesh
     mesh.rotation.x = -Math.PI / 2;
-
-    // align mesh
-    // mesh.position.set(chunkX * size + size / 2, chunkY * size + size / 2, 0);
-    mesh.position.set(chunkX * size + size / 2, 0, chunkY * size + size / 2);
+    mesh.position.set(chunkX * size, 0, chunkY * size);
 
     return (mesh);
 }
@@ -61,16 +86,16 @@ export function createChunk(chunkX, chunkY, size, resolution) {
 const rendered = new Map(); // chunks that are already rendered
 
 export function updateChunks(camera, scene) {
-    const size = 20;        // chunk size
-    const resolution = 25;  // vertices per axis
-    const distance = 2;     // chunk render distance
+    const size = 100;        // chunk size
+    const resolution = 200;  // vertices per axis
+    const distance = 3;     // chunk render distance
 
     let needed = new Set(); // chunks that needs to be rendered
 
     // determine the list of chunks that needs to be generated
         // get camera position in chunk coordinated
-    let cx = Math.floor(camera.position.x / size);
-    let cy = Math.floor(camera.position.z / size);
+    let cx = Math.floor((camera.position.x + size / 2) / size);
+    let cy = Math.floor((camera.position.z + size / 2) / size);
 
         // add all chunk coordinates in range to the set
     for (let x = -distance; x <= distance; x++) {
@@ -79,11 +104,7 @@ export function updateChunks(camera, scene) {
             needed.add(key);
 
             if (!rendered.has(key)) {
-                // generate the chunk
                 let mesh = createChunk(cx + x, cy + y, size, resolution);
-                // align mesh
-                // mesh.position.set((cx + x) * size + size / 2, 0, (cy + y) * size + size / 2);
-
                 scene.add(mesh);
                 rendered.set(key, mesh);
             }

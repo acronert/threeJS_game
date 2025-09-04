@@ -7,7 +7,7 @@ import { createControls } from "./controls.js";
 import { createRoom } from "./room.js";
 import { createTerrainMesh } from "./heightmap.js";
 import { createTextureRoom, updateRoom } from "./createTextureRoom.js";
-import { create360Environment } from "./environment.js";
+import { createSkybox } from "./skybox.js";
 
 import { createChunk } from "./terrainGenerator.js";
 import { updateChunks } from "./terrainGenerator.js";
@@ -15,8 +15,10 @@ import { updateChunks } from "./terrainGenerator.js";
 // Scene
 const scene = new THREE.Scene();
 
-const room = createTextureRoom();
-scene.add(room);
+// const room = createTextureRoom();
+// scene.add(room);
+
+createSkybox(scene);
 
 // Camera
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
@@ -62,16 +64,16 @@ document.addEventListener("mousedown", toggleFullscreen, { once: true });
 const input = createInputManager(renderer.domElement);
 const controls = createControls(camera, input);
 
-
-// Animation
 const interval = setInterval(() => {
     updateChunks(camera, scene);
 }, 500);
 
+// Animation
 function animate() {
     requestAnimationFrame(animate);
-    updateRoom();
     controls.update();
+
+    // updateRoom();
     composer.render();
 }
 animate();

@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { getTerrainHeightAt } from "./terrainGenerator.js";
 
 export function createControls(camera, inputManager) {
   const quaternion = new THREE.Quaternion();
@@ -8,7 +9,7 @@ export function createControls(camera, inputManager) {
   const tempQuaternion = new THREE.Quaternion();
   
   let yawOffset = 0;
-  const speed = 0.1;
+  const speed = 0.15;
   const rotSpeed = 0.02;
 
   // Screen orientation
@@ -40,6 +41,9 @@ export function createControls(camera, inputManager) {
     if (inputManager.keys.left)  camera.position.addScaledVector(right, -speed);
     if (inputManager.keys.up)   camera.position.addScaledVector(up, speed);
     if (inputManager.keys.down)  camera.position.addScaledVector(up, -speed);
+
+    // Camera height
+    camera.position.y = getTerrainHeightAt(camera.position.x, camera.position.z) + 1.6;
 
     // Rotations
     if (inputManager.keys.yaw_left)  yawOffset += rotSpeed;
