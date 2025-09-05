@@ -4,13 +4,12 @@ import { createComposer } from "./renderer.js";
 import { createInputManager } from "./inputManager.js";
 import { createControls } from "./controls.js";
 
-import { createRoom } from "./room.js";
-import { createTerrainMesh } from "./heightmap.js";
 import { createTextureRoom, updateRoom } from "./createTextureRoom.js";
 import { createSkybox } from "./skybox.js";
 
-import { createChunk } from "./terrainGenerator.js";
-import { updateChunks } from "./terrainGenerator.js";
+// import { createChunk } from "./terrainGenerator.js";
+import { createChunkGenerator } from "./terrainGenerator.js";
+// import { updateChunks } from "./heightMap.js";
 
 // Scene
 const scene = new THREE.Scene();
@@ -27,6 +26,9 @@ camera.position.set(0, 1.6, 0);
 // Renderer
 const renderer = createRenderer();
 const composer = createComposer(renderer, scene, camera);
+
+// ChunkGenerator
+const chunkGenerator = createChunkGenerator(scene, camera);
 
 // Fullscreen
 function requestFullscreen() {
@@ -65,7 +67,7 @@ const input = createInputManager(renderer.domElement);
 const controls = createControls(camera, input);
 
 const interval = setInterval(() => {
-    updateChunks(camera, scene);
+    chunkGenerator.update();
 }, 500);
 
 // Animation

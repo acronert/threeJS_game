@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { getTerrainHeightAt } from "./terrainGenerator.js";
+import { getTerrainHeightAt } from "./perlinNoise.js";
 
 export function createControls(camera, inputManager) {
   const quaternion = new THREE.Quaternion();
@@ -9,7 +9,7 @@ export function createControls(camera, inputManager) {
   const tempQuaternion = new THREE.Quaternion();
   
   let yawOffset = 0;
-  const speed = 0.3;
+  const speed = 0.2;
   const rotSpeed = 0.02;
 
   // Screen orientation

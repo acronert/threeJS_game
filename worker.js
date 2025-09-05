@@ -35,7 +35,7 @@ function dotGridGradient(ix, iy, x, y) {
 }
 
 // return from -1 to 1
-export function perlin_get(x, y) {
+function perlin_get(x, y) {
     // Cell coordinates
     let x0 = Math.floor(x);
     let x1 = x0 + 1;
@@ -61,7 +61,7 @@ export function perlin_get(x, y) {
     return value;
 }
 
-export function getTerrainHeightAt(x, y) {
+function getTerrainHeightAt(x, y) {
     let n1 = 0;
     let n2 = 0;
     let n3 = 0;
@@ -79,4 +79,22 @@ export function getTerrainHeightAt(x, y) {
     n3 = perlin_get(x * scale3, y * scale3 / 2) * amp3;
 
     return n1**2 + n2**2 + n3;
+}
+
+function generateChunkHeights(chunkX, chunkY, size, resolution) {
+    const data = new Float32Array(resolution * resolution);
+    for (let i = 0; i < resolution; i++) {
+        for (let j = 0; j < resolution; j++) {
+            const x = (chunkX + i / resolution) * size;
+            const y = (-chunkY + j / resolution) * size;
+            data[j * resolution + i] = getTerrainHeightAt(x, y);
+        }
+    }
+    return data;
+}
+
+onmessage = (e) => {
+    const { chunkX, chunkY, size, resolution } = e.data; // unpack input
+    const heightMap = generateChunkHeights(chunkX, chunkY, size, resolution);
+    postMessage({ chunkX, chunkY, resolution, heightMap }, [heightMap.buffer]); // [list] is uses to transfert ownership of the data
 }
