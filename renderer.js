@@ -22,6 +22,9 @@ export function createComposer(renderer, scene, camera) {
 
     composer.addPass( new RenderPass( scene, camera ));
 
+    // Fog
+    scene.fog = new THREE.FogExp2(0xe8e5d6, 0.002); 
+
     // // FilmPass: adds film grain
     // const filmPass = new FilmPass(
     //     0.65, // noise intensity

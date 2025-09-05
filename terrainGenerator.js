@@ -9,15 +9,18 @@ export function createChunkGenerator(scene, camera) {
     // Load Textures
     const loader = new THREE.TextureLoader();
     
-    const ground_color = loader.load('Ground054_1K-JPG/Ground054_1K-JPG_Color.jpg');
-    const ground_normal = loader.load('Ground054_1K-JPG/Ground054_1K-JPG_NormalGL.jpg');
-    const ground_roughness = loader.load('Ground054_1K-JPG/Ground054_1K-JPG_Roughness.jpg');
-    const ground_ambientOcclusion = loader.load('Ground054_1K-JPG/Ground054_1K-JPG_AmbientOcclusion.jpg');
+    const ground_color = loader.load('Ground055S_1K-JPG/Ground055S_1K-JPG_Color.jpg');
+    const ground_normal = loader.load('Ground055S_1K-JPG/Ground055S_1K-JPG_NormalGL.jpg');
+    const ground_roughness = loader.load('Ground055S_1K-JPG/Ground055S_1K-JPG_Roughness.jpg');
+    const ground_ambientOcclusion = loader.load('Ground055S_1K-JPG/Ground055S_1K-JPG_AmbientOcclusion.jpg');
+    const ground_displacement = loader.load('Ground055S_1K-JPG/Ground055S_1K-JPG_Displacement.jpg');
     
         // wrap them
-    [ground_color, ground_normal, ground_roughness, ground_ambientOcclusion].forEach(tex => {
+    [ground_color, ground_normal, ground_roughness, ground_ambientOcclusion, ground_displacement].forEach(tex => {
         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-        tex.repeat.set(size / 6, size / 6); 
+        tex.repeat.set(size / 64, size / 64); // wrap (divide more for zoom in)
+        tex.rotation = Math.PI / 2; // rotate the textures 90degrees...
+        tex.center.set(0.5, 0.5);   // ... center on the middle
     });
     
     // Create Material
@@ -26,7 +29,9 @@ export function createChunkGenerator(scene, camera) {
         normalMap: ground_normal,
         normalScale: new THREE.Vector2(1, 1),
         roughnessMap: ground_roughness,
-        aoMap: ground_ambientOcclusion
+        aoMap: ground_ambientOcclusion,
+        displacementMap: ground_displacement,
+        displacementScale: 0.1
     });
 
 
@@ -51,7 +56,7 @@ export function createChunkGenerator(scene, camera) {
         
         scene.add(mesh);
         rendered.set(`${chunkX}, ${chunkY}`, mesh);
-        console.log("received ", chunkX, chunkY);
+        // console.log("received ", chunkX, chunkY);
 
     };
 
@@ -86,7 +91,7 @@ export function createChunkGenerator(scene, camera) {
             if (!rendered.has(key)) {
                 let resolution = 128;
                 worker.postMessage({ chunkX, chunkY, size, resolution });
-                console.log("request ", chunkX, chunkY);
+                // console.log("request ", chunkX, chunkY);
                 rendered.set(key, null); // mark as loading
             }
         }

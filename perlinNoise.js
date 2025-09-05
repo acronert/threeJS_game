@@ -62,21 +62,35 @@ export function perlin_get(x, y) {
 }
 
 export function getTerrainHeightAt(x, y) {
-    let n1 = 0;
-    let n2 = 0;
-    let n3 = 0;
+    let o0 = perlin_get(x * 0.0005, y * 0.0003);
 
-    let scale1 = 0.0005;     // lower frequency = larger features
-    let amp1   = 10;        // higher amplitude = taller hills
-    n1 = perlin_get(x * scale1, y * scale1) * amp1;
+    let o1 = perlin_get(x * 0.005, y * 0.002);
+    o1 = Math.pow(1 - Math.abs(o1), 3.0); // sharp ridge
 
-    let scale2 = 0.007;
-    let amp2   = 10;      
-    n2 = perlin_get(x * scale2, y * scale2) * amp2;
+    let o2 = perlin_get(x * 0.01, y * 0.004);
+    o2 = Math.pow(1 - Math.abs(o2), 3.0); // sharp ridge
 
-    let scale3 = 0.07;
-    let amp3   = 3;
-    n3 = perlin_get(x * scale3, y * scale3 / 2) * amp3;
+    let o3 = perlin_get(x * 0.03, y * 0.01); // fine ripples
 
-    return n1**3 + n2**2 + n3;
+    return o0 * 100 + o1 * 30 + o2 * 20 + o3 * 4;
 }
+
+// export function getTerrainHeightAt(x, y) {
+//     let n1 = 0;
+//     let n2 = 0;
+//     let n3 = 0;
+
+//     let scale1 = 0.0005;     // lower frequency = larger features
+//     let amp1   = 10;        // higher amplitude = taller hills
+//     n1 = perlin_get(x * scale1, y * scale1) * amp1;
+
+//     let scale2 = 0.007;
+//     let amp2   = 10;      
+//     n2 = perlin_get(x * scale2, y * scale2) * amp2;
+
+//     let scale3 = 0.07;
+//     let amp3   = 3;
+//     n3 = perlin_get(x * scale3, y * scale3 / 2) * amp3;
+
+//     return n1**3 + n2**2 + n3;
+// }
