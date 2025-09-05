@@ -21,7 +21,7 @@ createSkybox(scene);
 
 // Camera
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 4096);
-camera.position.set(0, 1.6, 0);
+camera.position.set(0, 10, 0);
 
 // Renderer
 const renderer = createRenderer();
