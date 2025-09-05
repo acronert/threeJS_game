@@ -9,14 +9,14 @@ export function createChunkGenerator(scene, camera) {
     // Load Textures
     const loader = new THREE.TextureLoader();
     
-    const ground_color = loader.load('Ground055S_1K-JPG/Ground055S_1K-JPG_Color.jpg');
-    const ground_normal = loader.load('Ground055S_1K-JPG/Ground055S_1K-JPG_NormalGL.jpg');
-    const ground_roughness = loader.load('Ground055S_1K-JPG/Ground055S_1K-JPG_Roughness.jpg');
-    const ground_ambientOcclusion = loader.load('Ground055S_1K-JPG/Ground055S_1K-JPG_AmbientOcclusion.jpg');
-    const ground_displacement = loader.load('Ground055S_1K-JPG/Ground055S_1K-JPG_Displacement.jpg');
+    const tex1_color = loader.load('Ground055S_1K-JPG/Ground055S_1K-JPG_Color.jpg');
+    const tex1_normal = loader.load('Ground055S_1K-JPG/Ground055S_1K-JPG_NormalGL.jpg');
+    const tex1_roughness = loader.load('Ground055S_1K-JPG/Ground055S_1K-JPG_Roughness.jpg');
+    const tex1_ambientOcclusion = loader.load('Ground055S_1K-JPG/Ground055S_1K-JPG_AmbientOcclusion.jpg');
+    const tex1_displacement = loader.load('Ground055S_1K-JPG/Ground055S_1K-JPG_Displacement.jpg');
     
         // wrap them
-    [ground_color, ground_normal, ground_roughness, ground_ambientOcclusion, ground_displacement].forEach(tex => {
+    [tex1_color, tex1_normal, tex1_roughness, tex1_ambientOcclusion, tex1_displacement].forEach(tex => {
         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
         tex.repeat.set(size / 64, size / 64); // wrap (divide more for zoom in)
         tex.rotation = Math.PI / 2; // rotate the textures 90degrees...
@@ -25,15 +25,14 @@ export function createChunkGenerator(scene, camera) {
     
     // Create Material
     const material = new THREE.MeshStandardMaterial({
-        map: ground_color,
-        normalMap: ground_normal,
+        map: tex1_color,
+        normalMap: tex1_normal,
         normalScale: new THREE.Vector2(1, 1),
-        roughnessMap: ground_roughness,
-        aoMap: ground_ambientOcclusion,
-        displacementMap: ground_displacement,
-        displacementScale: 0.1
+        roughnessMap: tex1_roughness,
+        aoMap: tex1_ambientOcclusion,
+        displacementMap: tex1_displacement,
+        displacementScale: 0.3
     });
-
 
     const worker = new Worker("worker.js");
     const rendered = new Map(); // chunks that are already rendered
