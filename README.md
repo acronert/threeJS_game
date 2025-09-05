@@ -23,5 +23,8 @@
 
 ## Performance / Rendering
 - Asynchronous chunk generation 
+<<<<<<< HEAD
 - Pre bake texture2D of perlin noise in GPU, and use them as displacement map
 - rework order of chunk generation (spiral)
+=======
+>>>>>>> de3fdd4be4bf552104abe2c177aca754dd0c2fd2
