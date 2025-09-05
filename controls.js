@@ -43,7 +43,7 @@ export function createControls(camera, inputManager) {
     if (inputManager.keys.down)  camera.position.addScaledVector(up, -speed);
 
     // Camera height
-    camera.position.y = getTerrainHeightAt(camera.position.x, camera.position.z) + 1.6;
+    // camera.position.y = getTerrainHeightAt(camera.position.x, camera.position.z) + 1.6;
 
     // Rotations
     if (inputManager.keys.yaw_left)  yawOffset += rotSpeed;

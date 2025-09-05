@@ -4,7 +4,7 @@ import * as THREE from "three";
 
 export function createChunkGenerator(scene, camera) {
     const size = 128;        // chunk size
-    const chunkDepth = 3;     // chunk render distance
+    const chunkDepth = 8;     // chunk render distance
     
     // Load Textures
     const loader = new THREE.TextureLoader();
@@ -55,7 +55,7 @@ export function createChunkGenerator(scene, camera) {
 
     };
 
-
+    
     function update() {
         let needed = new Set(); // chunks that needs to be rendered
         let candidates = [];

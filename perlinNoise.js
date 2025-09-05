@@ -67,7 +67,7 @@ export function getTerrainHeightAt(x, y) {
     let n3 = 0;
 
     let scale1 = 0.0005;     // lower frequency = larger features
-    let amp1   = 15;        // higher amplitude = taller hills
+    let amp1   = 10;        // higher amplitude = taller hills
     n1 = perlin_get(x * scale1, y * scale1) * amp1;
 
     let scale2 = 0.007;
@@ -78,5 +78,5 @@ export function getTerrainHeightAt(x, y) {
     let amp3   = 3;
     n3 = perlin_get(x * scale3, y * scale3 / 2) * amp3;
 
-    return n1**2 + n2**2 + n3;
+    return n1**3 + n2**2 + n3;
 }
