@@ -23,7 +23,7 @@ export function createComposer(renderer, scene, camera) {
     composer.addPass( new RenderPass( scene, camera ));
 
     // Fog
-    scene.fog = new THREE.FogExp2(0xe8e5d6, 0.002); 
+    scene.fog = new THREE.FogExp2(0xe8e5d6, 0.0005); 
 
 
 

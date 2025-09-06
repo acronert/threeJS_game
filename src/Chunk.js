@@ -13,6 +13,11 @@ export class Chunk {
             positions.setZ(i, vertices[i]);
         }
         positions.needsUpdate = true;
+
+        // Set normals
+        // geometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
+        // positions.attributes.normal.needsUpdate = true;
+
         geometry.computeVertexNormals();
 
         // Place the chunk in world space

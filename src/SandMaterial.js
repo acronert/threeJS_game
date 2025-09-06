@@ -24,8 +24,8 @@ export function createSandMaterial(size) {
         normalScale: new THREE.Vector2(1, 1),
         roughnessMap: roughness,
         aoMap: ambientOcclusion,
-        displacementMap: displacement,
-        displacementScale: 0.3
+        // displacementMap: displacement,
+        // displacementScale: 0.3
     });
 
     return material;

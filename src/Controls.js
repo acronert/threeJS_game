@@ -9,8 +9,7 @@ export function createControls(camera, inputManager) {
   const tempQuaternion = new THREE.Quaternion();
   
   let yawOffset = 0;
-  // const speed = 0.5;
-  const speed = 3;
+  const speed = 50; // unit per second
   const rotSpeed = 0.025;
 
   // Screen orientation
@@ -24,7 +23,7 @@ export function createControls(camera, inputManager) {
     }
   }
 
-  function update() {
+  function update(delta) {
     // Move
     const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
     forward.y = 0; // keep movement on ground plane
@@ -36,15 +35,15 @@ export function createControls(camera, inputManager) {
 
     const up = new THREE.Vector3(0, 1, 0); // world up, or rotate with camera if you prefer
   
-    if (inputManager.keys.forward)   camera.position.addScaledVector(forward, speed);
-    if (inputManager.keys.backward)  camera.position.addScaledVector(forward, -speed);
-    if (inputManager.keys.right)   camera.position.addScaledVector(right, speed);
-    if (inputManager.keys.left)  camera.position.addScaledVector(right, -speed);
-    if (inputManager.keys.up)   camera.position.addScaledVector(up, speed);
-    if (inputManager.keys.down)  camera.position.addScaledVector(up, -speed);
+    if (inputManager.keys.forward)   camera.position.addScaledVector(forward, speed * delta);
+    if (inputManager.keys.backward)  camera.position.addScaledVector(forward, -speed * delta);
+    if (inputManager.keys.right)   camera.position.addScaledVector(right, speed * delta);
+    if (inputManager.keys.left)  camera.position.addScaledVector(right, -speed * delta);
+    if (inputManager.keys.up)   camera.position.addScaledVector(up, speed * delta);
+    if (inputManager.keys.down)  camera.position.addScaledVector(up, -speed * delta);
 
     // Camera height
-    // camera.position.y = getTerrainHeightAt(camera.position.x, camera.position.z) + 2.0;
+    camera.position.y = getTerrainHeightAt(camera.position.x, camera.position.z) + 2.0;
 
     // Rotations
     if (inputManager.keys.yaw_left)  yawOffset += rotSpeed;

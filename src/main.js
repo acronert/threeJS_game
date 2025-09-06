@@ -8,7 +8,7 @@ import { ChunkManager } from "./ChunkManager.js";
 class Simulation {
     constructor() {
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 4096);
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 8096);
         this.renderer = createRenderer();
 
         this.animate = this.animate.bind(this);
@@ -16,12 +16,14 @@ class Simulation {
         this.handleResize = this.handleResize.bind(this);
         this.toggleFullscreen = this.toggleFullscreen.bind(this);
 
+        this.fps = 0;
+        this.frames = 0;
+        this.lastFrameTime = 0;
     }
 
     init() {
         const chunkSize = 128;
-        const chunkDepth = 10;
-        this.chunkManager = new ChunkManager(this.scene, this.camera, chunkSize, chunkDepth);
+        this.chunkManager = new ChunkManager(this.scene, this.camera, chunkSize);
 
         this.camera.position.set(0, 10, 0);
         this.composer = createComposer(this.renderer, this.scene, this.camera);
@@ -74,7 +76,22 @@ class Simulation {
 
     animate() {
         requestAnimationFrame(this.animate);
-        this.controls.update();
+
+        const now = performance.now();
+        const delta = (now - this.lastFrameTime) / 1000; // delta in seconds
+        this.lastFrameTime = now;
+
+        // console.log("delta = ", delta);
+
+        // this.frames++;
+        // if (now - this.lastFrameTime >= 1000) {
+        //     this.fps = this.frames;
+        //     console.log("FPS:", this.fps);
+        //     this.frames = 0;
+        //     this.lastFrameTime = now;
+        // }
+
+        this.controls.update(delta);
         this.composer.render();
     }
 }

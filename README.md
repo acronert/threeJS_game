@@ -23,5 +23,6 @@
 
 ## Performance / Rendering
 - OK Asynchronous chunk generation 
-- Pre bake texture2D of perlin noise in GPU, and use them as displacement map
-- rework order of chunk generation (spiral)
+- Rework priority order of chunk request
+
+- More documentation for functions and why they are that way, explanations and shit
