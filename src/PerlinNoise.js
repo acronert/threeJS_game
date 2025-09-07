@@ -63,8 +63,8 @@ export function perlin_get(x, y) {
 
 // GenerateDunes
 export function getTerrainHeightAt(x, y) {
-    let o0 = perlin_get(x * 0.0007, y * 0.0005);
-    o0 = Math.pow(o0, 3.0); // sharp ridge
+    let o0 = perlin_get(x * 0.001, y * 0.001);  // zones of high and low dunes
+    o0 = o0 / 2 + 0.5;
 
     let o1 = perlin_get(x * 0.005, y * 0.002);
     o1 = Math.pow(1 - Math.abs(o1), 3.0); // sharp ridge
@@ -73,6 +73,23 @@ export function getTerrainHeightAt(x, y) {
     o2 = Math.pow(1 - Math.abs(o2), 3.0); // sharp ridge
 
     let o3 = perlin_get(x * 0.03, y * 0.01); // fine ripples
-    // let o3 = 0;
-    return o0 * 500 + o1 * 30 + o2 * 20 + o3 * 6;
+
+    return o0 * 2 * (o1 * 30 + o2 * 20 + o3 * 6);
 }
+
+
+// // GenerateDunes
+// export function getTerrainHeightAt(x, y) {
+//     let o0 = perlin_get(x * 0.0007, y * 0.0005);
+//     o0 = Math.pow(o0, 3.0); // sharp ridge
+
+//     let o1 = perlin_get(x * 0.005, y * 0.002);
+//     o1 = Math.pow(1 - Math.abs(o1), 3.0); // sharp ridge
+
+//     let o2 = perlin_get(x * 0.01, y * 0.004);
+//     o2 = Math.pow(1 - Math.abs(o2), 3.0); // sharp ridge
+
+//     let o3 = perlin_get(x * 0.03, y * 0.01); // fine ripples
+//     // let o3 = 0;
+//     return o0 * 500 + o1 * 30 + o2 * 20 + o3 * 6;
+// }
