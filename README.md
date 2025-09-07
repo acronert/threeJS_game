@@ -23,6 +23,8 @@
 
 ## Performance / Rendering
 - OK Asynchronous chunk generation 
-- Rework priority order of chunk request
+- Rework priority order of chunk request + max number of requests per update cycle
+- Retry the normal generation by the web workers, see if it is more optimized
+- add a new worker ...?
 
 - More documentation for functions and why they are that way, explanations and shit

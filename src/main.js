@@ -8,15 +8,15 @@ import { ChunkManager } from "./ChunkManager.js";
 class Simulation {
     constructor() {
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 8096);
+        this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 8000);
         this.renderer = createRenderer();
 
         this.animate = this.animate.bind(this);
-
         this.handleResize = this.handleResize.bind(this);
         this.toggleFullscreen = this.toggleFullscreen.bind(this);
 
         this.fps = 0;
+        this.lastFpsUpdate = 0;
         this.frames = 0;
         this.lastFrameTime = 0;
     }
@@ -25,7 +25,7 @@ class Simulation {
         const chunkSize = 128;
         this.chunkManager = new ChunkManager(this.scene, this.camera, chunkSize);
 
-        this.camera.position.set(0, 10, 0);
+        this.camera.position.set(0, 2000, 0);
         this.composer = createComposer(this.renderer, this.scene, this.camera);
 
         this.input = createInputManager(this.renderer.domElement);
@@ -69,7 +69,7 @@ class Simulation {
 
         const interval = setInterval(() => {
             this.chunkManager.update();
-        }, 500);
+        }, 250);
 
         this.animate()
     }
@@ -77,19 +77,20 @@ class Simulation {
     animate() {
         requestAnimationFrame(this.animate);
 
+        // Calculate the time to complete a animation cycle
         const now = performance.now();
         const delta = (now - this.lastFrameTime) / 1000; // delta in seconds
         this.lastFrameTime = now;
 
-        // console.log("delta = ", delta);
-
-        // this.frames++;
-        // if (now - this.lastFrameTime >= 1000) {
-        //     this.fps = this.frames;
-        //     console.log("FPS:", this.fps);
-        //     this.frames = 0;
-        //     this.lastFrameTime = now;
-        // }
+        
+        // Count FPS
+        this.frames++;
+        if (now - this.lastFpsUpdate >= 1000) {
+            this.fps = this.frames;
+            console.log("FPS:", this.fps);
+            this.frames = 0;
+            this.lastFpsUpdate = now;
+        }
 
         this.controls.update(delta);
         this.composer.render();
