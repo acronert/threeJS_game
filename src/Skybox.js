@@ -3,7 +3,7 @@ import { EXRLoader } from "three/examples/jsm/loaders/EXRLoader.js";
 
 export function createSkybox(scene) {
     const exrLoader = new EXRLoader();
-    exrLoader.load("../assets/DaySkyHDRI019B_4K-HDR_modified.exr", (texture) => {
+    exrLoader.load("./assets/DaySkyHDRI019B_4K-HDR_modified.exr", (texture) => {
         texture.mapping = THREE.EquirectangularReflectionMapping;
 
         scene.background = texture;     // show it as skybox
