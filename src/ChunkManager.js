@@ -1,43 +1,21 @@
 import { Chunk } from "./Chunk.js";
 import { createSandMaterial } from "./SandMaterial.js";
 
-        // TODO : change priority of needed chunks:
-        //  - chunks that are not rendered yet, in order of distance
-        //  - then chunks in order of distance
-        // + Maybe dont send too many requests at once in case the player goes fast
-        //   sending maybe the top 20 request per update cycle would avoid the 
-        //   late generation of chunks far behind, that are top of the list
-
 // For each Level Of Details (LOD), set the chunk distance and resolution
 const chunkDepth = {
     LOW: {
         depth:  32,
-        res:    2,
+        res:    16,
     },
     MID: {
-        depth:  8,
-        res:    8,
+        depth:  16,
+        res:    64,
     },
     HIGH: {
-        depth:  4,
+        depth:  8,
         res:    128
     }
 }
-
-// const chunkDepth = {
-//     LOW: {
-//         depth:  8,
-//         res:    16,
-//     },
-//     MID: {
-//         depth:  4,
-//         res:    64,
-//     },
-//     HIGH: {
-//         depth:  2,
-//         res:    128
-//     }
-// }
 
 // Number of chunks that are requested each time update() is triggered
 const updateSize = 20;
@@ -63,11 +41,6 @@ export class ChunkManager {
         const { chunkX, chunkY, resolution, vertices } = e.data;
         const key = `${chunkX},${chunkY}`;
 
-        // // check if the chunk is still needed
-        // if (!this.loaded.has(key)) {
-        //     return ;
-        // }
-
         const chunk = new Chunk( { x: chunkX, y: chunkY }, this.chunkSize, resolution, vertices, this.material);
         chunk.addTo(this.scene);
 
@@ -85,8 +58,8 @@ export class ChunkManager {
 
     // Return the chunks that are within the radius around the camera chunk
     // position as an array of [x, y, sqrDistance], sorted by sqrDistance
-    getCandidatesWithinRadius(radius) {
-        const candidates = [];
+    getNeededWithinRadius(radius) {
+        const needed = [];
         // get camera position in chunk coordinated
         let x0 = Math.floor((this.camera.position.x + this.chunkSize / 2) / this.chunkSize);
         let y0 = Math.floor((this.camera.position.z + this.chunkSize / 2) / this.chunkSize);
@@ -95,13 +68,13 @@ export class ChunkManager {
             for (let y = -radius; y <= radius; y++) {
                 let sqrDistance = x * x + y * y;
                 if (sqrDistance <= radius**2)
-                candidates.push([x0 + x, y0 + y, sqrDistance]);
+                needed.push([x0 + x, y0 + y, sqrDistance]);
             }
         }
         // sort by distance to camera chunk
-        candidates.sort((a, b) => a[2] - b[2]);
+        needed.sort((a, b) => a[2] - b[2]);
 
-        return candidates;
+        return needed;
     }
 
     // Returns the resolution based on the distance
@@ -113,59 +86,45 @@ export class ChunkManager {
 
     #requestChunk(chunkX, chunkY, resolution) {
         const key = `${chunkX},${chunkY}`;
-        // check if the chunk is not already requested
-        if (!this.requested.has(key)) {
-            this.worker.postMessage({ chunkX, chunkY, size: this.chunkSize, resolution });
-            this.requested.set(key, { resolution });
-        }
+        this.worker.postMessage({ chunkX, chunkY, size: this.chunkSize, resolution });
+        this.requested.set(key, { resolution });
     }
 
-    update() {
-        let nRequest = 0;
-        let candidates = this.getCandidatesWithinRadius(chunkDepth.LOW.depth);
-
-
-        
-        // again, for all candidates
-        // Second priority to the chunks that are nearest
-        for (const [chunkX, chunkY, sqrDistance] of candidates) {
-            if (nRequest > updateSize)  break;
-
-            const resolution = this.#getChunkResolution(sqrDistance);
-
-            // if the chunk is loaded, but not in that resolution -> request it
-            if (this.loaded.has(`${chunkX},${chunkY}`)
-                && this.loaded.get(`${chunkX},${chunkY}`).resolution != resolution) {
-                    this.#requestChunk(chunkX, chunkY, resolution);
-                    nRequest++;
-            }
-        }
-
-        // For all candidates
-        // First priority to the chunks that are nearest AND not loaded
-        for (const [chunkX, chunkY, sqrDistance] of candidates) {
-            if (nRequest > updateSize)  break;
-            // if the chunk is not loaded  -> request it
-            if (!this.loaded.has(`${chunkX},${chunkY}`)) {
-                const resolution = this.#getChunkResolution(sqrDistance);
-                this.#requestChunk(chunkX, chunkY, resolution);
-                nRequest++;
-            }
-        }
-
-        // Remove loaded chunks that are not candidates
-        // create a set from candidates to be able to check by key
-        const candidatesKey = new Set();
-        for (const [chunkX, chunkY] of candidates) {
-            candidatesKey.add(`${chunkX},${chunkY}`);
+    // Remove chunks that are not needed anymore
+    #removeOldChunks(needed) {
+        // create a set from needed to be able to check by key
+        const neededKey = new Set();
+        for (const [chunkX, chunkY] of needed) {
+            neededKey.add(`${chunkX},${chunkY}`);
         }
 
         for (let key of this.loaded.keys()) {
-            if (!candidatesKey.has(key)) {
+            if (!neededKey.has(key)) {
                 this.loaded.get(key).chunk.removeFrom(this.scene);
                 this.loaded.delete(key);
             }
         }
+    }
+
+    update() {
+        let nRequest = this.requested.size;
+
+        console.log("nRequest = ", nRequest);
+
+        let needed = this.getNeededWithinRadius(chunkDepth.LOW.depth);
+
+        for (const [chunkX, chunkY, sqrDistance] of needed) {
+            if (nRequest > updateSize)  break;
+            const resolution = this.#getChunkResolution(sqrDistance);
+
+            if (!this.requested.has(`${chunkX},${chunkY}`)          // Not requested
+                && (!this.loaded.has(`${chunkX},${chunkY}`)         // ... and ( not loaded ...
+                || (this.loaded.get(`${chunkX},${chunkY}`).resolution != resolution))) { // ... or need to change scale)
+                    this.#requestChunk(chunkX, chunkY, resolution);
+                    nRequest++;
+            }
+        }
+        this.#removeOldChunks(needed);
     }
 
     // dispose() {
