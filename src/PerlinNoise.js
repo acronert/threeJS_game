@@ -77,7 +77,6 @@ export function getTerrainHeightAt(x, y) {
     return o0 * 2 * (o1 * 30 + o2 * 20 + o3 * 6);
 }
 
-
 // // GenerateDunes
 // export function getTerrainHeightAt(x, y) {
 //     let o0 = perlin_get(x * 0.0007, y * 0.0005);

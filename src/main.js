@@ -25,7 +25,7 @@ class Simulation {
         const chunkSize = 128;
         this.chunkManager = new ChunkManager(this.scene, this.camera, chunkSize);
 
-        this.camera.position.set(0, 2000, 0);
+        this.camera.position.set(0, 50, 0);
         this.composer = createComposer(this.renderer, this.scene, this.camera);
 
         this.input = createInputManager(this.renderer.domElement);
@@ -91,6 +91,8 @@ class Simulation {
             this.frames = 0;
             this.lastFpsUpdate = now;
         }
+
+        this.chunkManager.updateMaterial(this.camera);
 
         this.controls.update(delta);
         this.composer.render();

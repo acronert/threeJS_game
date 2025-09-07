@@ -8,9 +8,9 @@ export function createSandMaterial(size) {
     const normal = loader.load('../assets/Ground055S_1K-JPG/Ground055S_1K-JPG_NormalGL.jpg');
     const roughness = loader.load('../assets/Ground055S_1K-JPG/Ground055S_1K-JPG_Roughness.jpg');
     const ambientOcclusion = loader.load('../assets/Ground055S_1K-JPG/Ground055S_1K-JPG_AmbientOcclusion.jpg');
-    const displacement = loader.load('../assets/Ground055S_1K-JPG/Ground055S_1K-JPG_Displacement.jpg');
+    // const displacement = loader.load('../assets/Ground055S_1K-JPG/Ground055S_1K-JPG_Displacement.jpg');
     
-    [color, normal, roughness, ambientOcclusion, displacement].forEach(tex => {
+    [color, normal, roughness, ambientOcclusion].forEach(tex => {
         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
         tex.repeat.set(size / 64, size / 64); // wrap (divide more for zoom in)
         tex.rotation = Math.PI / 2; // rotate the textures 90degrees...
@@ -28,5 +28,45 @@ export function createSandMaterial(size) {
         // displacementScale: 0.3
     });
 
+
+    material.onBeforeCompile = (shader) => {
+        // CURVATURE
+        // Add new uniforms
+        shader.uniforms.cameraPos = { value: new THREE.Vector3() };
+        shader.uniforms.curvatureRadius = { value: 50000.0 };
+
+        // Declare uniforms in vertex shader
+        shader.vertexShader = shader.vertexShader.replace(
+        '#include <common>',
+        `#include <common>
+        uniform vec3 cameraPos;
+        uniform float curvatureRadius;
+        `
+        );
+
+        // Inject curvature effect in the vertex shader
+        shader.vertexShader = shader.vertexShader.replace(
+        '#include <begin_vertex>',
+        `#include <begin_vertex>
+        
+        // Apply curvature effect
+        vec3 worldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;
+        vec2 offset = worldPos.xz - cameraPos.xz;
+        float dist2 = dot(offset, offset);
+        
+        // Apply curvature by modifying the transformed position
+        transformed.z -= dist2 / (2.0 * curvatureRadius);
+        `
+        );
+
+        // Store update function
+        material.userData.update = (camera) => {
+        shader.uniforms.cameraPos.value.copy(camera.position);
+        };
+    };
+
     return material;
 }
+
+
+

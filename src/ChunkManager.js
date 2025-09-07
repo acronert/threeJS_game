@@ -52,10 +52,10 @@ export class ChunkManager {
 
     // Triggers when the worker finished computing the heights of a chunk
     onWorkerMessage = (e) => {
-        const { chunkX, chunkY, resolution, vertices } = e.data;
+        const { chunkX, chunkY, resolution, heights, normals } = e.data;
         const key = `${chunkX},${chunkY}`;
 
-        const chunk = new Chunk( { x: chunkX, y: chunkY }, this.chunkSize, resolution, vertices, this.material);
+        const chunk = new Chunk( { x: chunkX, y: chunkY }, this.chunkSize, resolution, heights, normals, this.material);
         chunk.addTo(this.scene);
 
         // remove the request
@@ -69,6 +69,26 @@ export class ChunkManager {
         // put new chunk in chunks
         this.loaded.set(key, { chunk, resolution });
     };
+
+    // // Triggers when the worker finished computing the heights of a chunk
+    // onWorkerMessage = (e) => {
+    //     const { chunkX, chunkY, resolution, vertices } = e.data;
+    //     const key = `${chunkX},${chunkY}`;
+
+    //     const chunk = new Chunk( { x: chunkX, y: chunkY }, this.chunkSize, resolution, vertices, this.material);
+    //     chunk.addTo(this.scene);
+
+    //     // remove the request
+    //     this.requested.delete(key);
+
+    //     // remove the previous LOD chunk if it exist
+    //     if (this.loaded.has(key)) {
+    //         this.loaded.get(key).chunk.removeFrom(this.scene);
+    //         this.loaded.delete(key);
+    //     }
+    //     // put new chunk in chunks
+    //     this.loaded.set(key, { chunk, resolution });
+    // };
 
     // Return the chunks that are within the radius around the camera chunk
     // position as an array of [x, y, sqrDistance], sorted by sqrDistance
@@ -153,4 +173,10 @@ export class ChunkManager {
 
     // dispose() {
     // }
+
+    updateMaterial(camera) {
+        if (this.material.userData.update) {
+            this.material.userData.update(camera);
+        }
+    }
 }

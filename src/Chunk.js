@@ -1,7 +1,7 @@
 import * as THREE from "three";
 
 export class Chunk {
-    constructor(coord, size, resolution, vertices, material) {
+    constructor(coord, size, resolution, heights, normals, material) {
         this.coord = coord;
         this.size = size;
 
@@ -10,15 +10,13 @@ export class Chunk {
 
         // Set vertex height
         for (let i = 0; i < positions.count; i++) {
-            positions.setZ(i, vertices[i]);
+            positions.setZ(i, heights[i]);
         }
         positions.needsUpdate = true;
 
         // Set normals
-        // geometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
-        // positions.attributes.normal.needsUpdate = true;
-
-        geometry.computeVertexNormals();
+        geometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
+        geometry.attributes.normal.needsUpdate = true;
 
         // Place the chunk in world space
         this.mesh = new THREE.Mesh(geometry, material);

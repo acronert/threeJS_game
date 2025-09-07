@@ -2,88 +2,80 @@ import { getTerrainHeightAt } from "./PerlinNoise.js";
 
 function generateChunkHeights(chunkX, chunkY, size, resolution) {
     const vertices = new Float32Array(resolution * resolution);
-    for (let z = 0; z < resolution; z++) {
+    for (let y = 0; y < resolution; y++) {
         for (let x = 0; x < resolution; x++) {
-            const dx = (chunkX + z / (resolution - 1)) * size - size / 2;
-            const dy = (chunkY + x / (resolution - 1)) * size - size / 2;
-            vertices[x * resolution + z] = getTerrainHeightAt(dx, dy);
+            const d = getDeltaCoord(x, y, chunkX, chunkY, size, resolution);
+            vertices[x * resolution + y] = getTerrainHeightAt(d.x, d.y);
         }
     }
     return vertices;
 }
 
-function getWorldXZ(chunkX, chunkY, size, resolution, x, z) {
-    const worldX = chunkX * size + (x / (resolution - 1)) * size - size / 2;
-    const worldZ = chunkY * size + (z / (resolution - 1)) * size - size / 2;
-    return [worldX, worldZ];
+function getDeltaCoord(x, y, chunkX, chunkY, size, resolution) {
+    let d = { x: 0, y: 0};
+    d.x = (chunkX + y / (resolution - 1)) * size - size / 2;
+    d.y = (chunkY + x / (resolution - 1)) * size - size / 2;
+    return d;
 }
 
-function generateNormals(chunkX, chunkY, size,resolution, heights) {
+function generateGradientNormals(chunkX, chunkY, size, resolution, heights) {
     const normals = new Float32Array(resolution * resolution * 3);
+    const scale = size / (resolution - 1);
 
-    // for (let z = 1; z < resolution - 1; z++) {
-    //     for (let x = 1; x < resolution - 1; x++) {
-    for (let z = 0; z < resolution; z++) {
+    for (let y = 0; y < resolution; y++) {
         for (let x = 0; x < resolution; x++) {
-            const i = z * resolution + x;
+            const i = y * resolution + x;
 
             let hL;
-            let hR;
-            let hD;
-            let hU;
-
-
-            if (x === 0) {
-                const [wx, wz] = getWorldXZ(chunkX, chunkY, size, resolution, x - 1, z);
-                hL = getTerrainHeightAt(wx, wz);
-            } else {
+            if (x > 0) {
                 hL = heights[i - 1];
-            }
-
-            if (x === resolution - 1) {
-                const [wx, wz] = getWorldXZ(chunkX, chunkY, size, resolution, x + 1, z);
-                hR = getTerrainHeightAt(wx, wz);
             } else {
+                const d = getDeltaCoord(y, x - 1, chunkX, chunkY, size, resolution);
+                hL = getTerrainHeightAt(d.x, d.y);
+            }
+            
+            let hR;
+            if (x < resolution - 1) {
                 hR = heights[i + 1];
-            }
-
-            if (z === 0) {
-                const [wx, wz] = getWorldXZ(chunkX, chunkY, size, resolution, x, z - 1);
-                hD = getTerrainHeightAt(wx, wz);
             } else {
+                const d = getDeltaCoord(y, x + 1, chunkX, chunkY, size, resolution);
+                hR = getTerrainHeightAt(d.x, d.y);
+            }
+            
+            let hD;
+            if (y > 0) {
                 hD = heights[i - resolution];
-            }
-
-            if (z === resolution - 1) {
-                const [wx, wz] = getWorldXZ(chunkX, chunkY, size, resolution, x, z + 1);
-                hU = getTerrainHeightAt(wx, wz);
             } else {
+                const d = getDeltaCoord(y - 1, x, chunkX, chunkY, size, resolution);
+                hD = getTerrainHeightAt(d.x, d.y);
+            }
+            
+            let hU;
+            if (y < resolution - 1) {
                 hU = heights[i + resolution];
+            } else {
+                const d = getDeltaCoord(y + 1, x, chunkX, chunkY, size, resolution);
+                hU = getTerrainHeightAt(d.x, d.y);
             }
 
+            // Central differences (scaled by world spacing)
+            const dx = (hR - hL) / (2 * scale);
+            const dy = (hU - hD) / (2 * scale);
 
-
-            // const hL = heights[i - 1];
-            // const hR = heights[i + 1];
-            // const hD = heights[i - resolution];
-            // const hU = heights[i + resolution];
-
-            const dx = hR - hL;
-            const dz = hU - hD;
-
+            // Gradient normal
             let nx = -dx;
-            let ny = 2.0;
-            let nz = -dz;
+            let ny = -dy;
+            let nz = 2.0;
 
-            // normalize
-            const len = Math.sqrt(nx*nx + ny*ny + nz*nz);
+            // Normalize
+            const len = Math.sqrt(nx * nx + ny * ny + nz * nz);
             nx /= len;
             ny /= len;
             nz /= len;
 
-            normals[i*3] = nx;
-            normals[i*3 + 1] = ny;
-            normals[i*3 + 2] = nz;
+            normals[i * 3] = nx;
+            normals[i * 3 + 1] = ny;
+            normals[i * 3 + 2] = nz;
         }
     }
 
@@ -92,8 +84,7 @@ function generateNormals(chunkX, chunkY, size,resolution, heights) {
 
 onmessage = (e) => {
     const { chunkX, chunkY, size, resolution } = e.data; // unpack input
-    const vertices = generateChunkHeights(chunkX, chunkY, size, resolution);
-    postMessage({ chunkX, chunkY, resolution, vertices }, [vertices.buffer]); // [list] is uses to transfert ownership of the data
-    // const normals = generateNormals(chunkX, chunkY, size,resolution, vertices);
-    // postMessage({ chunkX, chunkY, resolution, vertices, normals }, [vertices.buffer, normals.buffer]); // [list] is uses to transfert ownership of the data
+    const heights = generateChunkHeights(chunkX, chunkY, size, resolution);
+    const normals = generateGradientNormals(chunkX, chunkY, size, resolution, heights);
+    postMessage({ chunkX, chunkY, resolution, heights, normals }, [heights.buffer, normals.buffer]); // [list] is uses to transfert ownership of the data
 }
