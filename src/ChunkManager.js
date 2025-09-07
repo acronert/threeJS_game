@@ -152,9 +152,6 @@ export class ChunkManager {
 
     update() {
         let nRequest = this.requested.size;
-
-        console.log("nRequest = ", nRequest);
-
         let needed = this.getNeededWithinRadius(chunkDepth.LOW.depth);
 
         for (const [chunkX, chunkY, sqrDistance] of needed) {
