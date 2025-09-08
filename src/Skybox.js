@@ -9,6 +9,4 @@ export function createSkybox(scene) {
         scene.background = texture;     // show it as skybox
         scene.environment = texture;    // use it for PBR reflections
     });
-
-
 }

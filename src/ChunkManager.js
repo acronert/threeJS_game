@@ -19,15 +19,15 @@ import { createSandMaterial } from "./SandMaterial.js";
 
 const chunkDepth = {
     LOW: {
-        depth:  12,
+        depth:  16,
         res:    16,
     },
     MID: {
-        depth:  6,
+        depth:  8,
         res:    64,
     },
     HIGH: {
-        depth:  3,
+        depth:  4,
         res:    128
     }
 }

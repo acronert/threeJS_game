@@ -5,8 +5,8 @@ import { createControls } from "./Controls.js";
 import { createSkybox } from "./Skybox.js";
 import { ChunkManager } from "./ChunkManager.js";
 import { FootprintManager } from "./FootprintManager.js";
+import { getTerrainHeightAt } from "./PerlinNoise.js";
 
-import { createMonolith } from "./Monolith.js";
 
 class Simulation {
     constructor() {
@@ -25,7 +25,7 @@ class Simulation {
     }
 
     init() {
-        const chunkSize = 128;
+        const chunkSize = 32;
         this.chunkManager = new ChunkManager(this.scene, this.camera, chunkSize);
 
         this.footprintManager = new FootprintManager(this.scene, this.camera, this.chunkManager);
@@ -72,8 +72,16 @@ class Simulation {
     start() {
         createSkybox(this.scene);
 
-        // const monolith_mesh = createMonolith();
-        // this.scene.add(monolith_mesh);
+        const geometry = new THREE.BoxGeometry(0.6, 2, 0.6);
+        const material = new THREE.MeshStandardMaterial({ color : 0xffaaaa });
+
+        const mesh = new THREE.Mesh(geometry, material);
+        const height = getTerrainHeightAt(-5, 0);
+        mesh.position.set(-5, 2.3, 0);
+        this.scene.add(mesh);
+        // const directionalLight = new THREE.DirectionalLight( 0xffffff, 1);
+        // directionalLight.position.set(2, 1, 0);
+        // this.scene.add(directionalLight);
 
         const interval = setInterval(() => {
             this.chunkManager.update();

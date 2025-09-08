@@ -9,8 +9,8 @@ export function createControls(camera, inputManager) {
   const tempQuaternion = new THREE.Quaternion();
   
   let yawOffset = 0;
-  const speed = 25; // unit per second
-  const rotSpeed = 0.025;
+  const speed = 3; // unit per second
+  const rotSpeed = 1.5; // rad per second
 
   // Screen orientation
   function getScreenTransform() {
@@ -43,11 +43,11 @@ export function createControls(camera, inputManager) {
     if (inputManager.keys.down)  camera.position.addScaledVector(up, -speed * delta);
 
     // Camera height
-    camera.position.y = getTerrainHeightAt(camera.position.x, camera.position.z) + 3.0;
+    camera.position.y = getTerrainHeightAt(camera.position.x, camera.position.z) + 1.7;
 
     // Rotations
-    if (inputManager.keys.yaw_left)  yawOffset += rotSpeed;
-    if (inputManager.keys.yaw_right)  yawOffset -= rotSpeed;
+    if (inputManager.keys.yaw_left)  yawOffset += rotSpeed * delta;
+    if (inputManager.keys.yaw_right)  yawOffset -= rotSpeed * delta;
     euler.set(inputManager.gyro.beta,
               inputManager.gyro.alpha + yawOffset,
               -inputManager.gyro.gamma,
