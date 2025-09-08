@@ -12,12 +12,11 @@
 - OK Procedural dunes with sharper edges
 - OK Tweak Perlin noise / octaves for realistic dune shapes
 - Blend terrain with rocky hills using a blend map
-- Footprints / paths on sand
 
 ## Textures
 - OK Sand with ridges / fine details
 - Rocky hills textures for blending
-- Footprint texture with geometry decals
+- OK Footprint texture with geometry decals
 
 ## Objects
 - Rocks / boulders placed across dunes
