@@ -3,7 +3,7 @@ import { DecalGeometry } from "three/examples/jsm/geometries/DecalGeometry.js";
 import { createFootprintMaterial } from "./FootprintMaterial.js";
 import { getTerrainHeightAt } from "./PerlinNoise.js";
 
-const footprintInterval = 0.7;
+const footprintInterval = 1.0;
 const maxFootprints = 50;
 
 export class FootprintManager {

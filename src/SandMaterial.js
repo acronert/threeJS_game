@@ -33,7 +33,7 @@ export function createSandMaterial(size = 1) {
         // CURVATURE
         // Add new uniforms
         shader.uniforms.cameraPos = { value: new THREE.Vector3() };
-        shader.uniforms.curvatureRadius = { value: 40000.0 };
+        shader.uniforms.curvatureRadius = { value: 4000.0 };
 
         // Declare uniforms in vertex shader
         shader.vertexShader = shader.vertexShader.replace(

@@ -9,7 +9,7 @@ export function createControls(camera, inputManager) {
   const tempQuaternion = new THREE.Quaternion();
   
   let yawOffset = 0;
-  const speed = 3; // unit per second
+  const speed = 4; // meter per second
   const rotSpeed = 1.5; // rad per second
 
   // Screen orientation
