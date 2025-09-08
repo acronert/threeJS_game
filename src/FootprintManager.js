@@ -3,7 +3,7 @@ import { DecalGeometry } from "three/examples/jsm/geometries/DecalGeometry.js";
 import { createFootprintMaterial } from "./FootprintMaterial.js";
 import { getTerrainHeightAt } from "./PerlinNoise.js";
 
-const footprintInterval = 1;
+const footprintInterval = 5;
 const maxFootprints = 50;
 
 export class FootprintManager {
@@ -29,9 +29,8 @@ export class FootprintManager {
         }
 
         const position = new THREE.Vector3(x, getTerrainHeightAt(x, z), z);
-
         const orientation = new THREE.Euler(-Math.PI / 2, 0, angle);
-        const size = new THREE.Vector3(3 / 3, 7 / 3, 10);
+        const size = new THREE.Vector3(3, 3, 10);
         const geometry = new DecalGeometry(
             chunkMesh,
             position,
@@ -39,7 +38,6 @@ export class FootprintManager {
             size
         );
         const material = isRight ? this.material.right : this.material.left;
-        // console.log("new footprint on ", x, z);
         return new THREE.Mesh(geometry, material);
     }
 

@@ -4,10 +4,10 @@ export function createFootprintMaterial(size = 1) {
     // Load Textures
     const loader = new THREE.TextureLoader();
     
-    const color = loader.load('./assets/Footprint/Foot_color.jpg');
+    const color = loader.load('./assets/Footprint/foot_color.jpg');
 
-    const normal_left = loader.load('./assets/Footprint/Foot_left_normal.jpg');
-    const alpha_left = loader.load('./assets/Footprint/Foot_left_alpha.jpg');
+    const normal_left = loader.load('./assets/Footprint/foot_left_normal.jpg');
+    const alpha_left = loader.load('./assets/Footprint/foot_left_alpha.jpg');
     
     [color, normal_left, alpha_left].forEach(tex => {
         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
@@ -19,6 +19,7 @@ export function createFootprintMaterial(size = 1) {
         map: color,
         alphaMap: alpha_left,
         normalMap: normal_left,
+        normalScale: new THREE.Vector2(2, 2),
         transparent: true,
         depthTest: true,
         depthWrite: false,
@@ -26,8 +27,8 @@ export function createFootprintMaterial(size = 1) {
         polygonOffsetFactor: -4
     });
 
-    const normal_right = loader.load('./assets/Footprint/Foot_right_normal.jpg');
-    const alpha_right = loader.load('./assets/Footprint/Foot_right_alpha.jpg');
+    const normal_right = loader.load('./assets/Footprint/foot_right_normal.jpg');
+    const alpha_right = loader.load('./assets/Footprint/foot_right_alpha.jpg');
     
     [color, normal_right, alpha_right].forEach(tex => {
         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
@@ -39,6 +40,7 @@ export function createFootprintMaterial(size = 1) {
         map: color,
         alphaMap: alpha_right,
         normalMap: normal_right,
+        normalScale: new THREE.Vector2(2, 2),
         transparent: true,
         depthTest: true,
         depthWrite: false,

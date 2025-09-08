@@ -77,7 +77,6 @@ class Simulation {
 
         const interval = setInterval(() => {
             this.chunkManager.update();
-            this.footprintManager.update();
 
         }, 250);
 
@@ -102,6 +101,7 @@ class Simulation {
         }
 
         this.chunkManager.updateMaterial(this.camera);
+        this.footprintManager.update();
 
         this.controls.update(delta);
         this.composer.render();
