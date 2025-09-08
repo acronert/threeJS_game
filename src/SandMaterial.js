@@ -12,7 +12,7 @@ export function createSandMaterial(size = 1) {
     
     [color, normal, roughness, ambientOcclusion].forEach(tex => {
         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-        tex.repeat.set(size / 6, size / 6); // wrap (divide more for zoom in)
+        tex.repeat.set(size / 8, size / 8); // wrap (divide more for zoom in)
         tex.rotation = Math.PI / 2; // rotate the textures 90degrees...
         tex.center.set(0.5, 0.5);   // ... center on the middle
     });
