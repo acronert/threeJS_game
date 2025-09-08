@@ -4,6 +4,9 @@ import { createInputManager } from "./InputManager.js";
 import { createControls } from "./Controls.js";
 import { createSkybox } from "./Skybox.js";
 import { ChunkManager } from "./ChunkManager.js";
+import { FootprintManager } from "./FootprintManager.js";
+
+import { createMonolith } from "./Monolith.js";
 
 class Simulation {
     constructor() {
@@ -24,6 +27,8 @@ class Simulation {
     init() {
         const chunkSize = 128;
         this.chunkManager = new ChunkManager(this.scene, this.camera, chunkSize);
+
+        this.footprintManager = new FootprintManager(this.scene, this.camera, this.chunkManager);
 
         this.camera.position.set(0, 50, 0);
         this.composer = createComposer(this.renderer, this.scene, this.camera);
@@ -67,8 +72,13 @@ class Simulation {
     start() {
         createSkybox(this.scene);
 
+        // const monolith_mesh = createMonolith();
+        // this.scene.add(monolith_mesh);
+
         const interval = setInterval(() => {
             this.chunkManager.update();
+            this.footprintManager.update();
+
         }, 250);
 
         this.animate()
@@ -82,7 +92,6 @@ class Simulation {
         const delta = (now - this.lastFrameTime) / 1000; // delta in seconds
         this.lastFrameTime = now;
 
-        
         // Count FPS
         this.frames++;
         if (now - this.lastFpsUpdate >= 1000) {

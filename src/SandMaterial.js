@@ -1,6 +1,6 @@
 import * as THREE from "three";
 
-export function createSandMaterial(size) {
+export function createSandMaterial(size = 1) {
     // Load Textures
     const loader = new THREE.TextureLoader();
     

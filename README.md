@@ -6,25 +6,26 @@
 - Sun glare / bloom
 - OK Fog for atmospheric depth
 - Mirages (refraction/distortion effects)
+- day night cycle, moving sun
 
 ## Terrain
 - OK Procedural dunes with sharper edges
 - OK Tweak Perlin noise / octaves for realistic dune shapes
 - Blend terrain with rocky hills using a blend map
-- Footprints / paths on sand (procedural algorithm needed)
+- Footprints / paths on sand
 
 ## Textures
 - OK Sand with ridges / fine details
 - Rocky hills textures for blending
-- Footprint texture or procedural path generation
+- Footprint texture with geometry decals
 
 ## Objects
 - Rocks / boulders placed across dunes
 
 ## Performance / Rendering
-- OK Asynchronous chunk generation 
+- Asynchronous chunk generation 
 - OK Rework priority order of chunk request + max number of requests per update cycle
-- Retry the normal generation by the web workers, see if it is more optimized
+- OK Retry the normal generation by the web workers, see if it is more optimized
 - OK dd a new worker ...?
 
 - More documentation for functions and why they are that way, explanations and shit

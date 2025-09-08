@@ -2,9 +2,14 @@ import * as THREE from "three";
 import { EffectComposer } from "three/examples/jsm/postprocessing/EffectComposer.js";
 import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
-import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
 import { FilmPass } from "three/examples/jsm/postprocessing/FilmPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
+
+import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
+import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
+import { TAARenderPass } from 'three/examples/jsm/postprocessing/TAARenderPass.js';
+
+
 
 export function createRenderer() {
     const renderer = new THREE.WebGLRenderer({antialias:true});
@@ -43,6 +48,22 @@ export function createComposer(renderer, scene, camera) {
     fxaaPass.material.uniforms['resolution'].value.y = 1 / window.innerHeight;
     composer.addPass(fxaaPass);
   
+    // SMAA
+    // const smaaPass = new SMAAPass(window.innerWidth, window.innerHeight);
+    // composer.addPass(smaaPass);
+
+    // TAA
+    // const taaRenderPass = new TAARenderPass(scene, camera);
+    // taaRenderPass.unbiased = false; // Set to true for unbiased sampling
+    // taaRenderPass.sampleLevel = 1;  // 0-5, higher = better quality but slower
+    // composer.addPass(taaRenderPass);
+    
+    // Optional: Add FXAA on top for extra smoothness
+    // const fxaaPass = new ShaderPass(FXAAShader);
+    // fxaaPass.material.uniforms['resolution'].value.x = 1 / window.innerWidth;
+    // fxaaPass.material.uniforms['resolution'].value.y = 1 / window.innerHeight;
+    // composer.addPass(fxaaPass);
+
     const outputPass = new OutputPass();
     composer.addPass( outputPass );
     

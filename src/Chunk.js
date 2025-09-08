@@ -22,6 +22,8 @@ export class Chunk {
         this.mesh = new THREE.Mesh(geometry, material);
         this.mesh.rotation.x = -Math.PI / 2;
         this.mesh.position.set(coord.x * size, 0, coord.y * size);
+
+        this.mesh.receiveShadow = true;
     }
 
     addTo(scene) {
@@ -31,5 +33,9 @@ export class Chunk {
     removeFrom(scene) {
         scene.remove(this.mesh);
         this.mesh.geometry.dispose();
+    }
+
+    getMesh() {
+        return this.mesh;
     }
 }
