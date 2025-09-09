@@ -74,7 +74,7 @@ class Simulation {
         
         this.rubber = new Rubber();
         const rubberMesh = this.rubber.getRubberMesh();
-        rubberMesh.position.set(-5, 2, 0);
+        rubberMesh.position.set(10, 25, -10);
         this.scene.add(rubberMesh);
 
 
@@ -105,6 +105,8 @@ class Simulation {
 
         this.chunkManager.updateMaterial(this.camera);
         this.footprintManager.update();
+
+        this.rubber.update(delta, this.scene);
 
         this.controls.update(delta);
         this.composer.render();

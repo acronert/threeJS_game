@@ -61,6 +61,33 @@ export function perlin_get(x, y) {
     return value;
 }
 
+export function getNormalAt(x, y, resolution) {
+    const normal = { x: 0, y: 0, z: 0 };
+
+    const hL = getTerrainHeightAt(x - resolution, y);
+    const hR = getTerrainHeightAt(x + resolution, y);
+    const hU = getTerrainHeightAt(x, y - resolution);
+    const hD = getTerrainHeightAt(x, y + resolution);
+    
+    const dx = (hR - hL) / (2 * resolution);
+    const dy = (hU - hD) / (2 * resolution);
+
+    // Gradient normal
+    normal.x = -dx;
+    normal.y = -dy;
+    normal.z = 2.0;
+
+    // Normalize
+    const len = Math.sqrt(normal.x * normal.x
+                        + normal.y * normal.y
+                        + normal.z * normal.z);
+    normal.x /= len;
+    normal.y /= len;
+    normal.z /= len;
+
+    return normal;
+}
+
 // GenerateDunes
 export function getTerrainHeightAt(x, y) {
     let o0 = perlin_get(x * 0.01, y * 0.01);  // zones of high and low dunes
