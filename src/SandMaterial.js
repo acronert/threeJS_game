@@ -61,7 +61,7 @@ export function createSandMaterial(size = 1) {
 
         // Store update function
         material.userData.update = (camera) => {
-        shader.uniforms.cameraPos.value.copy(camera.position);
+            shader.uniforms.cameraPos.value.copy(camera.position);
         };
     };
 

@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { getNormalAt, getTerrainHeightAt } from "./PerlinNoise.js";
+import { createRubberControls } from "./RubberControls.js";
 
 
 function createRubberMesh(rubberRadius) {
@@ -29,6 +30,7 @@ function createRubberMesh(rubberRadius) {
         };
         const tubeGeometry = new THREE.ExtrudeGeometry(tube, tubeExtrudeSettings);
         const tubeMesh = new THREE.Mesh(tubeGeometry, rubberMaterial);
+        tubeMesh.castShadow = true;
 
         // Rims
         const rim = new THREE.Shape();
@@ -51,6 +53,7 @@ function createRubberMesh(rubberRadius) {
         };
         const rimGeometry = new THREE.ExtrudeGeometry(rim, rimExtrudeSettings);
         const rimMesh = new THREE.Mesh(rimGeometry, rubberMaterial);
+        rimMesh.castShadow = true;
 
         // Assembly
         const rimMesh2 = rimMesh.clone();
@@ -64,76 +67,112 @@ function createRubberMesh(rubberRadius) {
         rubberMesh.add(rimMesh2);
 
         // test cube
-        const cube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({color: 0xff0000}));
-        rubberMesh.add(cube);
+        // const cube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({color: 0xff0000}));
+        // rubberMesh.add(cube);
 
+        rubberMesh.castShadow = true;
 
         return rubberMesh;
     }
+
+const steerSpeed = 3.0; // in rad/sec
+const acc = 25.0; // acceleration
+const friction = 0.95;
 
 export class Rubber {
     constructor() {
         this.rubberRadius = 0.55;
 
         this.rubberMesh = createRubberMesh(this.rubberRadius);
+        this.rubberControls = createRubberControls();
 
         this.position = this.rubberMesh.position;
-        this.rotation = this.rubberMesh.rotation;
+        this.heading = 0; // orientation on the up axis, in radians
+        this.forward = new THREE.Vector3(0, 0, 1); // local forward vector
         this.speed = new THREE.Vector3();
         this.acceleration = new THREE.Vector3();
         this.isOnGround = true;
     }
 
-    update(delta, scene) {
-        
-        // calculate acceleration ( gravity, input controls, friction)
+
+
+    update(delta) {
+        // GET TIRE DIRECTION
+            // Get steering input
+        if (this.rubberControls.steer_left) this.heading += steerSpeed * delta;
+        if (this.rubberControls.steer_right) this.heading -= steerSpeed * delta;
+
+            // compute forward vector (tire direction)
+            // horizontal component of velocity
+        let horizontalVel = this.speed.clone();
+        horizontalVel.y = 0;
+            // freeroll influence
+        const freerollWeight = 0.25; // 0 = ignore velocity, 1 = full freeroll
+        if (horizontalVel.lengthSq() > 0.01) {
+            // combine velocity direction and heading
+            const headingDir = new THREE.Vector3(Math.sin(this.heading), 0, Math.cos(this.heading)).normalize();
+            this.forward.copy(horizontalVel.normalize().multiplyScalar(freerollWeight)
+                            .add(headingDir.multiplyScalar(1 - freerollWeight))
+                            .normalize());
+        } else {
+            // if almost stationary, just use heading
+            this.forward.set(Math.sin(this.heading), 0, Math.cos(this.heading)).normalize();
+        }
+
+        // CALCULATE TIRE ACCELERATION
+        // Apply acceleration ( gravity + input controls)
         this.acceleration.set(0, -9.81, 0); // gravity
+        if (this.isOnGround) {
+            if (this.rubberControls.forward) this.acceleration.addScaledVector(this.forward, acc);
+            if (this.rubberControls.backward) this.acceleration.addScaledVector(this.forward, -acc);``
+        }
         
-        // calculate speed
+        // SET SPEED
+            // Apply acceleration
         this.speed.addScaledVector(this.acceleration, delta);
+            // Apply friction ( except on y )
+        if (this.isOnGround) {
+            this.speed.x *= friction;
+            this.speed.z *= friction;
+        }
+
+        // CALCULATE POSITION
+            // predict next pos 
+        const nextPos = this.position.clone().addScaledVector(this.speed, delta);
+
+            // get terrain infos
+        const groundY = getTerrainHeightAt(this.position.x, this.position.z) + this.rubberRadius;
+        const n = getNormalAt(this.position.x, this.position.z, 0.25);
+        const groundNormal = new THREE.Vector3(n.x, n.z, n.y); // invert z and y to put y up
         
-        // calculate position
-        this.position.addScaledVector(this.speed, delta);
-        
-        // clamp to terrain
-        const height = getTerrainHeightAt(this.position.x, this.position.z);
-        if (this.position.y < height + this.rubberRadius) {
-            this.position.y = height + this.rubberRadius
-            const bounce_restitution = 0.65;
-            this.speed.y = -this.speed.y * bounce_restitution;
+        // Check collision
+        if (this.position.y < groundY) {
+            nextPos.y = groundY; // snap to ground
+            // split velocity into normal (into the ground) and tanget (along the ground)
+            const v = this.speed.clone();
+            const vNormalMag = v.dot(groundNormal);
+            const vNormal = groundNormal.clone().multiplyScalar(vNormalMag);
+            const vTangent = v.sub(vNormal);
 
-            // align rubber with normal
-            const n = getNormalAt(this.position.x, this.position.z, 0.25);
-            const groundNormal = new THREE.Vector3(n.x, n.z, n.y); // invert z and y to put y up
-            
-            const arrow = new THREE.ArrowHelper(groundNormal, this.position, 1, 0xff0000);
-            scene.add(arrow);
+            // BOUNCE
+            // if going into the ground, bounce
+            const restitution = 0.6; // bounciness
+            if (vNormalMag < 0) {
+                vNormal.multiplyScalar(-restitution);
+            }
 
-            const v = this.speed.clone(); // copy the speed
-            const slide = v.sub(groundNormal.clone().multiplyScalar(v.dot(groundNormal)));
-            this.speed.copy(slide);
+            // recombine the veclocities
+            this.speed.copy(vTangent.add(vNormal));
 
-            // apply gravity along the slope
-            // const g = new THREE.Vector3(0, -9.81, 0).multiplyScalar(delta);
-            // const slideGravity = g.sub(groundNormal.clone().multiplyScalar(g.dot(groundNormal)));
-            // this.speed.add(slideGravity);
-            
             this.isOnGround = true;
         } else {
             this.isOnGround = false;
         }
 
-        // friction
-        const groundFriction = 0.9;
-        const airFriction = 0.99;
-
-        if (this.isOnGround) {
-            this.speed.x *= groundFriction;
-            this.speed.z *= groundFriction;
-        } else {
-            this.speed.x *= airFriction;
-            this.speed.z *= airFriction;
-        }
+        // calculate position from speed
+        this.position.copy(nextPos);
+        // apply rotation
+        this.rubberMesh.rotation.y = this.heading + Math.PI / 2;
     }
 
     getRubberMesh() {
@@ -141,3 +180,20 @@ export class Rubber {
     }
 }
 
+        // // friction
+        // const groundFriction = 0.99;
+        // if (this.isOnGround) {
+        //     this.speed.x *= groundFriction;
+        //     this.speed.z *= groundFriction;
+
+
+        //     // Bounce
+        //     this.position.y = height + this.rubberRadius
+        //     const bounce_restitution = 0.65;
+        //     this.speed.y = -this.speed.y * bounce_restitution;
+    
+        //     // Slide
+        //     const v = this.speed.clone(); // copy the speed
+        //     const slide = v.sub(groundNormal.clone().multiplyScalar(v.dot(groundNormal)));
+        //     this.speed.copy(slide);
+        // }

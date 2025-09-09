@@ -37,10 +37,10 @@ A desert simulation built with **Three.js**, featuring infinite chunk-based terr
   - ⌨️ Keyboard
   - 📱 Touch
 - [ ] Tire trail system
-- [ ] Physics:
-  - [ ] Velocity & acceleration on X/Y/Z
-  - [ ] Bounces / rebounds
-  - [ ] Freefall handling (disable input, spin tire)
+- [X] Physics:
+  - [X] Velocity & acceleration on X/Y/Z
+  - [X] Bounces / rebounds
+  - [X] Freefall handling (disable input, spin tire)
 - [ ] Camera modes:
   - [ ] First-person (inside tire)
   - [ ] Third-person follow

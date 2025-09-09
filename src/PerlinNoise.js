@@ -66,8 +66,8 @@ export function getNormalAt(x, y, resolution) {
 
     const hL = getTerrainHeightAt(x - resolution, y);
     const hR = getTerrainHeightAt(x + resolution, y);
-    const hU = getTerrainHeightAt(x, y - resolution);
-    const hD = getTerrainHeightAt(x, y + resolution);
+    const hD = getTerrainHeightAt(x, y - resolution);
+    const hU = getTerrainHeightAt(x, y + resolution);
     
     const dx = (hR - hL) / (2 * resolution);
     const dy = (hU - hD) / (2 * resolution);

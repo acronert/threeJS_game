@@ -31,7 +31,6 @@ class Simulation {
         this.footprintManager = new FootprintManager(this.scene, this.camera, this.chunkManager);
 
         this.camera.position.set(0, 50, 0);
-        this.composer = createComposer(this.renderer, this.scene, this.camera);
 
         this.input = createInputManager(this.renderer.domElement);
         this.controls = createControls(this.camera, this.input);
@@ -73,10 +72,13 @@ class Simulation {
         createSkybox(this.scene);
         
         this.rubber = new Rubber();
+        // this.rubberCamera = this.rubber.getCamera();
         const rubberMesh = this.rubber.getRubberMesh();
-        rubberMesh.position.set(10, 25, -10);
+        rubberMesh.position.set(10, 5, -10);
         this.scene.add(rubberMesh);
 
+        this.composer = createComposer(this.renderer, this.scene, this.camera);
+        // this.composer = createComposer(this.renderer, this.scene, this.camera);
 
         const interval = setInterval(() => {
             this.chunkManager.update();
@@ -103,6 +105,7 @@ class Simulation {
             this.lastFpsUpdate = now;
         }
 
+        // update for the curvature (camera pos is the center of the curve)
         this.chunkManager.updateMaterial(this.camera);
         this.footprintManager.update();
 
