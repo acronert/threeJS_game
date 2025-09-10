@@ -54,3 +54,11 @@ A desert simulation built with **Three.js**, featuring infinite chunk-based terr
 ## 🛠️ Development Notes
 - Add inline documentation for functions
 - Explain design choices (why certain methods / optimizations are used)
+
+
+- crash when getting off the rubber (probably due to camera position undefined)
+- Change the double tap, because its anoying when doing it unaware when riding the rubber
+- Shadow to reset for the rubber. Need to have a directional light following the camera around, with a small shadow resolution for perfomances + maybe set receiveShadow only on
+the current chunk !
+- Spin of the rubber
+- Higher dunes ?

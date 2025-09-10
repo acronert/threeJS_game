@@ -5,16 +5,24 @@ import { FootprintManager } from "./FootprintManager.js";
 const speed = 10; // m/s
 
 export class Walker {
-    constructor(camera) {
+    constructor(camera, scene, chunkManager) {
         this.camera = camera;
 
-        // this.footprintManager = new FootprintManager(this.scene, this.camera, this.chunkManager);
+        this.footprintManager = new FootprintManager(scene, this.camera, chunkManager);
 
         this.position = new THREE.Vector3();
         this.rotation = new THREE.Vector3();
     }
 
+    setPosition(x, z) {
+        this.position.x = x;
+        this.position.z = z;
+    }
+
     update(delta, controls) {
+        // footprints
+        this.footprintManager.update();
+
        // Movement
         const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(controls.orientationQuat);
         forward.y = 0; // keep movement on ground plane

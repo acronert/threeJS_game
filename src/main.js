@@ -13,7 +13,6 @@ class Simulation {
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 8000);
         this.renderer = createRenderer();
 
-        this.player = new Player(this.camera);
 
         this.animate = this.animate.bind(this);
         this.handleResize = this.handleResize.bind(this);
@@ -53,8 +52,9 @@ class Simulation {
     init() {
         const chunkSize = 32;
         this.chunkManager = new ChunkManager(this.scene, this.camera, chunkSize);
+        
+        this.player = new Player(this.camera, this.scene, this.chunkManager);
 
-        // const { input } = createInputManager(this.renderer.domElement);
         this.controlsManager = new ControlManager(this.renderer.domElement);
 
         window.addEventListener('resize', this.handleResize);

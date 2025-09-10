@@ -20,6 +20,7 @@ export class ControlManager {
             pitch_down: this.input.pitch_down,
             yaw_left:   this.input.yaw_left,
             yaw_right:  this.input.yaw_right,
+            interact:   this.input.interact,
             orientationQuat: new THREE.Quaternion()
         }
 
@@ -41,6 +42,7 @@ export class ControlManager {
                         up: false, down: false,
                         pitch_up:false, pitch_down: false,
                         yaw_left:false, yaw_right:false,
+                        interact: false,
                         gyro: {
                             alpha:0, beta:0, gamma:0
                         }};
@@ -58,6 +60,7 @@ export class ControlManager {
             if(e.code==="ArrowLeft")    input.yaw_left=true;
             if(e.code==="ArrowRight")   input.yaw_right=true;
             if(e.code==="ArrowRight")   input.yaw_right=true;
+            if(e.code==="Space")        input.interact=true;
         });
         
         document.addEventListener('keyup', e => {
@@ -71,6 +74,7 @@ export class ControlManager {
             if(e.code==="ArrowDown")    input.pitch_down=false;
             if(e.code==="ArrowLeft")    input.yaw_left=false;
             if(e.code==="ArrowRight")   input.yaw_right=false;
+            if(e.code==="Space")        input.interact=false;
         });
 
         // Mouse
@@ -90,7 +94,18 @@ export class ControlManager {
 
         //////////// MOBILE ////////////
         // Touch
+        let lastTapTime = 0;
+        const doubleTapThreshold = 300; // ms
         domElement.addEventListener("touchstart", (e) => {
+            const currentTime = performance.now();
+            const tapInterval = currentTime - lastTapTime;
+
+            if (tapInterval < doubleTapThreshold) {
+                input.interact = true;
+                console.log("double tap");
+            }
+            lastTapTime = currentTime;
+
             const rect = domElement.getBoundingClientRect();  // get canvas size
             const touch = e.touches[0];
             if (touch.clientX < rect.width / 4)             input.yaw_left = true;
@@ -104,6 +119,7 @@ export class ControlManager {
             input.backward = false;
             input.yaw_left = false;
             input.yaw_right = false;
+            input.interact = false;
         });
 
         window.addEventListener("touchcancel", () => {
@@ -111,6 +127,7 @@ export class ControlManager {
             input.backward = false;
             input.yaw_left = false;
             input.yaw_right = false;
+            input.interact = false;
         });
 
         // Gyroscope
@@ -146,6 +163,7 @@ export class ControlManager {
         this.controls.pitch_down = this.input.pitch_down;
         this.controls.yaw_left =   this.input.yaw_left;
         this.controls.yaw_right =  this.input.yaw_right;
+        this.controls.interact =   this.input.interact;
 
         if (this.input.yaw_left)    this.yawOffset += this.yawRotSpeed * delta;
         if (this.input.yaw_right)   this.yawOffset -= this.yawRotSpeed * delta;
