@@ -4,7 +4,7 @@ import { ControlManager } from "./ControlManager.js";
 import { createSkybox } from "./Skybox.js";
 import { ChunkManager } from "./ChunkManager.js";
 import { Player } from "./Player.js"
-import { createInputManager } from "./InputManager.js";
+import { Rubber } from "./Rubber.js"
 
 
 class Simulation {
@@ -97,9 +97,10 @@ class Simulation {
 
         // update for the curvature (camera pos is the center of the curve)
         this.chunkManager.updateMaterial(this.camera);
-
         const controls = this.controlsManager.update(delta);
         this.player.update(delta, controls);
+        // this.rubber.update(delta, controls);
+
         this.composer.render();
     }
 }

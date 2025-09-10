@@ -8,6 +8,7 @@ export class Player {
         this.walker = new Walker(this.camera);
         this.rubber = new Rubber(this.camera);
         this.current = this.walker; // default mode
+        // this.current = this.rubber; // default mode
     }
 
     getOnRubber() {
@@ -19,6 +20,7 @@ export class Player {
     }
 
     update(delta, controls) {
+        console.log("update");
         this.current.update(delta, controls);
     }
 }

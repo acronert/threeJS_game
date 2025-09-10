@@ -4,82 +4,82 @@ import { createRubberControls } from "./RubberControls.js";
 
 
 function createRubberMesh(rubberRadius) {
-        const rubberMesh = new THREE.Group();
+    const rubberMesh = new THREE.Group();
 
-        // MATERIAL
-        const rubberMaterial = new THREE.MeshStandardMaterial({
-            color: 0x222222
-        });
+    // MATERIAL
+    const rubberMaterial = new THREE.MeshStandardMaterial({
+        color: 0x222222
+    });
 
-        // GEOMETRY
-        const tubeWidth = 0.4;
-        const rimWidth = 0.05
-        // Outer tube
-        const tube = new THREE.Shape();
-        const tubeInnerRadius = 0.50;
+    // GEOMETRY
+    const tubeWidth = 0.4;
+    const rimWidth = 0.05
+    // Outer tube
+    const tube = new THREE.Shape();
+    const tubeInnerRadius = 0.50;
 
-        tube.absarc(0, 0, rubberRadius, 0, Math.PI * 2);
+    tube.absarc(0, 0, rubberRadius, 0, Math.PI * 2);
 
-        const tubeHole = new THREE.Path();
-        tubeHole.absarc(0, 0, tubeInnerRadius, 0, Math.PI * 2);
-        tube.holes.push(tubeHole);
+    const tubeHole = new THREE.Path();
+    tubeHole.absarc(0, 0, tubeInnerRadius, 0, Math.PI * 2);
+    tube.holes.push(tubeHole);
 
-        const tubeExtrudeSettings = {
-            depth: tubeWidth,
-            bevelEnabled: false
-        };
-        const tubeGeometry = new THREE.ExtrudeGeometry(tube, tubeExtrudeSettings);
-        const tubeMesh = new THREE.Mesh(tubeGeometry, rubberMaterial);
-        tubeMesh.castShadow = true;
+    const tubeExtrudeSettings = {
+        depth: tubeWidth,
+        bevelEnabled: false
+    };
+    const tubeGeometry = new THREE.ExtrudeGeometry(tube, tubeExtrudeSettings);
+    const tubeMesh = new THREE.Mesh(tubeGeometry, rubberMaterial);
+    tubeMesh.castShadow = true;
 
-        // Rims
-        const rim = new THREE.Shape();
-        const rimInnerRadius = 0.30;
+    // Rims
+    const rim = new THREE.Shape();
+    const rimInnerRadius = 0.30;
 
-        rim.absarc(0, 0, rubberRadius, 0, Math.PI * 2);
+    rim.absarc(0, 0, rubberRadius, 0, Math.PI * 2);
 
-        const rimHole = new THREE.Path();
-        rimHole.absarc(0, 0, rimInnerRadius, 0, Math.PI * 2);
-        rim.holes.push(rimHole);
+    const rimHole = new THREE.Path();
+    rimHole.absarc(0, 0, rimInnerRadius, 0, Math.PI * 2);
+    rim.holes.push(rimHole);
 
-        const rimExtrudeSettings = {
-            depth: 0.05,       // thickness
-            bevelEnabled: false,
-            // bevelEnabled: true,
-            // bevelSegments: 2,
-            // bevelSize: 0.025,    // how far the bevel sticks out
-            // bevelThickness: 0.025,
-            // curveSegments: 16   // controls smoothness of the profile
-        };
-        const rimGeometry = new THREE.ExtrudeGeometry(rim, rimExtrudeSettings);
-        const rimMesh = new THREE.Mesh(rimGeometry, rubberMaterial);
-        rimMesh.castShadow = true;
+    const rimExtrudeSettings = {
+        depth: 0.05,       // thickness
+        bevelEnabled: false,
+        // bevelEnabled: true,
+        // bevelSegments: 2,
+        // bevelSize: 0.025,    // how far the bevel sticks out
+        // bevelThickness: 0.025,
+        // curveSegments: 16   // controls smoothness of the profile
+    };
+    const rimGeometry = new THREE.ExtrudeGeometry(rim, rimExtrudeSettings);
+    const rimMesh = new THREE.Mesh(rimGeometry, rubberMaterial);
+    rimMesh.castShadow = true;
 
-        // Assembly
-        const rimMesh2 = rimMesh.clone();
-
-
-        tubeMesh.rotation.y = Math.PI / 2;
-        rimMesh.rotation.y = Math.PI / 2;
-        rimMesh2.rotation.y = Math.PI / 2;
-
-        tubeMesh.position.x = -tubeWidth / 2;  // shifts tube from [-0.15, +0.15]
-        rimMesh.position.x = tubeWidth / 2 - rimWidth; // front end of the tube
-        rimMesh2.position.x = -tubeWidth / 2;          // back end of the tube
-
-        rubberMesh.add(tubeMesh);
-        rubberMesh.add(rimMesh);
-        rubberMesh.add(rimMesh2);
-
-        rubberMesh.castShadow = true;
-
-        return rubberMesh;
-    }
+    // Assembly
+    const rimMesh2 = rimMesh.clone();
 
 
+    tubeMesh.rotation.y = Math.PI / 2;
+    rimMesh.rotation.y = Math.PI / 2;
+    rimMesh2.rotation.y = Math.PI / 2;
+
+    tubeMesh.position.x = -tubeWidth / 2;  // shifts tube from [-0.15, +0.15]
+    rimMesh.position.x = tubeWidth / 2 - rimWidth; // front end of the tube
+    rimMesh2.position.x = -tubeWidth / 2;          // back end of the tube
+
+    rubberMesh.add(tubeMesh);
+    rubberMesh.add(rimMesh);
+    rubberMesh.add(rimMesh2);
+
+    rubberMesh.castShadow = true;
+
+    return rubberMesh;
+}
 
 export class Rubber {
-    constructor() {
+    constructor(camera) {
+        this.camera = camera;
+
         this.rubberRadius = 0.55;
 
         this.rubberMesh = createRubberMesh(this.rubberRadius);
@@ -94,8 +94,34 @@ export class Rubber {
         this.isOnGround = true;
     }
 
-    update(delta) {
+    updateCamera(delta) {
+        // Desired camera position behind the player
+        const offsetDistance = 3; // distance behind
+        const offsetHeight = 1.5; // height above player
+        const trailingSpeed = 5; // how fast the camera catches up
 
+        // Calculate backward direction based on heading
+        const backward = new THREE.Vector3(
+            -Math.sin(this.heading),
+            0,
+            -Math.cos(this.heading)
+        );
+
+        // Desired position
+        const desiredPos = this.position.clone()
+            .add(backward.multiplyScalar(offsetDistance))
+            .add(new THREE.Vector3(0, offsetHeight, 0));
+
+        // Smoothly move camera to desired position
+        this.camera.position.lerp(desiredPos, Math.min(1, trailingSpeed * delta));
+
+        // Look at the player
+        const lookAtPos = this.position.clone();
+        this.camera.lookAt(lookAtPos);
+    }
+
+
+    update(delta, controls) {
         const steerSpeed = 3.0; // in rad/sec
         const acc = 10.0; // acceleration
         const friction = 0.99;
@@ -104,72 +130,73 @@ export class Rubber {
 
         const gravity = new THREE.Vector3(0, -9.81, 0);
 
+        this.updateCamera();
 
-        // Steering
-        if (this.rubberControls.steer_left)
-            this.heading += steerSpeed * delta;
-        if (this.rubberControls.steer_right)
-            this.heading -= steerSpeed * delta;
+        // // Steering
+        // if (controls.left)
+        //     this.heading += steerSpeed * delta;
+        // if (controls.right)
+        //     this.heading -= steerSpeed * delta;
 
-        // Update Direction
-        this.direction.set(
-            Math.sin(this.heading),
-            0,
-            Math.cos(this.heading)
-        );
+        // // Update Direction
+        // this.direction.set(
+        //     Math.sin(this.heading),
+        //     0,
+        //     Math.cos(this.heading)
+        // );
 
         
-        // Gravity
-            // get terrain infos
-        const groundHeight = getTerrainHeightAt(this.position.x, this.position.z) + this.rubberRadius;
-        const n = getNormalAt(this.position.x, this.position.z, 0.25);
-        const groundNormal = new THREE.Vector3(n.x, n.z, n.y); // invert z and y to put y up
-            // Calculate next position
-        const nextPos = this.position.clone().addScaledVector(this.speed, delta);
+        // // Gravity
+        //     // get terrain infos
+        // const groundHeight = getTerrainHeightAt(this.position.x, this.position.z) + this.rubberRadius;
+        // const n = getNormalAt(this.position.x, this.position.z, 0.25);
+        // const groundNormal = new THREE.Vector3(n.x, n.z, n.y); // invert z and y to put y up
+        //     // Calculate next position
+        // const nextPos = this.position.clone().addScaledVector(this.speed, delta);
 
-            // Check for collision
-        if (nextPos.y <= groundHeight + 0.01) {
-            this.isOnGround = true;
-            // project gravity on the slope
-            const slopeAccel = gravity.clone().projectOnPlane(groundNormal);
-            // apply input acceleration
-            if (this.rubberControls.forward)
-                slopeAccel.add(this.direction.clone().multiplyScalar(acc));
-            if (this.rubberControls.backward)
-                slopeAccel.add(this.direction.clone().multiplyScalar(-acc));
+        //     // Check for collision
+        // if (nextPos.y <= groundHeight + 0.01) {
+        //     this.isOnGround = true;
+        //     // project gravity on the slope
+        //     const slopeAccel = gravity.clone().projectOnPlane(groundNormal);
+        //     // apply input acceleration
+        //     if (controls.forward)
+        //         slopeAccel.add(this.direction.clone().multiplyScalar(acc));
+        //     if (controls.backward)
+        //         slopeAccel.add(this.direction.clone().multiplyScalar(-acc));
 
-            // update speed
-            this.speed.addScaledVector(slopeAccel, delta);
-            // Interpolate the direction and speed, to control direction + some drift
-            const targetDir = this.direction.clone().normalize();
-            const speedXZ = new THREE.Vector3(this.speed.x, 0, this.speed.z);
-            speedXZ.lerp(targetDir.multiplyScalar(speedXZ.length()), 1 - driftFactor);
-            this.speed.x = speedXZ.x;
-            this.speed.z = speedXZ.z;
-            // apply friction
-            this.speed.x *= friction;
-            this.speed.z *= friction;
+        //     // update speed
+        //     this.speed.addScaledVector(slopeAccel, delta);
+        //     // Interpolate the direction and speed, to control direction + some drift
+        //     const targetDir = this.direction.clone().normalize();
+        //     const speedXZ = new THREE.Vector3(this.speed.x, 0, this.speed.z);
+        //     speedXZ.lerp(targetDir.multiplyScalar(speedXZ.length()), 1 - driftFactor);
+        //     this.speed.x = speedXZ.x;
+        //     this.speed.z = speedXZ.z;
+        //     // apply friction
+        //     this.speed.x *= friction;
+        //     this.speed.z *= friction;
 
-            // Bounce along groundNormal if hitting from above
-            if (this.speed.y < 0) {
-                const velNormal = this.speed.clone().projectOnVector(groundNormal); // speed along groundNormal
-                const velPlane = this.speed.clone().projectOnPlane(groundNormal);   // speed along plane
-                velNormal.multiplyScalar(-bounceFactor);    // bounce along ground normal
-                this.speed.copy(velPlane).add(velNormal);   // add velPlane and velNormal
-                // small bounce threshold to avoid infinite bounces
-                if (Math.abs(this.speed.y) < 0.5)
-                    this.speed.y = 0;
-            }
-            nextPos.y = groundHeight; // clamp to ground
-        } else {
-            this.isOnGround = false;
-            // freefall
-            this.speed.y += -9.81 * delta;
-        }
+        //     // Bounce along groundNormal if hitting from above
+        //     if (this.speed.y < 0) {
+        //         const velNormal = this.speed.clone().projectOnVector(groundNormal); // speed along groundNormal
+        //         const velPlane = this.speed.clone().projectOnPlane(groundNormal);   // speed along plane
+        //         velNormal.multiplyScalar(-bounceFactor);    // bounce along ground normal
+        //         this.speed.copy(velPlane).add(velNormal);   // add velPlane and velNormal
+        //         // small bounce threshold to avoid infinite bounces
+        //         if (Math.abs(this.speed.y) < 0.5)
+        //             this.speed.y = 0;
+        //     }
+        //     nextPos.y = groundHeight; // clamp to ground
+        // } else {
+        //     this.isOnGround = false;
+        //     // freefall
+        //     this.speed.y += -9.81 * delta;
+        // }
 
-        // Apply new position and rotation
-        this.position.copy(nextPos);
-        this.rubberMesh.rotation.y = this.heading;
+        // // Apply new position and rotation
+        // this.position.copy(nextPos);
+        // this.rubberMesh.rotation.y = this.heading;
     }
 
     getRubberMesh() {

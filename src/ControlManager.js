@@ -1,5 +1,11 @@
 import * as THREE from "three";
 
+  const quaternion = new THREE.Quaternion();
+  const euler = new THREE.Euler();
+  const screenTransform = new THREE.Quaternion();
+  const worldTransform = new THREE.Quaternion();
+  const tempQuaternion = new THREE.Quaternion();
+
 export class ControlManager {
     constructor(domElement) {
         this.input = this.createInput(domElement);
@@ -75,12 +81,12 @@ export class ControlManager {
             console.log("click");
         });
 
-        document.addEventListener('mousemove', e => {
-            const sensitivity = 0.002;
-            input.gyro.alpha -= e.movementX * sensitivity;
-            input.gyro.beta -= e.movementY * sensitivity;
-            input.gyro.gamma = 0;
-        });
+        // document.addEventListener('mousemove', e => {
+        //     const sensitivity = 0.002;
+        //     input.gyro.alpha -= e.movementX * sensitivity;
+        //     input.gyro.beta -= e.movementY * sensitivity;
+        //     input.gyro.gamma = 0;
+        // });
 
         //////////// MOBILE ////////////
         // Touch
@@ -141,8 +147,8 @@ export class ControlManager {
         this.controls.yaw_left =   this.input.yaw_left;
         this.controls.yaw_right =  this.input.yaw_right;
 
-        if (this.input.yaw_left)    this.yawOffset += yawRotSpeed * delta;
-        if (this.input.yaw_right)   this.yawOffset -= yawRotSpeed * delta;
+        if (this.input.yaw_left)    this.yawOffset += this.yawRotSpeed * delta;
+        if (this.input.yaw_right)   this.yawOffset -= this.yawRotSpeed * delta;
     
         this.euler.set(this.input.gyro.beta,
                 this.input.gyro.alpha + this.yawOffset,
