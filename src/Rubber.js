@@ -58,26 +58,25 @@ function createRubberMesh(rubberRadius) {
         // Assembly
         const rimMesh2 = rimMesh.clone();
 
-        tubeMesh.position.z = -tubeWidth / 2;  // shifts tube from [-0.15, +0.15]
-        rimMesh.position.z = tubeWidth / 2 - rimWidth; // front end of the tube
-        rimMesh2.position.z = -tubeWidth / 2;          // back end of the tube
+
+        tubeMesh.rotation.y = Math.PI / 2;
+        rimMesh.rotation.y = Math.PI / 2;
+        rimMesh2.rotation.y = Math.PI / 2;
+
+        tubeMesh.position.x = -tubeWidth / 2;  // shifts tube from [-0.15, +0.15]
+        rimMesh.position.x = tubeWidth / 2 - rimWidth; // front end of the tube
+        rimMesh2.position.x = -tubeWidth / 2;          // back end of the tube
 
         rubberMesh.add(tubeMesh);
         rubberMesh.add(rimMesh);
         rubberMesh.add(rimMesh2);
-
-        // test cube
-        // const cube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({color: 0xff0000}));
-        // rubberMesh.add(cube);
 
         rubberMesh.castShadow = true;
 
         return rubberMesh;
     }
 
-const steerSpeed = 3.0; // in rad/sec
-const acc = 25.0; // acceleration
-const friction = 0.95;
+
 
 export class Rubber {
     constructor() {
@@ -87,92 +86,90 @@ export class Rubber {
         this.rubberControls = createRubberControls();
 
         this.position = this.rubberMesh.position;
-        this.heading = 0; // orientation on the up axis, in radians
-        this.forward = new THREE.Vector3(0, 0, 1); // local forward vector
+        this.direction = new THREE.Vector3();
+        this.heading = 0;
+
         this.speed = new THREE.Vector3();
         this.acceleration = new THREE.Vector3();
         this.isOnGround = true;
     }
 
-
-
     update(delta) {
-        // GET TIRE DIRECTION
-            // Get steering input
-        if (this.rubberControls.steer_left) this.heading += steerSpeed * delta;
-        if (this.rubberControls.steer_right) this.heading -= steerSpeed * delta;
 
-            // compute forward vector (tire direction)
-            // horizontal component of velocity
-        let horizontalVel = this.speed.clone();
-        horizontalVel.y = 0;
-            // freeroll influence
-        const freerollWeight = 0.25; // 0 = ignore velocity, 1 = full freeroll
-        if (horizontalVel.lengthSq() > 0.01) {
-            // combine velocity direction and heading
-            const headingDir = new THREE.Vector3(Math.sin(this.heading), 0, Math.cos(this.heading)).normalize();
-            this.forward.copy(horizontalVel.normalize().multiplyScalar(freerollWeight)
-                            .add(headingDir.multiplyScalar(1 - freerollWeight))
-                            .normalize());
-        } else {
-            // if almost stationary, just use heading
-            this.forward.set(Math.sin(this.heading), 0, Math.cos(this.heading)).normalize();
-        }
+        const steerSpeed = 3.0; // in rad/sec
+        const acc = 10.0; // acceleration
+        const friction = 0.99;
+        const driftFactor = 0.6;
+        const bounceFactor = 0.3;
 
-        // CALCULATE TIRE ACCELERATION
-        // Apply acceleration ( gravity + input controls)
-        this.acceleration.set(0, -9.81, 0); // gravity
-        if (this.isOnGround) {
-            if (this.rubberControls.forward) this.acceleration.addScaledVector(this.forward, acc);
-            if (this.rubberControls.backward) this.acceleration.addScaledVector(this.forward, -acc);``
-        }
+        const gravity = new THREE.Vector3(0, -9.81, 0);
+
+
+        // Steering
+        if (this.rubberControls.steer_left)
+            this.heading += steerSpeed * delta;
+        if (this.rubberControls.steer_right)
+            this.heading -= steerSpeed * delta;
+
+        // Update Direction
+        this.direction.set(
+            Math.sin(this.heading),
+            0,
+            Math.cos(this.heading)
+        );
+
         
-        // SET SPEED
-            // Apply acceleration
-        this.speed.addScaledVector(this.acceleration, delta);
-            // Apply friction ( except on y )
-        if (this.isOnGround) {
-            this.speed.x *= friction;
-            this.speed.z *= friction;
-        }
-
-        // CALCULATE POSITION
-            // predict next pos 
-        const nextPos = this.position.clone().addScaledVector(this.speed, delta);
-
+        // Gravity
             // get terrain infos
-        const groundY = getTerrainHeightAt(this.position.x, this.position.z) + this.rubberRadius;
+        const groundHeight = getTerrainHeightAt(this.position.x, this.position.z) + this.rubberRadius;
         const n = getNormalAt(this.position.x, this.position.z, 0.25);
         const groundNormal = new THREE.Vector3(n.x, n.z, n.y); // invert z and y to put y up
-        
-        // Check collision
-        if (this.position.y < groundY) {
-            nextPos.y = groundY; // snap to ground
-            // split velocity into normal (into the ground) and tanget (along the ground)
-            const v = this.speed.clone();
-            const vNormalMag = v.dot(groundNormal);
-            const vNormal = groundNormal.clone().multiplyScalar(vNormalMag);
-            const vTangent = v.sub(vNormal);
+            // Calculate next position
+        const nextPos = this.position.clone().addScaledVector(this.speed, delta);
 
-            // BOUNCE
-            // if going into the ground, bounce
-            const restitution = 0.6; // bounciness
-            if (vNormalMag < 0) {
-                vNormal.multiplyScalar(-restitution);
-            }
-
-            // recombine the veclocities
-            this.speed.copy(vTangent.add(vNormal));
-
+            // Check for collision
+        if (nextPos.y <= groundHeight + 0.01) {
             this.isOnGround = true;
+            // project gravity on the slope
+            const slopeAccel = gravity.clone().projectOnPlane(groundNormal);
+            // apply input acceleration
+            if (this.rubberControls.forward)
+                slopeAccel.add(this.direction.clone().multiplyScalar(acc));
+            if (this.rubberControls.backward)
+                slopeAccel.add(this.direction.clone().multiplyScalar(-acc));
+
+            // update speed
+            this.speed.addScaledVector(slopeAccel, delta);
+            // Interpolate the direction and speed, to control direction + some drift
+            const targetDir = this.direction.clone().normalize();
+            const speedXZ = new THREE.Vector3(this.speed.x, 0, this.speed.z);
+            speedXZ.lerp(targetDir.multiplyScalar(speedXZ.length()), 1 - driftFactor);
+            this.speed.x = speedXZ.x;
+            this.speed.z = speedXZ.z;
+            // apply friction
+            this.speed.x *= friction;
+            this.speed.z *= friction;
+
+            // Bounce along groundNormal if hitting from above
+            if (this.speed.y < 0) {
+                const velNormal = this.speed.clone().projectOnVector(groundNormal); // speed along groundNormal
+                const velPlane = this.speed.clone().projectOnPlane(groundNormal);   // speed along plane
+                velNormal.multiplyScalar(-bounceFactor);    // bounce along ground normal
+                this.speed.copy(velPlane).add(velNormal);   // add velPlane and velNormal
+                // small bounce threshold to avoid infinite bounces
+                if (Math.abs(this.speed.y) < 0.5)
+                    this.speed.y = 0;
+            }
+            nextPos.y = groundHeight; // clamp to ground
         } else {
             this.isOnGround = false;
+            // freefall
+            this.speed.y += -9.81 * delta;
         }
 
-        // calculate position from speed
+        // Apply new position and rotation
         this.position.copy(nextPos);
-        // apply rotation
-        this.rubberMesh.rotation.y = this.heading + Math.PI / 2;
+        this.rubberMesh.rotation.y = this.heading;
     }
 
     getRubberMesh() {
@@ -197,3 +194,185 @@ export class Rubber {
         //     const slide = v.sub(groundNormal.clone().multiplyScalar(v.dot(groundNormal)));
         //     this.speed.copy(slide);
         // }
+
+
+
+
+    //         update(delta) {
+    //     // GET TIRE HEADING
+    //         // Get steering input
+    //     if (this.rubberControls.steer_left) this.heading += steerSpeed * delta;
+    //     if (this.rubberControls.steer_right) this.heading -= steerSpeed * delta;
+
+    //     // CALCULATE TIRE ACCELERATION
+    //         // Apply acceleration ( gravity + input controls)
+    //     this.acceleration.set(0, -9.81, 0);
+    //     if (this.isOnGround) {
+    //         if (this.rubberControls.forward) this.acceleration.addScaledVector(this.direction, acc);
+    //         if (this.rubberControls.backward) this.acceleration.addScaledVector(this.direction, -acc);``
+    //     }
+
+    //     // SET SPEED
+    //         // Apply acceleration
+    //     this.speed.addScaledVector(this.acceleration, delta);
+    //         // Apply friction ( except on y )
+    //     if (this.isOnGround) {
+    //         this.speed.x *= friction;
+    //         this.speed.z *= friction;
+    //     }
+
+    //     // CALCULATE TIRE DIRECTION (the effective tire direction)
+    //     // if (this.isOnGround) {
+    //         // if isOnGround -> the direction should align progressively with the heading, to allow some drifting
+    //         // Method 1: Simple linear interpolation approach
+    //         const alignmentRate = 0.95; // How quickly direction aligns with heading (0-1)
+            
+    //         // Calculate target direction from heading
+    //         const targetDirection = new THREE.Vector3(
+    //             Math.sin(this.heading),
+    //             0,
+    //             Math.cos(this.heading)
+    //         );
+            
+    //         // Gradually align current direction with target direction
+    //         this.direction.lerp(targetDirection, alignmentRate * delta);
+    //         this.direction.normalize();
+    
+    //     // } else {
+    //         // if not on ground -> the direction should not change
+
+    //     // }
+
+    //     //     // compute forward vector (tire direction)
+    //     //     // horizontal component of velocity
+    //     // let horizontalVel = this.speed.clone();
+    //     // horizontalVel.y = 0;
+    //     //     // freeroll influence
+    //     // const freerollWeight = 0.25; // 0 = ignore velocity, 1 = full freeroll
+    //     // if (horizontalVel.lengthSq() > 0.01) {
+    //     //     // combine velocity direction and heading
+    //     //     const headingDir = new THREE.Vector3(Math.sin(this.heading), 0, Math.cos(this.heading)).normalize();
+    //     //     this.direction.copy(horizontalVel.normalize().multiplyScalar(freerollWeight)
+    //     //                     .add(headingDir.multiplyScalar(1 - freerollWeight))
+    //     //                     .normalize());
+    //     // } else {
+    //     //     // if almost stationary, just use heading
+    //     //     this.direction.set(Math.sin(this.heading), 0, Math.cos(this.heading)).normalize();
+    //     // }
+
+        
+
+
+    //     // CALCULATE POSITION
+    //         // predict next pos 
+    //     const nextPos = this.position.clone().addScaledVector(this.speed, delta);
+
+    //         // get terrain infos
+    //     const groundY = getTerrainHeightAt(this.position.x, this.position.z) + this.rubberRadius;
+    //     const n = getNormalAt(this.position.x, this.position.z, 0.25);
+    //     const groundNormal = new THREE.Vector3(n.x, n.z, n.y); // invert z and y to put y up
+        
+    //     // Check collision
+    //     if (this.position.y < groundY) {
+    //         nextPos.y = groundY; // snap to ground
+    //         // split velocity into normal (into the ground) and tanget (along the ground)
+    //         const v = this.speed.clone();
+    //         const vNormalMag = v.dot(groundNormal);
+    //         const vNormal = groundNormal.clone().multiplyScalar(vNormalMag);
+    //         const vTangent = v.sub(vNormal);
+
+    //         // BOUNCE
+    //         // if going into the ground, bounce
+    //         const restitution = 0.6; // bounciness
+    //         if (vNormalMag < 0) {
+    //             vNormal.multiplyScalar(-restitution);
+    //         }
+
+    //         // recombine the veclocities
+    //         this.speed.copy(vTangent.add(vNormal));
+
+    //         this.isOnGround = true;
+    //     } else {
+    //         this.isOnGround = false;
+    //     }
+
+    //     // calculate position from speed
+    //     this.position.copy(nextPos);
+    //     // apply rotation
+    //     this.rubberMesh.rotation.y = this.heading;
+    // }
+
+
+
+
+
+
+
+
+
+    //     update(delta) {
+
+    //     const steerSpeed = 3.0; // in rad/sec
+    //     const acc = 10.0; // acceleration
+    //     const friction = 0.99;
+    //     const driftFactor = 0.4;
+    //     const bounceFactor = 0.3;
+
+    //     const nextPos = this.position.clone().addScaledVector(this.speed, delta);
+    //     const groundHeight = getTerrainHeightAt(this.position.x, this.position.z) + this.rubberRadius;
+    //     const n = getNormalAt(this.position.x, this.position.z, 0.25);
+    //     const groundNormal = new THREE.Vector3(n.x, n.z, n.y); // invert z and y to put y up
+
+    //     // Steering
+    //     if (this.rubberControls.steer_left)
+    //         this.heading += steerSpeed * delta;
+    //     if (this.rubberControls.steer_right)
+    //         this.heading -= steerSpeed * delta;
+
+    //     // Update Direction
+    //     this.direction.set(
+    //         Math.sin(this.heading),
+    //         0,
+    //         Math.cos(this.heading)
+    //     );
+
+    //     // Interpolate the direction and speed, to control direction + some drift
+    //     const targetDir = this.direction.clone().normalize();
+    //     const speedXZ = new THREE.Vector3(this.speed.x, 0, this.speed.z);
+    //     speedXZ.lerp(targetDir.multiplyScalar(speedXZ.length()), 1 - driftFactor);
+    //     this.speed.x = speedXZ.x;
+    //     this.speed.z = speedXZ.z;
+
+    //     // ACCELERATION
+    //         // Apply acceleration ( gravity + input controls)
+    //     this.acceleration.set(0, -9.81, 0);
+    //     if (this.isOnGround) {
+    //         if (this.rubberControls.forward)
+    //             this.acceleration.addScaledVector(this.direction, acc);
+    //         if (this.rubberControls.backward)
+    //             this.acceleration.addScaledVector(this.direction, -acc);``
+    //     }
+
+    //     // SPEED
+    //     this.speed.addScaledVector(this.acceleration, delta);
+    //         // Apply friction ( except on y )
+    //     if (this.isOnGround) {
+    //         this.speed.x *= friction;
+    //         this.speed.z *= friction;
+    //     }
+
+    //     // CHECK FOR COLLISION
+    //     this.isOnGround = nextPos.y <= groundHeight;
+
+    //     // Clamp to ground
+    //     if (this.isOnGround) {
+    //         nextPos.y = groundHeight;
+    //         console.log("isOnGround");
+    //     }
+
+    //     // APPLY NEW POSITION
+    //     this.position.copy(nextPos);
+
+    //     // APPLY ROTATION
+    //     this.rubberMesh.rotation.y = this.heading;
+    // }
