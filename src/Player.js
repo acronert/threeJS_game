@@ -11,7 +11,7 @@ export class Player {
         this.scene = scene;
 
         this.walker = new Walker(this.camera, scene, chunkManager);
-        this.rubber = new Rubber(this.camera, scene, chunkManager);
+        this.rubber = new Rubber(this.camera, scene, chunkManager, 3, 0);
 
         this.rubberMesh = this.rubber.getRubberMesh()
         this.scene.add(this.rubberMesh);
