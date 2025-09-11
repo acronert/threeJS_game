@@ -141,7 +141,6 @@ export class Rubber {
 
         const gravity = new THREE.Vector3(0, -9.81, 0);
 
-
         // Steering
         if (controls && controls.left)
             this.heading += steerSpeed * delta;
@@ -150,9 +149,8 @@ export class Rubber {
             // roll steering
         if (controls) {
             const rollRad = getRollRelativeToForward(controls.orientationQuat);
-            const roll = Math.min(1, Math.max(-1, rollRad * 2.0)); // clamp to [-1, 1]
+            const roll = Math.min(1, Math.max(-1, rollRad)); // clamp to [-1, 1]
             this.heading += steerSpeed * delta * roll;
-
         }
 
         // Update Direction
@@ -170,9 +168,18 @@ export class Rubber {
             // Calculate next position
         const nextPos = this.position.clone().addScaledVector(this.speed, delta);
 
+        let targetQuat;
+        const up = new THREE.Vector3(0, 1, 0); // up relative to the mesh
+
             // Check for collision
         if (nextPos.y <= groundHeight + 0.01) {
             this.isOnGround = true;
+
+            const slopeQuat = new THREE.Quaternion().setFromUnitVectors(up, groundNormal);  // create the rotation
+            const yawQuat = new THREE.Quaternion().setFromAxisAngle(groundNormal, this.heading);
+            targetQuat = slopeQuat.multiply(yawQuat); // add the rotations
+
+
             // project gravity on the slope
             const slopeAccel = gravity.clone().projectOnPlane(groundNormal);
             // apply input acceleration
@@ -208,11 +215,15 @@ export class Rubber {
             this.isOnGround = false;
             // freefall
             this.speed.y += -9.81 * delta;
+
+            targetQuat = new THREE.Quaternion().setFromAxisAngle(up, this.heading);
         }
 
         // Apply new position and rotation
         this.position.copy(nextPos);
-        this.rubberMesh.rotation.y = this.heading;
+        // this.rubberMesh.rotation.y = this.heading;
+        this.rubberMesh.quaternion.slerp(targetQuat, 0.2); // slerp
+
 
         if (controls)
             this.updateCamera(controls);

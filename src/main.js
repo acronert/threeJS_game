@@ -4,7 +4,6 @@ import { ControlManager } from "./ControlManager.js";
 import { createSkybox } from "./Skybox.js";
 import { ChunkManager } from "./ChunkManager.js";
 import { Player } from "./Player.js"
-import { Rubber } from "./Rubber.js"
 
 
 class Simulation {
@@ -67,7 +66,8 @@ class Simulation {
     start() {
         this.init();
 
-        createSkybox(this.scene, this.renderer);
+        this.sky = createSkybox(this.scene);
+
         this.composer = createComposer(this.renderer, this.scene, this.camera);
 
         const interval = setInterval(() => {
@@ -105,6 +105,8 @@ class Simulation {
         const controls = this.controlsManager.update(delta);
         this.player.update(delta, controls);
 
+
+        this.sky.update(this.camera.position); // make the shadow light follow the camera
         this.composer.render();
     }
 }
