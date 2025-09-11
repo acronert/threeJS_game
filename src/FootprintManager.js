@@ -54,15 +54,17 @@ export class FootprintManager {
                 euler.y,
                 this.isRight
             );
-            this.isRight = !this.isRight;
-            this.scene.add(mesh);
-            this.footprints.push(mesh);
+            if (mesh) {
+                this.scene.add(mesh);
+                this.footprints.push(mesh);
+                this.isRight = !this.isRight;
+            }
             
             // Remove first footprint
             if (this.footprints.length >= maxFootprints) {
                 const mesh = this.footprints[0];
                 this.scene.remove(mesh);
-                mesh.geometry.dispose();
+                if (mesh.geometry) mesh.geometry.dispose();
                 this.footprints.shift();
             }
             this.lastFootprintPos = { x: this.camera.position.x, y: this.camera.position.z };

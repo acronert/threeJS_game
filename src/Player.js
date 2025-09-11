@@ -6,12 +6,12 @@ const distToMount = 4;
 const interactInterval = 1000; //ms
 
 export class Player {
-    constructor(camera, scene, ChunkManager) {
+    constructor(camera, scene, chunkManager) {
         this.camera = camera;
         this.scene = scene;
 
-        this.walker = new Walker(this.camera, scene, ChunkManager);
-        this.rubber = new Rubber(this.camera);
+        this.walker = new Walker(this.camera, scene, chunkManager);
+        this.rubber = new Rubber(this.camera, scene, chunkManager);
 
         this.rubberMesh = this.rubber.getRubberMesh()
         this.scene.add(this.rubberMesh);

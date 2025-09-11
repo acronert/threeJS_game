@@ -87,12 +87,12 @@ export class ControlManager {
             console.log("click");
         });
 
-        // document.addEventListener('mousemove', e => {
-        //     const sensitivity = 0.002;
-        //     input.gyro.alpha -= e.movementX * sensitivity;
-        //     input.gyro.beta -= e.movementY * sensitivity;
-        //     input.gyro.gamma = 0;
-        // });
+        document.addEventListener('mousemove', e => {
+            const sensitivity = 0.002;
+            input.gyro.alpha -= e.movementX * sensitivity;
+            input.gyro.beta -= e.movementY * sensitivity;
+            input.gyro.gamma = 0;
+        });
 
         //////////// MOBILE ////////////
         // Touch

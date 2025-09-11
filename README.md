@@ -23,17 +23,14 @@ A desert simulation built with **Three.js**, featuring infinite chunk-based terr
 ## 🎮 Controls
 - [ ] Splash screen / start menu with clean exit
 - [ ] Settings menu (quality presets, chunk depth & resolution, toggle effects)
-- [ ] Enter / exit the "rubber" (walking vs. tire mode)
-- [ ] Jump:
-  - ⌨️ Keyboard: `Space`
-  - 📱 Mobile: shake phone (accelerometer)
+- [X] Enter / exit the "rubber" (walking vs. tire mode)
 - [ ] Switch camera view when controlling the rubber
 
 ---
 
 ## 🏁 Gameplay
-- [ ] Add controllable **rubber (tire)**
-- [ ] Input methods:
+- [X] Add controllable **rubber (tire)**
+- [X] Input methods:
   - ⌨️ Keyboard
   - 📱 Touch
 - [ ] Tire trail system
@@ -43,7 +40,7 @@ A desert simulation built with **Three.js**, featuring infinite chunk-based terr
   - [X] Freefall handling (disable input, spin tire)
 - [ ] Camera modes:
   - [ ] First-person (inside tire)
-  - [ ] Third-person follow
+  - [X] Third-person follow
 - [ ] Particles: dust trail behind tire
 - [ ] Sound design:
   - Tire rolling on gravel

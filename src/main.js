@@ -5,6 +5,36 @@ import { createSkybox } from "./Skybox.js";
 import { ChunkManager } from "./ChunkManager.js";
 import { Player } from "./Player.js"
 
+const fullscreen_button = document.getElementById("fullscreen_button");
+
+fullscreen_button.addEventListener("click", () => {
+    if (!document.fullscreenElement &&
+        !document.webkitFullscreenElement &&
+        !document.msFullscreenElement) {
+        // enter fullscreen
+        const el = document.body; // or this.renderer.domElement
+        if (el.requestFullscreen) el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen(); // Safari
+        else if (el.msRequestFullscreen) el.msRequestFullscreen(); // old IE/Edge
+    } else {
+        // exit fullscreen
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        else if (document.msExitFullscreen) document.msExitFullscreen();
+    }
+});
+
+const help_button = document.getElementById("help_button");
+const help = document.getElementById("help");
+
+help_button.addEventListener("click", () => {
+    console.log("help button");
+
+    if (help.style.display == "block")
+        help.style.display = "none";
+    else
+        help.style.display = "block"
+});
 
 class Simulation {
     constructor() {
@@ -14,7 +44,7 @@ class Simulation {
 
         this.animate = this.animate.bind(this);
         this.handleResize = this.handleResize.bind(this);
-        this.toggleFullscreen = this.toggleFullscreen.bind(this);
+        // this.toggleFullscreen = this.toggleFullscreen.bind(this);
 
         this.fps = 0;
         this.lastFpsUpdate = 0;
@@ -22,23 +52,25 @@ class Simulation {
         this.lastFrameTime = 0;
     }
 
-    requestFullscreen() {
-        const el = document.body; // or this.renderer.domElement
-        if (el.requestFullscreen) el.requestFullscreen();
-        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen(); // Safari
-        else if (el.msRequestFullscreen) el.msRequestFullscreen(); // old IE/Edge
-    }
 
-    exitFullscreen() {
-        if (document.exitFullscreen) document.exitFullscreen();
-        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-        else if (document.msExitFullscreen) document.msExitFullscreen();
-    }
 
-    toggleFullscreen() {
-        if (!document.fullscreenElement) this.requestFullscreen();
-        else this.exitFullscreen();
-    }
+    // requestFullscreen() {
+    //     const el = document.body; // or this.renderer.domElement
+    //     if (el.requestFullscreen) el.requestFullscreen();
+    //     else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen(); // Safari
+    //     else if (el.msRequestFullscreen) el.msRequestFullscreen(); // old IE/Edge
+    // }
+
+    // exitFullscreen() {
+    //     if (document.exitFullscreen) document.exitFullscreen();
+    //     else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    //     else if (document.msExitFullscreen) document.msExitFullscreen();
+    // }
+
+    // toggleFullscreen() {
+    //     if (!document.fullscreenElement) this.requestFullscreen();
+    //     else this.exitFullscreen();
+    // }
 
     handleResize() {
         this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -59,8 +91,8 @@ class Simulation {
         this.handleResize();
 
         // Fullscreen on first click
-        document.addEventListener("touchstart", this.toggleFullscreen, { once: true });
-        document.addEventListener("mousedown", this.toggleFullscreen, { once: true });
+        // document.addEventListener("touchstart", this.toggleFullscreen, { once: true });
+        // document.addEventListener("mousedown", this.toggleFullscreen, { once: true });
     }
 
     start() {

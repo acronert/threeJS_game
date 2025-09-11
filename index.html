@@ -10,14 +10,77 @@
 </head>
 <body>
 	<div id="fps_counter">FPS:</div>
+	<button id="help_button">?</button>
+	<button id="fullscreen_button">Fullscreen</button>
+	<div id="help">
+		<strong>What is this?</strong><br><br>
+		This is an infinite, chunk-based desert environment generated with Perlin noise. You can explore it on foot or ride the rubber tire. It works especially well on mobile, where you can look around by moving your device. Built with Three.js as a learning project, without using a game engine or physics engine. September 2025.<br><br>
+
+		<strong>Controls</strong><br><br>
+
+		<strong>Desktop:</strong><br>
+		- <strong>WASD</strong> → Move<br>
+		- <strong>Mouse / Arrow Keys</strong> → Look around<br>
+		- <strong>Space</strong> → Mount / Dismount the tire<br><br>
+
+		<strong>Mobile:</strong><br>
+		- <strong>Single tap</strong> → Move forward<br>
+		- <strong>Single tap near bottom</strong> → Move backward<br>
+		- <strong>Swipe to edges</strong> → Turn around<br>
+		- <strong>Gyroscope</strong> → Look around<br>
+		- <strong>Double tap</strong> → Mount / Dismount the tire<br>
+		- <strong>Tilt phone</strong> → Control tire orientation
+
+	<p>
+		Thank you to <a href="https://ambientCG.com" target="_blank">ambientCG.com</a> for all the quality textures and the HDRI sky, licensed under the Creative Commons CC0 1.0 Universal License. <br><br>
+		<a href="https://github.com/acronert/threeJS_game" target="_blank">github.com/acronert/threeJS_game</a><br>
+		Alex CRÖNERT
+	</p>
+	</div>
 	<style>
 	#fps_counter {
 		position: absolute;
 		top: 20px;
-		left: 20px;
+		right: 20px;
 		color: white;
 		font-size: 24px;
 		font-family: monospace;
+	}
+	#fullscreen_button {
+		position: absolute;
+		top: 20px;
+		left: 60px;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		padding: 5px 10px;
+		border-radius: 8px;
+		font-size: 18px;
+		cursor: pointer;
+	}
+	#help_button {
+		position: absolute;
+		top: 20px;
+		left: 20px;
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		padding: 5px 10px;
+		border-radius: 8px;
+		font-size: 18px;
+		cursor: pointer;
+	}
+	#help {
+		position: absolute;
+		top: 60px;
+		left: 20px;
+		width: 500px;
+		background-color: rgba(255, 255, 255, 0.8);
+		color: rgb(0, 0, 0);
+		padding: 15px;
+		border-radius: 8px;
+		display: none;
+		z-index: 10;
 	}
 	</style>
 	<script type="importmap">

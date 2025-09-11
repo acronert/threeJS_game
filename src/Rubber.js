@@ -1,14 +1,27 @@
 import * as THREE from "three";
 import { getNormalAt, getTerrainHeightAt } from "./PerlinNoise.js";
-// import { createRubberControls } from "./RubberControls.js";
+import { TiretracksManager } from "./TiretracksManager.js";
 
 
 function createRubberMesh(rubberRadius) {
     const rubberMesh = new THREE.Group();
 
     // MATERIAL
-    const rubberMaterial = new THREE.MeshStandardMaterial({
-        color: 0x222222
+    const loader = new THREE.TextureLoader();
+    const normal = loader.load('./assets/TireTracks001_1K-JPG/TireTracks001_1K-JPG_NormalGL.jpg');
+    
+    [normal].forEach(tex => {
+        tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+        tex.repeat.set(1, 2.5);
+    });
+
+    const tubeMaterial = new THREE.MeshStandardMaterial({
+        color: 0x222222,
+        normalMap: normal,
+        normalScale: new THREE.Vector2(4, 4)
+    });
+    const rimMaterial = new THREE.MeshStandardMaterial({
+        color: 0x222222,
     });
 
     // GEOMETRY
@@ -26,17 +39,18 @@ function createRubberMesh(rubberRadius) {
 
     const tubeExtrudeSettings = {
         depth: tubeWidth,
-        bevelEnabled: false
+        bevelEnabled: false,
+        curveSegments: 32
     };
     const tubeGeometry = new THREE.ExtrudeGeometry(tube, tubeExtrudeSettings);
-    const tubeMesh = new THREE.Mesh(tubeGeometry, rubberMaterial);
+    const tubeMesh = new THREE.Mesh(tubeGeometry, tubeMaterial);
     tubeMesh.castShadow = true;
 
     // Rims
     const rim = new THREE.Shape();
     const rimInnerRadius = 0.30;
 
-    rim.absarc(0, 0, rubberRadius, 0, Math.PI * 2);
+    rim.absarc(0, 0, rubberRadius - 0.051 , 0, Math.PI * 2);
 
     const rimHole = new THREE.Path();
     rimHole.absarc(0, 0, rimInnerRadius, 0, Math.PI * 2);
@@ -45,14 +59,14 @@ function createRubberMesh(rubberRadius) {
     const rimExtrudeSettings = {
         depth: 0.05,       // thickness
         bevelEnabled: false,
-        // bevelEnabled: true,
-        // bevelSegments: 2,
-        // bevelSize: 0.025,    // how far the bevel sticks out
-        // bevelThickness: 0.025,
-        // curveSegments: 16   // controls smoothness of the profile
+        bevelEnabled: true,
+        bevelSegments: 2,
+        bevelSize: 0.05,    // how far the bevel sticks out
+        bevelThickness: 0.05,
+        curveSegments: 32   // controls smoothness of the profile
     };
     const rimGeometry = new THREE.ExtrudeGeometry(rim, rimExtrudeSettings);
-    const rimMesh = new THREE.Mesh(rimGeometry, rubberMaterial);
+    const rimMesh = new THREE.Mesh(rimGeometry, rimMaterial);
     rimMesh.castShadow = true;
 
     // Assembly
@@ -97,8 +111,11 @@ function getRollRelativeToForward(quat) {
 }
 
 export class Rubber {
-    constructor(camera, x = 0, z = 0) {
+    constructor(camera, scene, chunkManager, x = 0, z = 0) {
         this.camera = camera;
+
+        this.tiretracksManager = new TiretracksManager(scene, this.camera, chunkManager);
+
 
         this.rubberRadius = 0.55;
 
@@ -108,6 +125,7 @@ export class Rubber {
         this.position = this.rubberMesh.position;
         this.direction = new THREE.Vector3();
         this.heading = 0;
+        this.spin = 0;
 
         this.speed = new THREE.Vector3(0, 0, 0);
         this.acceleration = new THREE.Vector3(0, 0, 0);
@@ -117,8 +135,6 @@ export class Rubber {
     getPosition() {
         return this.position.clone();
     }
-
-
 
     updateCamera(controls) {
         const offset = new THREE.Vector3(0, 2, 0);
@@ -131,14 +147,12 @@ export class Rubber {
 
     }
 
-
     update(delta, controls) {
         const steerSpeed = 3.0; // in rad/sec
         const acc = 15.0; // acceleration
-        const friction = 0.99;
+        const friction = 0.98;
         const driftFactor = 0.6;
         const bounceFactor = 0.3;
-
         const gravity = new THREE.Vector3(0, -9.81, 0);
 
         // Steering
@@ -165,21 +179,13 @@ export class Rubber {
         const groundHeight = getTerrainHeightAt(this.position.x, this.position.z) + this.rubberRadius;
         const n = getNormalAt(this.position.x, this.position.z, 0.25);
         const groundNormal = new THREE.Vector3(n.x, n.z, n.y); // invert z and y to put y up
+
             // Calculate next position
         const nextPos = this.position.clone().addScaledVector(this.speed, delta);
 
-        let targetQuat;
-        const up = new THREE.Vector3(0, 1, 0); // up relative to the mesh
-
-            // Check for collision
+        // Check for collision
         if (nextPos.y <= groundHeight + 0.01) {
             this.isOnGround = true;
-
-            const slopeQuat = new THREE.Quaternion().setFromUnitVectors(up, groundNormal);  // create the rotation
-            const yawQuat = new THREE.Quaternion().setFromAxisAngle(groundNormal, this.heading);
-            targetQuat = slopeQuat.multiply(yawQuat); // add the rotations
-
-
             // project gravity on the slope
             const slopeAccel = gravity.clone().projectOnPlane(groundNormal);
             // apply input acceleration
@@ -215,18 +221,34 @@ export class Rubber {
             this.isOnGround = false;
             // freefall
             this.speed.y += -9.81 * delta;
-
-            targetQuat = new THREE.Quaternion().setFromAxisAngle(up, this.heading);
         }
-
+        
         // Apply new position and rotation
         this.position.copy(nextPos);
+        
+        // rotate and spin the rubber
+        const headingQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), this.heading);
+        const distance = this.speed.length() * delta;
+        const deltaRot = distance / this.rubberRadius;
+        this.spin += deltaRot;
+        const spinQuat = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), this.spin);
+
+        this.rubberMesh.quaternion.copy(headingQuat).multiply(spinQuat);
+
+
+        // const axis = new THREE.Vector3(1, 0, 0);
+        // this.rubberMesh.rotateOnAxis(axis, 0.5);
         // this.rubberMesh.rotation.y = this.heading;
-        this.rubberMesh.quaternion.slerp(targetQuat, 0.2); // slerp
 
+        // make the wheel spin
 
-        if (controls)
+        // if (this.isOnGround) {
+            // this.tiretracksManager.update(this.position, this.heading);
+        // }
+
+        if (controls) {
             this.updateCamera(controls);
+        }
 
     }
 
