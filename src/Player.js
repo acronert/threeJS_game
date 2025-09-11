@@ -23,24 +23,13 @@ export class Player {
 
     getOnRubber() {
         console.log("getOnRubber");
-        this.camera.position.x = 0;
-        this.camera.position.y = 0;
-        this.camera.position.z = 0;
-        this.camera.rotation.x = 0;
-        this.camera.rotation.y = 0;
-        this.camera.rotation.z = 0;
         this.current = this.rubber;
     }
 
     getOffRubber() {
         console.log("getOffRubber");
-        this.walker.setPosition(this.camera.x - 0.5, 0, this.camera.z - 0.5);
-        this.camera.position.x = 0;
-        this.camera.position.y = 0;
-        this.camera.position.z = 0;
-        this.camera.rotation.x = 0;
-        this.camera.rotation.y = 0;
-        this.camera.rotation.z = 0;
+        const pos = this.rubber.getPosition();
+        this.walker.setPosition(pos.x, pos.z, 0);
         this.current = this.walker;
     }
 
@@ -51,8 +40,11 @@ export class Player {
 
 
     update(delta, controls) {
+        if (this.current instanceof Rubber == false) {
+            this.rubber.update(delta, null);
+        }
         this.current.update(delta, controls);
-        
+
         if (controls.interact && performance.now() - this.lastInteractTime > interactInterval) {
             console.log("interact, dist:", this.distanceToRubber());
             if (this.current instanceof Walker && this.distanceToRubber() <= distToMount)

@@ -1,11 +1,5 @@
 import * as THREE from "three";
 
-  const quaternion = new THREE.Quaternion();
-  const euler = new THREE.Euler();
-  const screenTransform = new THREE.Quaternion();
-  const worldTransform = new THREE.Quaternion();
-  const tempQuaternion = new THREE.Quaternion();
-
 export class ControlManager {
     constructor(domElement) {
         this.input = this.createInput(domElement);
@@ -34,6 +28,14 @@ export class ControlManager {
         this.tmpQuat = new THREE.Quaternion();
         this.worldTransform = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0), -Math.PI/2);
         this.screenTransform = new THREE.Quaternion();
+
+        // precalculate
+        this.screenTransforms = {
+            portrait: new THREE.Quaternion(),
+            landscape: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1), -Math.PI/2),
+            rlandscape: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1), Math.PI/2),
+            rportrait: new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1), Math.PI),
+        };
     }
 
     createInput(domElement) {
@@ -114,6 +116,22 @@ export class ControlManager {
             else                                            input.forward = true;
         });
 
+        domElement.addEventListener("touchmove", (e) => {
+            const rect = domElement.getBoundingClientRect();  // get canvas size
+            const touch = e.touches[0];
+
+            input.yaw_left = false;
+            input.yaw_right = false;
+
+            if (touch.clientX < rect.width / 4) {
+                input.yaw_left = true;
+            }
+            else if (touch.clientX > 3 * rect.width / 4) {
+                input.yaw_right = true;
+            }
+        });
+
+
         domElement.addEventListener("touchend", () => {
             input.forward = false;
             input.backward = false;
@@ -144,11 +162,11 @@ export class ControlManager {
     // Screen orientation
     getScreenTransform() {
         switch (window.orientation || 0) {
-        case 0: return new THREE.Quaternion(); // portrait
-        case 90: return new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1), -Math.PI/2);
-        case -90: return new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1), Math.PI/2);
-        case 180: return new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,0,1), Math.PI);
-        default: return new THREE.Quaternion();
+            case 0: return this.screenTransforms.portrait;
+            case 90: return this.screenTransforms.landscape;
+            case -90: return this.screenTransforms.rlandscape;
+            case 180: return this.screenTransforms.rportrait;
+            default:  return this.screenTransforms.portrait;
         }
     }
 
@@ -173,7 +191,9 @@ export class ControlManager {
                 -this.input.gyro.gamma,
                 "YXZ"
             ); // YXZ to avoid gimbal lock
-        this.tmpQuat.setFromEuler(this.euler).multiply(this.worldTransform).multiply(this.getScreenTransform())
+        this.tmpQuat.setFromEuler(this.euler)
+            .multiply(this.worldTransform)
+            .multiply(this.getScreenTransform())
         this.controls.orientationQuat.slerp(this.tmpQuat, this.slerpFactor);
 
         return this.controls;

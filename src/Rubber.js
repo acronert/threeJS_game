@@ -76,6 +76,26 @@ function createRubberMesh(rubberRadius) {
     return rubberMesh;
 }
 
+function getRollRelativeToForward(quat) {
+    const up = new THREE.Vector3(0, -1, 0).applyQuaternion(quat).normalize();
+    const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(quat).normalize();
+
+    // Project forward onto XZ (ignore pitch for roll reference)
+    forward.y = 0;
+    forward.normalize();
+
+    // Right vector in XZ plane
+    const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0,1,0)).normalize();
+
+    // Roll = angle between "up" and global up, around forward axis
+    const projectedUp = new THREE.Vector3().crossVectors(forward, right).normalize();
+
+    const dot = up.dot(projectedUp);
+    const det = up.dot(right); // sign
+
+    return Math.atan2(det, dot); // roll in radians
+}
+
 export class Rubber {
     constructor(camera, x = 0, z = 0) {
         this.camera = camera;
@@ -94,14 +114,21 @@ export class Rubber {
         this.isOnGround = true;
     }
 
-    updateCamera() {
-        const offset = new THREE.Vector3(1, 3, 1);
+    getPosition() {
+        return this.position.clone();
+    }
+
+
+
+    updateCamera(controls) {
+        const offset = new THREE.Vector3(0, 2, 0);
         const target = this.position.clone()
             .add(offset)
-            .add(this.direction.clone().multiplyScalar(-5));
+            .add(this.direction.clone().multiplyScalar(-3));
 
         this.camera.position.lerp(target, 0.1);
         this.camera.lookAt(this.position);
+
     }
 
 
@@ -114,11 +141,19 @@ export class Rubber {
 
         const gravity = new THREE.Vector3(0, -9.81, 0);
 
+
         // Steering
-        if (controls.left || controls.yaw_left)
+        if (controls && controls.left)
             this.heading += steerSpeed * delta;
-        if (controls.right || controls. yaw_left)
+        if (controls && controls.right)
             this.heading -= steerSpeed * delta;
+            // roll steering
+        if (controls) {
+            const rollRad = getRollRelativeToForward(controls.orientationQuat);
+            const roll = Math.min(1, Math.max(-1, rollRad * 2.0)); // clamp to [-1, 1]
+            this.heading += steerSpeed * delta * roll;
+
+        }
 
         // Update Direction
         this.direction.set(
@@ -141,9 +176,9 @@ export class Rubber {
             // project gravity on the slope
             const slopeAccel = gravity.clone().projectOnPlane(groundNormal);
             // apply input acceleration
-            if (controls.forward)
+            if (controls && controls.forward)
                 slopeAccel.add(this.direction.clone().multiplyScalar(acc));
-            if (controls.backward)
+            if (controls && controls.backward)
                 slopeAccel.add(this.direction.clone().multiplyScalar(-acc));
 
             // update speed
@@ -179,7 +214,8 @@ export class Rubber {
         this.position.copy(nextPos);
         this.rubberMesh.rotation.y = this.heading;
 
-        this.updateCamera();
+        if (controls)
+            this.updateCamera(controls);
 
     }
 

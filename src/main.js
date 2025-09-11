@@ -13,7 +13,6 @@ class Simulation {
         this.camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 8000);
         this.renderer = createRenderer();
 
-
         this.animate = this.animate.bind(this);
         this.handleResize = this.handleResize.bind(this);
         this.toggleFullscreen = this.toggleFullscreen.bind(this);
@@ -73,9 +72,21 @@ class Simulation {
 
         const interval = setInterval(() => {
             this.chunkManager.update();
-        }, 250);
+        }, 1000);
 
         this.animate()
+    }
+
+    updateFPS() {
+        const now = performance.now();
+        this.frames++;
+        if (now - this.lastFpsUpdate >= 1000) {
+            this.fps = this.frames;
+            document.getElementById("fps_counter").textContent = "FPS: " + this.fps;
+            // console.log("FPS:", this.fps);
+            this.frames = 0;
+            this.lastFpsUpdate = now;
+        }
     }
 
     animate() {
@@ -87,19 +98,12 @@ class Simulation {
         this.lastFrameTime = now;
 
         // Count FPS
-        this.frames++;
-        if (now - this.lastFpsUpdate >= 1000) {
-            this.fps = this.frames;
-            console.log("FPS:", this.fps);
-            this.frames = 0;
-            this.lastFpsUpdate = now;
-        }
+        this.updateFPS();
 
         // update for the curvature (camera pos is the center of the curve)
         this.chunkManager.updateMaterial(this.camera);
         const controls = this.controlsManager.update(delta);
         this.player.update(delta, controls);
-        // this.rubber.update(delta, controls);
 
         this.composer.render();
     }
