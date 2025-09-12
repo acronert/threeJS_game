@@ -61,13 +61,13 @@ export function perlin_get(x, y) {
     return value;
 }
 
-export function getNormalAt(x, y, resolution) {
+export function getNormalAt(x, y, resolution, heightFunction) {
     const normal = { x: 0, y: 0, z: 0 };
 
-    const hL = getTerrainHeightAt(x - resolution, y);
-    const hR = getTerrainHeightAt(x + resolution, y);
-    const hD = getTerrainHeightAt(x, y - resolution);
-    const hU = getTerrainHeightAt(x, y + resolution);
+    const hL = heightFunction(x - resolution, y);
+    const hR = heightFunction(x + resolution, y);
+    const hD = heightFunction(x, y - resolution);
+    const hU = heightFunction(x, y + resolution);
     
     const dx = (hR - hL) / (2 * resolution);
     const dy = (hU - hD) / (2 * resolution);
@@ -89,7 +89,7 @@ export function getNormalAt(x, y, resolution) {
 }
 
 // GenerateDunes
-export function getTerrainHeightAt(x, y) {
+export function getDesertHeightAt(x, y) {
     let o0 = perlin_get(x * 0.01, y * 0.01);  // zones of high and low dunes
     o0 = o0 / 2 + 0.5;
     // o0 = 1;
@@ -103,6 +103,14 @@ export function getTerrainHeightAt(x, y) {
     let o3 = perlin_get(x * 0.3, y * 0.1); // fine ripples
 
     return o0 * 2 * (o1 * 3 + o2 * 2 + o3 * 0.6);
+}
+
+export function getSnowHeightAt(x, y) {
+    let o1 = perlin_get(x * 0.1, y * 0.1);
+    let o2 = perlin_get(x * 0.01, y * 0.01);
+    let o3 = perlin_get(x * 0.001, y * 0.001);
+
+    return o1 * 2 + o2 * 4 + o3 * 8;
 }
 
 // // GenerateDunes

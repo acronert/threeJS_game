@@ -1,6 +1,6 @@
 import * as THREE from "three";
-import { getNormalAt, getTerrainHeightAt } from "./PerlinNoise.js";
-import { TiretracksManager } from "./TiretracksManager.js";
+import { getNormalAt } from "./PerlinNoise.js";
+import { Tiretracks } from "./ATerrainDecal.js";
 
 function createRubberMesh(rubberRadius) {
     const rubberMesh = new THREE.Group();
@@ -113,13 +113,14 @@ export class Rubber {
     constructor(camera, scene, chunkManager, x = 0, z = 0) {
         this.camera = camera;
 
-        this.tiretracksManager = new TiretracksManager(scene, this.camera, chunkManager);
+        this.tiretracks = new Tiretracks(scene, chunkManager);
 
+        this.chunkManager = chunkManager;
 
         this.rubberRadius = 0.55;
 
         this.rubberMesh = createRubberMesh(this.rubberRadius);
-        this.rubberMesh.position.set(x, getTerrainHeightAt(x, z), z);
+        this.rubberMesh.position.set(x, 100, z);
 
         this.position = this.rubberMesh.position;
         this.direction = new THREE.Vector3();
@@ -139,7 +140,7 @@ export class Rubber {
         const offset = new THREE.Vector3(0, 2, 0);
         const targetPos = this.position.clone()
             .add(offset)
-            .add(this.direction.clone().multiplyScalar(-2));
+            .add(this.direction.clone().multiplyScalar(-4));
         const targetLookAt = this.position.clone()
             .add(this.direction.clone().multiplyScalar(5));
 
@@ -177,8 +178,8 @@ export class Rubber {
 
         // Gravity
             // get terrain infos
-        const groundHeight = getTerrainHeightAt(this.position.x, this.position.z) + this.rubberRadius;
-        const n = getNormalAt(this.position.x, this.position.z, 0.25);
+        const groundHeight = this.chunkManager.getHeightAt(this.position.x, this.position.z) + this.rubberRadius;
+        const n = getNormalAt(this.position.x, this.position.z, 0.25, this.chunkManager.getHeightAt);
         const groundNormal = new THREE.Vector3(n.x, n.z, n.y); // invert z and y to put y up
 
             // Calculate next position
@@ -243,9 +244,9 @@ export class Rubber {
 
         // make the wheel spin
 
-        // if (this.isOnGround) {
-            // this.tiretracksManager.update(this.position, this.heading);
-        // }
+        if (this.isOnGround) {
+            this.tiretracks.update(this.position.x, this.position.z, this.heading);
+        }
 
         if (controls) {
             this.updateCamera(controls);

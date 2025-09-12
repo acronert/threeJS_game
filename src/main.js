@@ -3,11 +3,15 @@ import { createRenderer, createComposer } from "./Renderer.js";
 import { ControlManager } from "./ControlManager.js";
 import { createSkybox } from "./Skybox.js";
 import { ChunkManager } from "./ChunkManager.js";
+import { DesertEnvironment, SnowEnvironment } from "./AEnvironment.js";
 import { Player } from "./Player.js"
 
-// Fullscreen switch
+const environment_button = document.getElementById("environment_button");
 const fullscreen_button = document.getElementById("fullscreen_button");
+const help_button = document.getElementById("help_button");
+const help = document.getElementById("help");
 
+// Fullscreen switch
 fullscreen_button.addEventListener("click", () => {
   if (!document.fullscreenElement) {
     document.body.requestFullscreen?.() ||
@@ -21,9 +25,6 @@ fullscreen_button.addEventListener("click", () => {
 });
 
 // Help menu display
-const help_button = document.getElementById("help_button");
-const help = document.getElementById("help");
-
 help_button.addEventListener("click", () => {
   if (help.style.display == "block")
     help.style.display = "none";
@@ -38,9 +39,14 @@ class Simulation {
     this.renderer = createRenderer();
     this.composer = createComposer(this.renderer, this.scene, this.camera);
 
+
+    // Create Enviroment class
     const chunkSize = 32;
     this.chunkManager = new ChunkManager(this.scene, this.camera, chunkSize);
     this.player = new Player(this.camera, this.scene, this.chunkManager);
+    this.environment = new DesertEnvironment(this.scene, this.camera, this.chunkManager, this.player);
+
+
     this.controlsManager = new ControlManager(this.renderer.domElement);
 
     this.animate = this.animate.bind(this);
@@ -59,14 +65,27 @@ class Simulation {
     this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
+  changeEnvironment() {
+    console.log("click environment");
+    if (this.environment instanceof DesertEnvironment) {
+      console.log("SNOW");
+      this.environment = new SnowEnvironment(this.scene, this.camera, this.chunkManager, this.player);
+    } else if (this.environment instanceof SnowEnvironment) {
+      console.log("DESERT");
+      this.environment = new DesertEnvironment(this.scene, this.camera, this.chunkManager, this.player);
+    }
+  }
+
   start() {
+    environment_button.addEventListener("click", this.changeEnvironment.bind(this));
+
     window.addEventListener('resize', this.handleResize);
     this.handleResize();
 
     this.sky = createSkybox(this.scene);
 
     const interval = setInterval(() => {
-      this.chunkManager.update();
+      this.environment.updateChunks();
     }, 500);
 
     this.animate()
@@ -92,9 +111,17 @@ class Simulation {
     this.updateFPS(now);
 
     // Update game
-    this.chunkManager.updateMaterial(this.camera); // update curvature based on camera.pos
+    // this.chunkManager.updateMaterial(this.camera); // update curvature based on camera.pos
     const controls = this.controlsManager.update(delta);
-    this.player.update(delta, controls);
+    
+    this.player.update(delta, controls); // update Player position and physic
+
+    // IF ENVIRONMENT CHANGE
+    // this.environment = new Environment()
+    //  -> reset ChunkManager (shape and texture of chunks)
+    //  -> reset TrackManager (color of tracks)
+
+
     this.sky.update(this.camera.position); // make the shadow light follow the camera
 
     this.composer.render();

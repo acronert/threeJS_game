@@ -21,6 +21,11 @@ export class Player {
         this.current = this.walker; // default mode
     }
 
+    updateTracksColor(colorMap) {
+        this.walker.footprints.updateMaterialColor(colorMap);
+        this.rubber.tiretracks.updateMaterialColor(colorMap);
+    }
+
     getOnRubber() {
         console.log("getOnRubber");
         this.current = this.rubber;

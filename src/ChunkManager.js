@@ -1,5 +1,5 @@
+import { MeshStandardMaterial } from "three";
 import { Chunk } from "./Chunk.js";
-import { createSandMaterial } from "./SandMaterial.js";
 
 // For each Level Of Details (LOD),
 // set the chunk distance (in chunk size) and resolution
@@ -27,7 +27,11 @@ export class ChunkManager {
     this.scene = scene;
     this.chunkSize = chunkSize;
 
-    this.sandMaterial = createSandMaterial(chunkSize);
+    // Needs to be initialized before use !
+    this.material = new MeshStandardMaterial({ color: 0xff0000 });
+    this.getHeightAt = (x, z) => 0;
+    this.terrainType = "";
+
     this.loaded = new Map();
     this.requested = new Map();
 
@@ -43,11 +47,18 @@ export class ChunkManager {
     }
   }
 
+  init(material, heightFunction, terrainType) {
+    this.material = material;
+    this.getHeightAt = heightFunction;
+    this.terrainType = terrainType;
+    console.log("ChunkManager changed to type:", this.terrainType);
+  }
+
   // Triggers when the worker finished computing the heights of a chunk
   onWorkerMessage = (e) => {
-    const { chunkX, chunkY, resolution, heights, normals } = e.data;
-    const key = `${chunkX},${chunkY}`;
-    const chunk = new Chunk({ x: chunkX, y: chunkY }, this.chunkSize, resolution, heights, normals, this.sandMaterial);
+    const { chunkX, chunkY, resolution, terrainType, heights, normals } = e.data;
+    const key = `${chunkX},${chunkY},${terrainType}`;
+    const chunk = new Chunk({ x: chunkX, y: chunkY }, this.chunkSize, resolution, heights, normals, this.material);
     chunk.addTo(this.scene);
 
     // remove the request
@@ -59,7 +70,7 @@ export class ChunkManager {
     }
     // put new chunk in chunks
     this.loaded.set(key, { chunk, resolution });
-    console.log("number of loaded chunks:", this.loaded.size);
+    // console.log("number of loaded chunks:", this.loaded.size);
   };
 
   #getChunkCoordinates(x, y) {
@@ -93,10 +104,17 @@ export class ChunkManager {
   }
 
   #requestChunk(chunkX, chunkY, resolution) {
-    const key = `${chunkX},${chunkY}`;
+    const key = `${chunkX},${chunkY},${this.terrainType}`;
     const worker = this.workers[this.workerIndex];
     this.workerIndex = (this.workerIndex + 1) % this.workers.length;
-    worker.postMessage({ chunkX, chunkY, size: this.chunkSize, resolution });
+
+    worker.postMessage({
+      chunkX,
+      chunkY,
+      size: this.chunkSize,
+      resolution,
+      terrainType: this.terrainType
+    });
     this.requested.set(key, { resolution });
   }
 
@@ -105,7 +123,7 @@ export class ChunkManager {
     // create a set from needed to be able to check by key
     const neededKey = new Set();
     for (const [chunkX, chunkY] of needed) {
-      neededKey.add(`${chunkX},${chunkY}`);
+      neededKey.add(`${chunkX},${chunkY},${this.terrainType}`);
     }
 
     for (let key of this.loaded.keys()) {
@@ -125,10 +143,11 @@ export class ChunkManager {
     for (const [chunkX, chunkY, sqrDistance] of needed) {
       if (nRequest > updateSize) break;
       const resolution = this.#getChunkResolution(sqrDistance);
+      const key = `${chunkX},${chunkY},${this.terrainType}`;
 
-      if (!this.requested.has(`${chunkX},${chunkY}`)          // Not requested
-        && (!this.loaded.has(`${chunkX},${chunkY}`)         // ... and ( not loaded ...
-          || (this.loaded.get(`${chunkX},${chunkY}`).resolution != resolution))) { // ... or need to change scale)
+      if (!this.requested.has(key)          // Not requested
+        && (!this.loaded.has(key)         // ... and ( not loaded ...
+          || (this.loaded.get(key).resolution != resolution))) { // ... or need to change scale)
         this.#requestChunk(chunkX, chunkY, resolution);
         nRequest++;
       }
@@ -136,12 +155,15 @@ export class ChunkManager {
     this.#removeOldChunks(needed);
   }
 
-  // dispose() {
+  // disposeChunks() {
+  //   for (const chunk of this.loaded) {
+  //     chunk.removeFrom(this.scene)
+  //   }
   // }
 
   getChunkMesh(x, y) {
     const { cx, cy } = this.#getChunkCoordinates(x, y);
-    const key = `${cx},${cy}`;
+    const key = `${cx},${cy},${this.terrainType}`;
 
     if (this.loaded.has(key)) {
       return this.loaded.get(key).chunk.getMesh();
@@ -149,10 +171,10 @@ export class ChunkManager {
     return null;
   }
 
-  updateMaterial(camera) {
+  updateCurvature(camera) {
     // Update the curvature shader effect
-    if (this.sandMaterial.userData.update) {
-      this.sandMaterial.userData.update(camera);
+    if (this.material.userData.update) {
+      this.material.userData.update(camera);
     }
   }
 }

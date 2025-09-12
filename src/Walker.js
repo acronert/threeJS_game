@@ -1,14 +1,14 @@
 import * as THREE from "three";
-import { getTerrainHeightAt } from "./PerlinNoise.js";
-import { FootprintManager } from "./FootprintManager.js";
+import { Footprints } from "./ATerrainDecal.js";
 
 const speed = 10; // m/s
 
 export class Walker {
     constructor(camera, scene, chunkManager) {
         this.camera = camera;
+        this.chunkManager = chunkManager;
 
-        this.footprintManager = new FootprintManager(scene, this.camera, chunkManager);
+        this.footprints = new Footprints(scene, chunkManager);
 
         this.position = new THREE.Vector3();
         this.rotation = new THREE.Vector3();
@@ -20,9 +20,6 @@ export class Walker {
     }
 
     update(delta, controls) {
-        // footprints
-        this.footprintManager.update();
-
        // Movement
         const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(controls.orientationQuat);
         forward.y = 0; // keep movement on ground plane
@@ -39,14 +36,16 @@ export class Walker {
         if (controls.up)   this.position.addScaledVector(up, speed * delta);
         if (controls.down)  this.position.addScaledVector(up, -speed * delta);
 
-        this.position.y = getTerrainHeightAt(this.position.x, this.position.z) + 1.7;
+        this.position.y = this.chunkManager.getHeightAt(this.position.x, this.position.z) + 1.7;
 
         // Apply rotation and movement
         this.camera.position.copy(this.position);
         this.camera.quaternion.copy(controls.orientationQuat);
 
-        // Footsteps
-        // this.footprintManager.update();
+        // Footprints
+        const euler = new THREE.Euler();
+        euler.setFromQuaternion(this.camera.quaternion, "YXZ");
+        this.footprints.update(this.position.x, this.position.z, euler.y);
     
     }
 }
