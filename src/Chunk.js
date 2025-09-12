@@ -1,41 +1,40 @@
 import * as THREE from "three";
 
 export class Chunk {
-    constructor(coord, size, resolution, heights, normals, material) {
-        this.coord = coord;
-        this.size = size;
+  constructor(coord, size, resolution, heights, normals, material) {
+    this.coord = coord;
+    this.size = size;
 
-        const geometry = new THREE.PlaneGeometry(size, size, resolution - 1, resolution - 1);
-        const positions = geometry.attributes.position;
+    const geometry = new THREE.PlaneGeometry(size, size, resolution - 1, resolution - 1);
+    const positions = geometry.attributes.position;
 
-        // Set vertex height
-        for (let i = 0; i < positions.count; i++) {
-            positions.setZ(i, heights[i]);
-        }
-        positions.needsUpdate = true;
+    // Set vertex height
+    for (let i = 0; i < positions.count; i++)
+      positions.setZ(i, heights[i]);
+    positions.needsUpdate = true;
 
-        // Set normals
-        geometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
-        geometry.attributes.normal.needsUpdate = true;
+    // Set normals
+    geometry.setAttribute("normal", new THREE.BufferAttribute(normals, 3));
+    geometry.attributes.normal.needsUpdate = true;
 
-        // Place the chunk in world space
-        this.mesh = new THREE.Mesh(geometry, material);
-        this.mesh.rotation.x = -Math.PI / 2;
-        this.mesh.position.set(coord.x * size, 0, coord.y * size);
+    // Place the chunk in world space
+    this.mesh = new THREE.Mesh(geometry, material);
+    this.mesh.rotation.x = -Math.PI / 2;
+    this.mesh.position.set(coord.x * size, 0, coord.y * size);
 
-        this.mesh.receiveShadow = true;
-    }
+    this.mesh.receiveShadow = true;
+  }
 
-    addTo(scene) {
-        scene.add(this.mesh);
-    }
+  addTo(scene) {
+    scene.add(this.mesh);
+  }
 
-    removeFrom(scene) {
-        scene.remove(this.mesh);
-        this.mesh.geometry.dispose();
-    }
+  removeFrom(scene) {
+    scene.remove(this.mesh);
+    this.mesh.geometry.dispose();
+  }
 
-    getMesh() {
-        return this.mesh;
-    }
+  getMesh() {
+    return this.mesh;
+  }
 }

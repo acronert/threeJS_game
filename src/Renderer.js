@@ -4,12 +4,9 @@ import { RenderPass } from "three/examples/jsm/postprocessing/RenderPass.js";
 import { OutputPass } from "three/examples/jsm/postprocessing/OutputPass.js";
 import { FilmPass } from "three/examples/jsm/postprocessing/FilmPass.js";
 import { ShaderPass } from "three/examples/jsm/postprocessing/ShaderPass.js";
-
 import { FXAAShader } from 'three/examples/jsm/shaders/FXAAShader.js';
 import { SMAAPass } from 'three/examples/jsm/postprocessing/SMAAPass.js';
 import { TAARenderPass } from 'three/examples/jsm/postprocessing/TAARenderPass.js';
-
-
 
 export function createRenderer() {
     const renderer = new THREE.WebGLRenderer({antialias:true});

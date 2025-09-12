@@ -81,18 +81,18 @@ export class ControlManager {
 
         // Mouse
             // get the pointer lock
-        // const canvas = document.querySelector("canvas");
-        // canvas.addEventListener("click", () => {
-        //     canvas.requestPointerLock();
-        //     console.log("click");
-        // });
+        const canvas = document.querySelector("canvas");
+        canvas.addEventListener("click", () => {
+            canvas.requestPointerLock();
+            console.log("click");
+        });
 
-        // document.addEventListener('mousemove', e => {
-        //     const sensitivity = 0.002;
-        //     input.gyro.alpha -= e.movementX * sensitivity;
-        //     input.gyro.beta -= e.movementY * sensitivity;
-        //     input.gyro.gamma = 0;
-        // });
+        document.addEventListener('mousemove', e => {
+            const sensitivity = 0.002;
+            input.gyro.alpha -= e.movementX * sensitivity;
+            input.gyro.beta -= e.movementY * sensitivity;
+            input.gyro.gamma = 0;
+        });
 
         //////////// MOBILE ////////////
         // Touch

@@ -2,7 +2,6 @@ import * as THREE from "three";
 import { getNormalAt, getTerrainHeightAt } from "./PerlinNoise.js";
 import { TiretracksManager } from "./TiretracksManager.js";
 
-
 function createRubberMesh(rubberRadius) {
     const rubberMesh = new THREE.Group();
 
@@ -138,12 +137,14 @@ export class Rubber {
 
     updateCamera(controls) {
         const offset = new THREE.Vector3(0, 2, 0);
-        const target = this.position.clone()
+        const targetPos = this.position.clone()
             .add(offset)
-            .add(this.direction.clone().multiplyScalar(-3));
+            .add(this.direction.clone().multiplyScalar(-2));
+        const targetLookAt = this.position.clone()
+            .add(this.direction.clone().multiplyScalar(5));
 
-        this.camera.position.lerp(target, 0.1);
-        this.camera.lookAt(this.position);
+        this.camera.position.lerp(targetPos, 0.2);
+        this.camera.lookAt(targetLookAt);
 
     }
 
