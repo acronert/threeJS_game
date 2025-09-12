@@ -5,7 +5,7 @@ import { Chunk } from "./Chunk.js";
 // set the chunk distance (in chunk size) and resolution
 const chunkDepth = {
   LOW: {
-    depth: 12,
+    depth: 16,
     res: 16,
   },
   MID: {

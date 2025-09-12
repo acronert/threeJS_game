@@ -46,7 +46,7 @@ export function createTiretrackMaterial() {
     const loader = new THREE.TextureLoader();
     
     const normal = loader.load('./assets/TireTracks001_1K-JPG/TireTracks001_1K-JPG_NormalGL.jpg');
-    const alpha = loader.load('./assets/TireTracks001_1K-JPG/TireTracks001_1K-JPG_Alpha2.jpg');
+    const alpha = loader.load('./assets/TireTracks001_1K-JPG/TireTracks001_1K-JPG_Alpha.jpg');
 
     [alpha, normal].forEach(tex => {
         tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
