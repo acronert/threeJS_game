@@ -10,6 +10,7 @@
 </head>
 <body>
 	<div id="fps_counter">FPS:</div>
+	<div id="pause_screen">Pause</div>
 	<button id="help_button">?</button>
 	<button id="environment_button">Change Environment</button>
 	<button id="fullscreen_button">Fullscreen</button>
@@ -47,6 +48,21 @@
 		font-size: 24px;
 		font-family: monospace;
 	}
+	#pause_screen {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%); /* center */
+		background-color: rgba(255, 255, 255, 0.8);
+		color: rgb(0, 0, 0);
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		padding: 20px 20px;
+		border-radius: 8px;
+		display: none;
+		font-size: 48px;
+	}
 	#fullscreen_button {
 		position: absolute;
 		top: 20px;
@@ -61,8 +77,8 @@
 	}
 	#environment_button {
 		position: absolute;
-		top: 20px;
-		left: 100px;
+		top: 60px;
+		left: 20px;
 		display: flex;
 		flex-direction: column;
 		gap: 10px;

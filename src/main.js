@@ -10,6 +10,7 @@ const environment_button = document.getElementById("environment_button");
 const fullscreen_button = document.getElementById("fullscreen_button");
 const help_button = document.getElementById("help_button");
 const help = document.getElementById("help");
+const pause_screen = document.getElementById("pause_screen");
 
 // Fullscreen switch
 fullscreen_button.addEventListener("click", () => {
@@ -31,6 +32,7 @@ help_button.addEventListener("click", () => {
   else
     help.style.display = "block"
 });
+
 
 class Simulation {
   constructor() {
@@ -56,7 +58,10 @@ class Simulation {
     this.lastFpsUpdate = 0;
     this.frames = 0;
     this.lastFrameTime = 0;
+
+    this.pause = false;
   }
+
 
   handleResize() {
     this.camera.aspect = window.innerWidth / window.innerHeight;
@@ -78,6 +83,18 @@ class Simulation {
 
   start() {
     environment_button.addEventListener("click", this.changeEnvironment.bind(this));
+
+    window.addEventListener("blur", () => {
+      console.log("Pause");
+      pause_screen.style.display = "block";
+      this.pause = true;
+    });
+    
+    window.addEventListener("focus", () => {
+      console.log("Unpause");
+      pause_screen.style.display = "none";
+      this.pause = false;
+    });
 
     window.addEventListener('resize', this.handleResize);
     this.handleResize();
@@ -102,6 +119,10 @@ class Simulation {
 
   animate() {
     requestAnimationFrame(this.animate);
+    if (this.pause) {
+      this.lastFrameTime = performance.now(); // else the delta is gigenormous
+      return;
+    }
 
     // Calculate delta
     const now = performance.now();
@@ -113,15 +134,8 @@ class Simulation {
     // Update game
     // this.chunkManager.updateMaterial(this.camera); // update curvature based on camera.pos
     const controls = this.controlsManager.update(delta);
-    
+
     this.player.update(delta, controls); // update Player position and physic
-
-    // IF ENVIRONMENT CHANGE
-    // this.environment = new Environment()
-    //  -> reset ChunkManager (shape and texture of chunks)
-    //  -> reset TrackManager (color of tracks)
-
-
     this.sky.update(this.camera.position); // make the shadow light follow the camera
 
     this.composer.render();

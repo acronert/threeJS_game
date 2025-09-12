@@ -106,41 +106,32 @@ export function getDesertHeightAt(x, y) {
 }
 
 export function getSnowHeightAt(x, y) {
-    let o1 = perlin_get(x * 0.1, y * 0.1);
-    let o2 = perlin_get(x * 0.01, y * 0.01);
-    let o3 = perlin_get(x * 0.001, y * 0.001);
+    // Large-scale base terrain (wide valleys and ridges)
+    let base = perlin_get(x * 0.008, y * 0.008); // very low frequency
 
-    return o1 * 2 + o2 * 4 + o3 * 8;
+    // Mid-frequency detail
+    let mid = perlin_get(x * 0.02, y * 0.02);
+    // High-frequency rocky detail
+    let high = perlin_get(x * 0.05, y * 0.05);
+    // Shape the base to exaggerate valleys (square to widen valleys, sharpen peaks)
+    let shapedBase = Math.pow(Math.abs(base), 3.0) * Math.sign(base);
+
+    // Combine
+    let height = shapedBase * 200         // large mountain/valley forms
+                + mid * 5               // medium hills
+                + high * 2;              // fine rocky detail
+
+    // Add slope to tilt the terrain
+    height -= 0.3 * x;  
+
+    return height;
 }
 
-// // GenerateDunes
-// export function getTerrainHeightAt(x, y) {
-//     let o0 = perlin_get(x * 0.001, y * 0.001);  // zones of high and low dunes
-//     o0 = o0 / 2 + 0.5;
 
-//     let o1 = perlin_get(x * 0.005, y * 0.002);
-//     o1 = Math.pow(1 - Math.abs(o1), 3.0); // sharp ridge
+// export function getSnowHeightAt(x, y) {
+//     let o1 = perlin_get(x * 0.1, y * 0.1);
+//     let o2 = perlin_get(x * 0.01, y * 0.01);
+//     let o3 = perlin_get(x * 0.001, y * 0.001);
 
-//     let o2 = perlin_get(x * 0.01, y * 0.004);
-//     o2 = Math.pow(1 - Math.abs(o2), 3.0); // sharp ridge
-
-//     let o3 = perlin_get(x * 0.03, y * 0.01); // fine ripples
-
-//     return o0 * 2 * (o1 * 30 + o2 * 20 + o3 * 6);
-// }
-
-// // GenerateDunes
-// export function getTerrainHeightAt(x, y) {
-//     let o0 = perlin_get(x * 0.0007, y * 0.0005);
-//     o0 = Math.pow(o0, 3.0); // sharp ridge
-
-//     let o1 = perlin_get(x * 0.005, y * 0.002);
-//     o1 = Math.pow(1 - Math.abs(o1), 3.0); // sharp ridge
-
-//     let o2 = perlin_get(x * 0.01, y * 0.004);
-//     o2 = Math.pow(1 - Math.abs(o2), 3.0); // sharp ridge
-
-//     let o3 = perlin_get(x * 0.03, y * 0.01); // fine ripples
-//     // let o3 = 0;
-//     return o0 * 500 + o1 * 30 + o2 * 20 + o3 * 6;
+//     return o1 * 2 + o2 * 8 + o3 * 16 - 0.3 * x;
 // }
