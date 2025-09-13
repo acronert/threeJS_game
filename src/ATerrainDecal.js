@@ -80,7 +80,7 @@ export class Footprints extends ATerrainDecal {
 export class Tiretracks extends ATerrainDecal {
     constructor(scene, chunkManager) {
         super(scene, chunkManager)
-            this.decalInterval = 0.3;
+            this.decalInterval = 0.5;
             this.material = createTiretrackMaterial();
             this.decalSize.set(0.6, 1.0, 1.0);
     }

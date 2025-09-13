@@ -43,8 +43,7 @@ class Simulation {
 
 
     // Create Enviroment class
-    const chunkSize = 32;
-    this.chunkManager = new ChunkManager(this.scene, this.camera, chunkSize);
+    this.chunkManager = new ChunkManager(this.scene);
     this.player = new Player(this.camera, this.scene, this.chunkManager);
     this.environment = new DesertEnvironment(this.scene, this.camera, this.chunkManager, this.player);
 

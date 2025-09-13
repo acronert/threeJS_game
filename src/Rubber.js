@@ -74,11 +74,11 @@ export class Rubber {
     if (controls && controls.right)
       this.heading -= this.steerSpeed * delta;
     // roll steering
-    if (controls) {
-      const rollRad = getRollRelativeToForward(controls.orientationQuat);
-      const roll = Math.min(1, Math.max(-1, rollRad)); // clamp to [-1, 1]
-      this.heading += this.steerSpeed * delta * roll;
-    }
+    // if (controls) {
+    //   const rollRad = getRollRelativeToForward(controls.orientationQuat);
+    //   const roll = Math.min(1, Math.max(-1, rollRad)); // clamp to [-1, 1]
+    //   this.heading += this.steerSpeed * delta * roll;
+    // }
   }
 
   getGroundNormal() {
@@ -128,11 +128,11 @@ export class Rubber {
     const velNormal = this.speed.clone().projectOnVector(groundNormal);
     const velPlane = this.speed.clone().projectOnPlane(groundNormal);
     // Only bounce when significant normal speed downward
-    if (this.speed.y < 0 && velNormal.length() > 5.0) {
+    if (this.speed.y < 0 && velNormal.length() > 2.0) {
       velNormal.multiplyScalar(-this.bounceFactor);    // bounce along ground normal
       this.speed.copy(velPlane).add(velNormal);   // restore speed
       // small bounce threshold to avoid infinite bounces
-      if (Math.abs(this.speed.y) < 5.0)
+      if (Math.abs(this.speed.y) < 3.0)
         this.speed.y = 0;
     }
   }
@@ -175,7 +175,7 @@ export class Rubber {
     this.updateRotation(delta);
 
     // if (this.isOnGround)
-    // this.tiretracks.update(this.position.x, this.position.z, this.heading);
+      // this.tiretracks.update(this.position.x, this.position.z, this.heading);
 
     if (controls)
       this.updateCamera(controls);

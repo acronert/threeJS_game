@@ -2,60 +2,15 @@
 
 A desert simulation built with **Three.js**, featuring infinite chunk-based terrain generation, atmospheric effects, and experimental gameplay (drive a bouncing tire across the dunes).
 
----
+- Rework tiretracks with decalGeometry: very laggy
+- - actually not possible to preallocate decalGeometries, because I cant change the mesh on which to apply it. A solution would be for the chunk Manager to return an invisible "big Mesh" (2x2 chunksize), that is moved but not recreated, in order to always apply decals to it
 
-## ✨ Visual Effects (Planned / WIP)
-- [ ] Heat haze / shimmering air near horizon
-- [ ] Blinding sun effect (brightness adaptation when looking at sun, fades over time)
-- [ ] Sun glare / bloom
-- [ ] Shadow casting (sync second "sun" with HDRI skybox)
-- [ ] Improved anti-aliasing (keep good performance)
-- [ ] Mirage effects (refraction / distortion)
-- [ ] Rocky hill textures blending
+- Create class Vehicule, a base for creating the "snowboard" and "deltaplane" classes
 
----
+- Frontend:
+- - Menu
+- - Switch vehicule button
+- - cleaner look
 
-## ⚡ Performance / Rendering
-- [ ] Asynchronous chunk mesh generation
-
----
-
-## 🎮 Controls
-- [ ] Splash screen / start menu with clean exit
-- [ ] Settings menu (quality presets, chunk depth & resolution, toggle effects)
-- [X] Enter / exit the "rubber" (walking vs. tire mode)
-- [ ] Switch camera view when controlling the rubber
-
----
-
-## 🏁 Gameplay
-- [X] Add controllable **rubber (tire)**
-- [X] Input methods:
-  - ⌨️ Keyboard
-  - 📱 Touch
-- [ ] Tire trail system
-- [X] Physics:
-  - [X] Velocity & acceleration on X/Y/Z
-  - [X] Bounces / rebounds
-  - [X] Freefall handling (disable input, spin tire)
-- [ ] Camera modes:
-  - [ ] First-person (inside tire)
-  - [X] Third-person follow
-- [ ] Particles: dust trail behind tire
-- [ ] Sound design:
-  - Tire rolling on gravel
-  - Bouncing impact ("yoga ball slap")
-
----
-
-## 🛠️ Development Notes
-- Add inline documentation for functions
-- Explain design choices (why certain methods / optimizations are used)
-
-
-- crash when getting off the rubber (probably due to camera position undefined)
-- Change the double tap, because its anoying when doing it unaware when riding the rubber
-- Shadow to reset for the rubber. Need to have a directional light following the camera around, with a small shadow resolution for perfomances + maybe set receiveShadow only on
-the current chunk !
-- Spin of the rubber
-- Higher dunes ?
+- Controls
+- - better controls on mobile

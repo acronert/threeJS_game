@@ -94,5 +94,5 @@ onmessage = (e) => {
 
   const heights = generateChunkHeights(chunkX, chunkY, size, resolution, heightFunction);
   const normals = generateGradientNormals(chunkX, chunkY, size, resolution, heights, heightFunction);
-  postMessage({ chunkX, chunkY, resolution, terrainType, heights, normals }, [heights.buffer, normals.buffer]); // [list] is uses to transfert ownership of the data
+  postMessage({ chunkX, chunkY, size, resolution, terrainType, heights, normals }, [heights.buffer, normals.buffer]); // [list] is uses to transfert ownership of the data
 }

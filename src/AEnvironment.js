@@ -28,7 +28,7 @@ export class DesertEnvironment extends AEnvironment {
   }
 
   updateChunks() {
-    this.chunkManager.update();
+    this.chunkManager.update(this.camera.position);
     // this.chunkManager.updateCurvature(); // OPTIONAL
   }
 }
@@ -49,7 +49,7 @@ export class SnowEnvironment extends AEnvironment {
   }
 
   updateChunks() {
-    this.chunkManager.update();
+    this.chunkManager.update(this.camera.position);
     // this.chunkManager.updateCurvature(); // OPTIONAL
   }
 }

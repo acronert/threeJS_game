@@ -146,7 +146,7 @@ export class AVehicule {
   }
 
   getRubberMesh() {
-    return this.rubberMesh;
+    return this.mesh;
   }
 }
 
