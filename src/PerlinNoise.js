@@ -88,7 +88,7 @@ export function getNormalAt(x, y, resolution, heightFunction) {
     return normal;
 }
 
-// GenerateDunes
+// Generate dunes
 export function getDesertHeightAt(x, y) {
     let o0 = perlin_get(x * 0.01, y * 0.01);  // zones of high and low dunes
     o0 = o0 / 2 + 0.5;
@@ -105,6 +105,7 @@ export function getDesertHeightAt(x, y) {
     return o0 * 2 * (o1 * 3 + o2 * 2 + o3 * 0.6);
 }
 
+// Generate slope
 export function getSnowHeightAt(x, y) {
     // Large-scale base terrain (wide valleys and ridges)
     let base = perlin_get(x * 0.008, y * 0.008); // very low frequency

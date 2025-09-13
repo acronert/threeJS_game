@@ -13,8 +13,8 @@ function generateChunkHeights(chunkX, chunkY, size, resolution, heightFunction) 
 
 function getDeltaCoord(x, y, chunkX, chunkY, size, resolution) {
   let d = { x: 0, y: 0 };
-  d.x = (chunkX + y / (resolution - 1)) * size - size / 2;
-  d.y = (chunkY + x / (resolution - 1)) * size - size / 2;
+  d.x = (chunkX + y / (resolution - 1)) * size - size;
+  d.y = (chunkY + x / (resolution - 1)) * size - size;
   return d;
 }
 
