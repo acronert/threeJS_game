@@ -6,17 +6,13 @@ import { createRubberMesh } from "./RubberMesh.js";
 function getRollRelativeToForward(quat) {
   const up = new THREE.Vector3(0, -1, 0).applyQuaternion(quat).normalize();
   const forward = new THREE.Vector3(0, 0, -1).applyQuaternion(quat).normalize();
-
   // Project forward onto XZ (ignore pitch for roll reference)
   forward.y = 0;
   forward.normalize();
-
   // Right vector in XZ plane
   const right = new THREE.Vector3().crossVectors(forward, new THREE.Vector3(0, 1, 0)).normalize();
-
   // Roll = angle between "up" and global up, around forward axis
   const projectedUp = new THREE.Vector3().crossVectors(forward, right).normalize();
-
   const dot = up.dot(projectedUp);
   const det = up.dot(right); // sign
 
@@ -50,6 +46,10 @@ export class Rubber {
     this.bounceFactor = 0.5;
     this.gravity = new THREE.Vector3(0, -9.81, 0);
 
+  }
+
+  getSpeed() {
+    return this.speed.length();
   }
 
   getPosition() {
@@ -127,6 +127,7 @@ export class Rubber {
     // Separate speed along ground normal (upward) from speed along the plane
     const velNormal = this.speed.clone().projectOnVector(groundNormal);
     const velPlane = this.speed.clone().projectOnPlane(groundNormal);
+
     // Only bounce when significant normal speed downward
     if (this.speed.y < 0 && velNormal.length() > 2.0) {
       velNormal.multiplyScalar(-this.bounceFactor);    // bounce along ground normal
@@ -181,7 +182,7 @@ export class Rubber {
       this.updateCamera(controls);
   }
 
-  getRubberMesh() {
+  getMesh() {
     return this.rubberMesh;
   }
 }

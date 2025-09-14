@@ -7,6 +7,7 @@ import { DesertEnvironment, SnowEnvironment } from "./AEnvironment.js";
 import { Player } from "./Player.js"
 
 const environment_button = document.getElementById("environment_button");
+const speedometer = document.getElementById("speedometer");
 const fullscreen_button = document.getElementById("fullscreen_button");
 const help_button = document.getElementById("help_button");
 const help = document.getElementById("help");
@@ -37,7 +38,7 @@ help_button.addEventListener("click", () => {
 class Simulation {
   constructor() {
     this.scene = new THREE.Scene();
-    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 8000);
+    this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 300000);
     this.renderer = createRenderer();
     this.composer = createComposer(this.renderer, this.scene, this.camera);
 
@@ -102,9 +103,16 @@ class Simulation {
 
     const interval = setInterval(() => {
       this.environment.updateChunks();
-    }, 500);
+      this.updateHUD();
+      // console.log(`Camera pos: [${Math.floor(this.camera.position.x)},${Math.floor(this.camera.position.z)}]`)
+    }, 100);
 
     this.animate()
+  }
+
+  updateHUD() {
+    const speed = Math.floor(this.player.getSpeed() * 3.6); // m/s to km/h
+    document.getElementById("speedometer").textContent = speed + " km/h";
   }
 
   updateFPS(now) {
@@ -131,7 +139,7 @@ class Simulation {
     this.updateFPS(now);
 
     // Update game
-    // this.chunkManager.updateMaterial(this.camera); // update curvature based on camera.pos
+    this.chunkManager.updateCurvature(this.camera); // update curvature based on camera.pos
     const controls = this.controlsManager.update(delta);
 
     this.player.update(delta, controls); // update Player position and physic

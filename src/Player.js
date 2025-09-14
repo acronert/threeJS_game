@@ -1,6 +1,8 @@
 import { ChunkManager } from "./ChunkManager.js";
 import { Rubber } from "./Rubber.js";
 import { Walker } from "./Walker.js";
+import { Wheel } from "./AVehicule.js";
+import { SnowBoard } from "./AVehicule.js";
 
 const distToMount = 4;
 const interactInterval = 1000; //ms
@@ -11,10 +13,10 @@ export class Player {
         this.scene = scene;
 
         this.walker = new Walker(this.camera, scene, chunkManager);
-        this.rubber = new Rubber(this.camera, scene, chunkManager, 3, 0);
-
-        this.rubberMesh = this.rubber.getRubberMesh()
-        this.scene.add(this.rubberMesh);
+        this.vehicules = [
+            new Wheel(this.camera, scene, chunkManager),
+            new SnowBoard(this.camera, scene, chunkManager)
+        ];
 
         this.lastInteractTime = 0;
 
@@ -23,39 +25,61 @@ export class Player {
 
     updateTracksColor(colorMap) {
         this.walker.footprints.updateMaterialColor(colorMap);
-        this.rubber.tiretracks.updateMaterialColor(colorMap);
+
+        for (const vehicule of this.vehicules) {
+            vehicule.decals?.updateMaterialColor(colorMap);
+        }
     }
 
-    getOnRubber() {
-        console.log("getOnRubber");
-        this.current = this.rubber;
+    getOnVehicule(vehicule) {
+        this.current = vehicule;
     }
 
-    getOffRubber() {
-        console.log("getOffRubber");
-        const pos = this.rubber.getPosition();
-        this.walker.setPosition(pos.x, pos.z, 0);
+    getOffVehicule(vehicule) {
+        const pos = vehicule.getPosition();
+        this.walker.setPosition(pos.x, pos.z, pos.y);
         this.current = this.walker;
     }
 
-    distanceToRubber() {
-        return Math.sqrt((this.camera.position.x - this.rubberMesh.position.x)**2
-                        + (this.camera.position.z - this.rubberMesh.position.z)**2);
+    getSpeed() {
+        if (this.current instanceof Walker)
+            return 0;
+        return this.current.getSpeed();
     }
 
+    closestVehicule(pos) {
+        let minDistance = Infinity;
+        let closestVehicule = null;
+
+        for (const vehicule of this.vehicules) {
+            const vPos = vehicule.getPosition();
+            const distance = (pos.clone().sub(vPos)).length();
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestVehicule = vehicule;
+            }
+        }
+        return { minDistance, closestVehicule };
+    }
 
     update(delta, controls) {
-        if (this.current instanceof Rubber == false) {
-            this.rubber.update(delta, null);
+        for (const vehicule of this.vehicules) {
+            if (this.current != vehicule)
+                vehicule.update(delta, null);
         }
         this.current.update(delta, controls);
 
         if (controls.interact && performance.now() - this.lastInteractTime > interactInterval) {
-            console.log("interact, dist:", this.distanceToRubber());
-            if (this.current instanceof Walker && this.distanceToRubber() <= distToMount)
-                this.getOnRubber();
-            else if (this.current instanceof Rubber)
-                this.getOffRubber();
+            if (this.current instanceof Walker) {
+                const { minDistance, closestVehicule } = this.closestVehicule(this.camera.position);
+                console.log("distance = ", minDistance);
+                if (minDistance <= distToMount)
+                    this.getOnVehicule(closestVehicule);
+            }
+            else {
+                this.getOffVehicule(this.current);
+            }
 
             this.lastInteractTime = performance.now();
             controls.interact = false;
