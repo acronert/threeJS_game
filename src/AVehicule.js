@@ -379,36 +379,36 @@ export class Plane extends AVehicule {
     // dragForce = 0.5 * airDensity * dragCoef * referenceArea / mass
 
     // DELTAPLANE
-    // this.rho = 1.225;  // Air density (kg/m**3) : 1.225  at sea level;
-    // this.S = 15.0;     // Wing area (m**2)
-    // this.C_L = 0.2;    // Lift coefficent (dimensionless): 0.5->1.5 depending on area of attack
-    // this.mass = 120;   // (kg)
-    // this.liftCoef = 0.5 * this.rho * this.S * this.C_L / this.mass;
-
-    // this.A = 1.0;     // Reference area 
-    // this.C_D = 0.05;  // Drag coefficient
-    // this.dragCoef = 0.5 * this.rho * this.C_D * this.A / this.mass;
-
-    // this.thrust = 20.0; // m/s**2
-    // this.thrustLevel = 0.0;
-    // this.thrustPerSec = 0.5;
-    // this.thrustForce = this.thrust / this.mass;
-
-    // // JET FIGHTER
     this.rho = 1.225;  // Air density (kg/m**3) : 1.225  at sea level;
-    this.S = 28.0;     // Wing area (m**2)
+    this.S = 15.0;     // Wing area (m**2)
     this.C_L = 0.2;    // Lift coefficent (dimensionless): 0.5->1.5 depending on area of attack
-    this.mass = 11600;   // (kg)
+    this.mass = 120;   // (kg)
     this.liftCoef = 0.5 * this.rho * this.S * this.C_L / this.mass;
 
     this.A = 1.0;     // Reference area 
-    this.C_D = 0.03;  // Drag coefficient
+    this.C_D = 0.05;  // Drag coefficient
     this.dragCoef = 0.5 * this.rho * this.C_D * this.A / this.mass;
 
-    this.thrust = 80.0; // m/s**2
+    this.thrust = 10.0; // m/s**2
     this.thrustLevel = 0.0;
     this.thrustPerSec = 0.5;
     this.thrustForce = this.thrust / this.mass;
+
+    // // JET FIGHTER
+    // this.rho = 1.225;  // Air density (kg/m**3) : 1.225  at sea level;
+    // this.S = 28.0;     // Wing area (m**2)
+    // this.C_L = 0.2;    // Lift coefficent (dimensionless): 0.5->1.5 depending on area of attack
+    // this.mass = 11600;   // (kg)
+    // this.liftCoef = 0.5 * this.rho * this.S * this.C_L / this.mass;
+
+    // this.A = 1.0;     // Reference area 
+    // this.C_D = 0.03;  // Drag coefficient
+    // this.dragCoef = 0.5 * this.rho * this.C_D * this.A / this.mass;
+
+    // this.thrust = 50.0; // m/s**2
+    // this.thrustLevel = 0.0;
+    // this.thrustPerSec = 0.5;
+    // this.thrustForce = this.thrust / this.mass;
   }
 
   getAltitude() {
