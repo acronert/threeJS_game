@@ -1,4 +1,4 @@
-import { getDesertHeightAt, getSnowHeightAt } from "./PerlinNoise.js";
+import { getDesertHeightAt, getSnowHeightAt, getPlanetHeightAt } from "./PerlinNoise.js";
 
 function generateChunkHeights(chunkX, chunkY, size, resolution, heightFunction) {
   const vertices = new Float32Array(resolution * resolution);
@@ -88,6 +88,7 @@ onmessage = (e) => {
   switch(terrainType) {
       case "DESERT": heightFunction = getDesertHeightAt; break;
       case "SNOW": heightFunction = getSnowHeightAt; break;
+      case "PLANET": heightFunction = getPlanetHeightAt; break;
       // case "MOON": heightFunction = getMoonHeightAt; break;
       default: heightFunction = (x, z) => 0;
   } 

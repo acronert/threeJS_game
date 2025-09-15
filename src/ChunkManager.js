@@ -293,6 +293,7 @@ export class ChunkManager {
     let needed = this.#getNeededWithinRadius(position.x, position.z, chunkDepth.VERY_LOW.depth);
 
     // console.log(`Loaded chunks:${this.loaded.size} | Requested chunks:${this.requested.size}`);
+    console.log(`Horizon is at ${this.size * chunkDepth.VERY_LOW.depth}`);
 
     for (const [chunkX, chunkY, sqrDistance] of needed) {
       if (nRequest > updateSize) break;

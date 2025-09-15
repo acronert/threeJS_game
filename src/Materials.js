@@ -126,7 +126,8 @@ export function createSandMaterial(size = 32) {
   material.onBeforeCompile = (shader) => {
     // Add new uniforms
     shader.uniforms.cameraPos = { value: new THREE.Vector3() };
-    shader.uniforms.curvatureRadius = { value: 1000000.0 };
+    shader.uniforms.curvatureRadius = { value: 2000000.0 }; // earth radius
+    // shader.uniforms.curvatureRadius = { value: 6357000.0 }; // earth radius
 
     // Declare uniforms in vertex shader
     shader.vertexShader = shader.vertexShader.replace(
@@ -161,3 +162,66 @@ export function createSandMaterial(size = 32) {
   return material;
 }
 
+export function createPlanetMaterial(size = 32) {
+  const material = new THREE.MeshStandardMaterial({
+    // Base material properties - you can adjust these
+    roughness: 0.8,
+    metalness: 0.2,
+  });
+
+  material.onBeforeCompile = (shader) => {
+    // Add our custom varying to pass height to fragment shader
+    shader.vertexShader = shader.vertexShader.replace(
+      '#include <common>',
+      `
+      #include <common>
+      varying float vHeight;
+      `
+    );
+
+    // Capture the world position height in vertex shader
+    shader.vertexShader = shader.vertexShader.replace(
+      '#include <begin_vertex>',
+      `
+      #include <begin_vertex>
+      vHeight = position.z;
+      `
+    );
+
+    // Add varying to fragment shader
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <common>',
+      `
+      #include <common>
+      varying float vHeight;
+      `
+    );
+
+    // Override the diffuse color based on height
+    shader.fragmentShader = shader.fragmentShader.replace(
+      '#include <color_fragment>',
+      `
+      #include <color_fragment>
+      
+      // Height-based coloring
+      vec3 heightColor;
+      if (vHeight <= 0.0) {
+        heightColor = vec3(0.0, 0.05, 0.3); // water
+      } else if (vHeight < 5.0) {
+       heightColor = vec3(0.9, 0.85, 0.5); // sand
+      } else if (vHeight < 200.0) {
+        heightColor = vec3(0.1, 0.5, 0.1); // grass
+      } else if (vHeight < 300.0) {
+        heightColor = vec3(0.3, 0.3, 0.3); // rock
+      } else {
+        heightColor = vec3(1.0, 1.0, 1.0); // snow
+      }
+      
+      // Apply our height-based color
+      diffuseColor.rgb = heightColor;
+      `
+    );
+  };
+
+  return material;
+}

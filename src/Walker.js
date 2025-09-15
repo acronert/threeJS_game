@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { Footprints } from "./ATerrainDecal.js";
 
+// const speed = 1000; // m/s
 const speed = 10; // m/s
 
 export class Walker {

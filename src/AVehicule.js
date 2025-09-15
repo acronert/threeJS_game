@@ -365,76 +365,64 @@ export class Plane extends AVehicule {
 
     // Plane specific
 
+
+
+
     // LIFT CALCULATION
     // liftAcceleration = liftForce * forwardVelocity**2
     // where:
     //    liftForce = 0.5 * airDensity * wingArea * liftCoef / mass;
-    this.rho = 1.225;  // Air density (kg/m**3) : 1.225  at sea level;
-    this.S = 15.0;     // Wing area (m**2)
-    this.C_L = 0.3;    // Lift coefficent (dimensionless): 0.5->1.5 depending on area of attack
-    this.mass = 120;   // (kg)
-
-    this.liftCoef = 0.5 * this.rho * this.S * this.C_L / this.mass;
 
     // DRAG CALCULATION
     // dragAcceleration = -dragCoef * v * |v|
     // where:
     // dragForce = 0.5 * airDensity * dragCoef * referenceArea / mass
-    this.A = 1.0;     // Reference area 
-    this.C_D = 0.05;  // Drag coefficient
 
+    // DELTAPLANE
+    // this.rho = 1.225;  // Air density (kg/m**3) : 1.225  at sea level;
+    // this.S = 15.0;     // Wing area (m**2)
+    // this.C_L = 0.2;    // Lift coefficent (dimensionless): 0.5->1.5 depending on area of attack
+    // this.mass = 120;   // (kg)
+    // this.liftCoef = 0.5 * this.rho * this.S * this.C_L / this.mass;
+
+    // this.A = 1.0;     // Reference area 
+    // this.C_D = 0.05;  // Drag coefficient
+    // this.dragCoef = 0.5 * this.rho * this.C_D * this.A / this.mass;
+
+    // this.thrust = 20.0; // m/s**2
+    // this.thrustLevel = 0.0;
+    // this.thrustPerSec = 0.5;
+    // this.thrustForce = this.thrust / this.mass;
+
+    // // JET FIGHTER
+    this.rho = 1.225;  // Air density (kg/m**3) : 1.225  at sea level;
+    this.S = 28.0;     // Wing area (m**2)
+    this.C_L = 0.2;    // Lift coefficent (dimensionless): 0.5->1.5 depending on area of attack
+    this.mass = 11600;   // (kg)
+    this.liftCoef = 0.5 * this.rho * this.S * this.C_L / this.mass;
+
+    this.A = 1.0;     // Reference area 
+    this.C_D = 0.03;  // Drag coefficient
     this.dragCoef = 0.5 * this.rho * this.C_D * this.A / this.mass;
 
-    // THRUST CALCULATION
-    this.thrust = 10.0; // m/s**2
+    this.thrust = 80.0; // m/s**2
+    this.thrustLevel = 0.0;
+    this.thrustPerSec = 0.5;
     this.thrustForce = this.thrust / this.mass;
+  }
 
-    // DEBUG
-    this.redArrow = new THREE.ArrowHelper(
-      new THREE.Vector3(0, 1, 0),
-      this.position,
-      5,
-      0xff0000
-    );
-    this.scene.add(this.redArrow);
+  getAltitude() {
+    return this.position.y;
+  }
 
-    this.greenArrow = new THREE.ArrowHelper(
-      new THREE.Vector3(0, 1, 0),
-      this.position,
-      5,
-      0x00ff00
-    );
-    this.scene.add(this.greenArrow);
-
-    this.blueArrow = new THREE.ArrowHelper(
-      new THREE.Vector3(0, 1, 0),
-      this.position,
-      5,
-      0x0000ff
-    );
-    this.scene.add(this.blueArrow);
-
-    this.magentaArrow = new THREE.ArrowHelper(
-      new THREE.Vector3(0, 1, 0),
-      this.position,
-      5,
-      0xff00ff
-    );
-    this.scene.add(this.magentaArrow);
-
-    this.yellowArrow = new THREE.ArrowHelper(
-      new THREE.Vector3(0, 1, 0),
-      this.position,
-      5,
-      0xffff00
-    );
-    this.scene.add(this.yellowArrow);
-
+  getThrustLevel() {
+    return this.thrustLevel;
   }
 
   getAirInputRotations(delta, controls) {
-    // KEYBOARD
+    // DESKTOP
     if (controls?.isMobile == false) {
+      // Keyboard
       if (controls?.pitch_up) {
         const q = new THREE.Quaternion().setFromAxisAngle(this.worldRight, -this.rotationSpeed * delta);
         this.orientation.multiply(q);
@@ -451,6 +439,14 @@ export class Plane extends AVehicule {
         const q = new THREE.Quaternion().setFromAxisAngle(this.worldForward, this.rotationSpeed * delta);
         this.orientation.multiply(q);
       }
+      // Mouse
+      const mouseQuat = controls.orientationQuat.clone();
+      const euler = new THREE.Euler().setFromQuaternion(mouseQuat, 'YXZ');
+      const currentEuler = new THREE.Euler().setFromQuaternion(this.orientation, 'YXZ');
+      currentEuler.x = -euler.x; // pitch from mouse
+      currentEuler.z = -euler.y; // yaw from mouse
+      this.orientation.setFromEuler(currentEuler);
+
     }
     // MOBILE
     else if (controls?.isMobile == true) {
@@ -468,21 +464,13 @@ export class Plane extends AVehicule {
     const cameraPos = this.position.clone().add(cameraPosOffset);
 
     this.camera.position.copy(cameraPos);
-    this.camera.lookAt(this.position);
+    // this.camera.lookAt(this.position); 
+    const rotate = new THREE.Quaternion().setFromAxisAngle(this.worldUp, Math.PI);
+
+    this.camera.quaternion.copy(this.orientation).multiply(rotate);
+
+
   }
-
-  // updateCamera() {
-  //   const offset = new THREE.Vector3(3, 3, 3);
-  //   const forward = this.worldForward.clone().applyQuaternion(this.orientation);
-  //   const cameraPos = this.position.clone()
-  //     .add(offset)
-  //     .add(forward.clone().multiplyScalar(-4));
-  //   const cameraTarget = this.position.clone()
-  //   // .add(forward.clone().multiplyScalar(5));
-
-  //   this.camera.position.copy(cameraPos);
-  //   this.camera.lookAt(cameraTarget);
-  // }
 
   applyAirRotation(delta) {
     const forward = this.worldForward.clone().applyQuaternion(this.orientation).normalize();
@@ -490,99 +478,80 @@ export class Plane extends AVehicule {
     const vLateral = this.speed.clone().sub(vForward);
 
     // lateral drift
-    this.speed.copy(vForward.addScaledVector(vLateral, 0.98));
+    this.speed.copy(vForward.addScaledVector(vLateral, 1.0));
   }
 
-  handleAirPhysics(delta, controls) {
+  applyAirAcceleration(delta, controls) {
+    const forward = this.worldForward.clone().applyQuaternion(this.orientation).normalize();
     // Gravity
+
     this.acceleration.copy(this.gravity);
 
-    this.magentaArrow.position.copy(this.position);
-    this.magentaArrow.setDirection(this.gravity.clone().normalize());
-    this.magentaArrow.setLength(this.gravity.length());
-
-
-
-    // get Rotation Input (roll and pitch)
-    this.getAirInputRotations(delta, controls);
-    // make the speed follow the direction
-    this.applyAirRotation();
-
-    const forward = this.worldForward.clone().applyQuaternion(this.orientation).normalize();
-
-
     // Thrust
-    let thrustForce = new THREE.Vector3(0, 0, 0);
-    if (controls?.forward)
-      thrustForce = forward.clone().multiplyScalar(this.thrust);
-    if (controls?.backward)
-      thrustForce = forward.clone().multiplyScalar(-this.thrust * 0.5);
+    if (controls?.forward) {
+      this.thrustLevel += this.thrustPerSec * delta;
+      console.log("increase");
+    }
+    if (controls?.backward) {
+      this.thrustLevel -= this.thrustPerSec * delta;
+      console.log("decrease");
+    }
+    this.thrustLevel = Math.min(1, Math.max(0, this.thrustLevel));
 
-    this.blueArrow.position.copy(this.position);
-    this.blueArrow.setDirection(thrustForce.clone().normalize());
-    this.blueArrow.setLength(thrustForce.length());
-
+    const thrustForce = forward.clone().multiplyScalar(this.thrust * this.thrustLevel);
     this.acceleration.add(thrustForce);
 
     // Drag
     const v = this.speed.length();
     const dragAccel = this.speed.clone().multiplyScalar(-this.dragCoef * v * Math.abs(v));
-    this.redArrow.position.copy(this.position);
-    this.redArrow.setDirection(dragAccel.clone().normalize());
-    this.redArrow.setLength(dragAccel.length());
     this.acceleration.add(dragAccel);
-
 
     // Lift
     const vForward = Math.max(0, this.speed.dot(forward));
     const liftAccel = this.liftCoef * vForward ** 2;
     const up = this.worldUp.clone().applyQuaternion(this.orientation).normalize();
-
-    // Update arrow helper to show lift/up direction
-    this.greenArrow.position.copy(this.position);
-    this.greenArrow.setDirection(up.clone().normalize());
-    this.greenArrow.setLength(liftAccel);
-
     this.acceleration.add(up.multiplyScalar(liftAccel));
+  }
 
-    this.yellowArrow.position.copy(this.position);
-    this.yellowArrow.setDirection(this.acceleration.clone().normalize());
-    this.yellowArrow.setLength(this.acceleration.length());
+  // Make yaw follow roll
+  yawPlane() {
+    const forward = this.worldForward.clone().applyQuaternion(this.orientation).normalize();
 
-    // Add to speed
+    const accelDir = this.speed.clone().normalize(); // target direction
+
+    // Project acceleration onto plane's horizontal plane (ignore Y for pitch)
+    const accelDirHorizontal = accelDir.clone();
+    accelDirHorizontal.y = 0;
+    accelDirHorizontal.normalize();
+
+    // Current forward in world XZ plane
+    const forwardHorizontal = forward.clone();
+    forwardHorizontal.y = 0;
+    forwardHorizontal.normalize();
+
+    // Compute angle difference around Y axis (yaw)
+    const targetYaw = Math.atan2(accelDirHorizontal.x, accelDirHorizontal.z);   // desired yaw
+    const currentYaw = Math.atan2(forwardHorizontal.x, forwardHorizontal.z);    // current yaw
+    let yawDelta = targetYaw - currentYaw;
+
+    // Wrap angle to [-PI, PI]
+    if (yawDelta > Math.PI) yawDelta -= 2 * Math.PI;
+    if (yawDelta < -Math.PI) yawDelta += 2 * Math.PI;
+
+    // Rotate around local up axis (Y) only
+    const qYaw = new THREE.Quaternion();
+    qYaw.setFromAxisAngle(new THREE.Vector3(0, 1, 0), yawDelta * 0.01); // 0.1 = responsiveness
+
+    this.orientation.multiply(qYaw);
+  }
+
+  handleAirPhysics(delta, controls) {
+    this.getAirInputRotations(delta, controls);
+    this.applyAirRotation();
+    this.applyAirAcceleration(delta, controls);
     this.speed.addScaledVector(this.acceleration, delta);
 
-    // Only if acceleration is significant
-    if (this.acceleration.lengthSq() > 0.0001) {
-      const accelDir = this.acceleration.clone().normalize(); // target direction
-
-      // Project acceleration onto plane's horizontal plane (ignore Y for pitch)
-      const accelDirHorizontal = accelDir.clone();
-      accelDirHorizontal.y = 0;
-      accelDirHorizontal.normalize();
-
-      // Current forward in world XZ plane
-      const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(this.orientation);
-      const forwardHorizontal = forward.clone();
-      forwardHorizontal.y = 0;
-      forwardHorizontal.normalize();
-
-      // Compute angle difference around Y axis (yaw)
-      const targetYaw = Math.atan2(accelDirHorizontal.x, accelDirHorizontal.z);   // desired yaw
-      const currentYaw = Math.atan2(forwardHorizontal.x, forwardHorizontal.z);    // current yaw
-      let yawDelta = targetYaw - currentYaw;
-
-      // Wrap angle to [-PI, PI]
-      if (yawDelta > Math.PI) yawDelta -= 2 * Math.PI;
-      if (yawDelta < -Math.PI) yawDelta += 2 * Math.PI;
-
-      // Rotate around local up axis (Y) only
-      const qYaw = new THREE.Quaternion();
-      qYaw.setFromAxisAngle(new THREE.Vector3(0, 1, 0), yawDelta * 0.01); // 0.1 = responsiveness
-      this.orientation.multiply(qYaw);
-    }
-
-
+    this.yawPlane();
   }
 
   // block position

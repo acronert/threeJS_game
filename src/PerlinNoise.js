@@ -88,36 +88,52 @@ export function getNormalAt(x, y, resolution, heightFunction) {
     return normal;
 }
 
-// Generate dunes
+
+export function getPlanetHeightAt(x, y) {
+    let continent = perlin_get(x * 0.00005, y * 0.00005); // large continents
+
+    let mountains = perlin_get(x * 0.0005, y * 0.0005);
+    mountains = Math.pow(Math.abs(mountains), 4.0); // sharper peaks
+
+    let hills = perlin_get(x * 0.001, y * 0.001);
+    hills = Math.pow(Math.abs(hills), 1.5);
+
+    let detail = perlin_get(x * 0.05, y * 0.05);
+    detail = detail * 0.1; // small variation
+
+    let height = continent * 600       // continents base height (~km)
+               + mountains * 1500       // mountain ranges
+               + hills * 300           // hills
+               + detail * 10;          // micro-detail
+
+    return Math.max(100, height) - 100;
+}
+
+
+// // Generate dunes
 export function getDesertHeightAt(x, y) {
-    let o0 = perlin_get(x * 0.01, y * 0.01);  // zones of high and low dunes
+    let o0 = perlin_get(x * 0.01, y * 0.01);
     o0 = o0 / 2 + 0.5;
     // o0 = 1;
-
     let o1 = perlin_get(x * 0.05, y * 0.02);
-    o1 = Math.pow(1 - Math.abs(o1), 3.0); // sharp ridge
+    o1 = Math.pow(1 - Math.abs(o1), 3.0);
 
     let o2 = perlin_get(x * 0.1, y * 0.04);
-    o2 = Math.pow(1 - Math.abs(o2), 3.0); // sharp ridge
+    o2 = Math.pow(1 - Math.abs(o2), 3.0);
 
-    let o3 = perlin_get(x * 0.3, y * 0.1); // fine ripples
+    let o3 = perlin_get(x * 0.3, y * 0.1);
 
     return o0 * 2 * (o1 * 3 + o2 * 2 + o3 * 0.6);
 }
 
 // Generate slope
 export function getSnowHeightAt(x, y) {
-    // Large-scale base terrain (wide valleys and ridges)
     let base = perlin_get(x * 0.008, y * 0.008); // very low frequency
 
-    // Mid-frequency detail
     let mid = perlin_get(x * 0.02, y * 0.02);
-    // High-frequency rocky detail
     let high = perlin_get(x * 0.05, y * 0.05);
-    // Shape the base to exaggerate valleys (square to widen valleys, sharpen peaks)
     let shapedBase = Math.pow(Math.abs(base), 3.0) * Math.sign(base);
 
-    // Combine
     let height = shapedBase * 200         // large mountain/valley forms
                 + mid * 5               // medium hills
                 + high * 2;              // fine rocky detail
@@ -128,11 +144,3 @@ export function getSnowHeightAt(x, y) {
     return height;
 }
 
-
-// export function getSnowHeightAt(x, y) {
-//     let o1 = perlin_get(x * 0.1, y * 0.1);
-//     let o2 = perlin_get(x * 0.01, y * 0.01);
-//     let o3 = perlin_get(x * 0.001, y * 0.001);
-
-//     return o1 * 2 + o2 * 8 + o3 * 16 - 0.3 * x;
-// }

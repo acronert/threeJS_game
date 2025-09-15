@@ -53,3 +53,25 @@ export class SnowEnvironment extends AEnvironment {
     // this.chunkManager.updateCurvature(); // OPTIONAL
   }
 }
+
+
+import { getPlanetHeightAt } from "./PerlinNoise.js";
+import { createPlanetMaterial } from "./Materials.js";
+
+export class PlanetEnvironment extends AEnvironment {
+  constructor(scene, camera, chunkManager, player) {
+    super(scene, camera, chunkManager, player);
+
+    console.log("SnowEnvironment constructor");
+    this.heightFunction = getPlanetHeightAt;
+    this.material = createPlanetMaterial();
+
+    this.chunkManager.init(this.material, this.heightFunction, "PLANET");
+    this.player.updateTracksColor(this.material.map);
+  }
+
+  update() {
+    this.chunkManager.update(this.camera.position);
+    // this.chunkManager.updateCurvature(); // OPTIONAL
+  }
+}

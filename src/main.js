@@ -3,11 +3,10 @@ import { createRenderer, createComposer } from "./Renderer.js";
 import { ControlManager } from "./ControlManager.js";
 import { createSkybox } from "./Skybox.js";
 import { ChunkManager } from "./ChunkManager.js";
-import { DesertEnvironment, SnowEnvironment } from "./AEnvironment.js";
+import { DesertEnvironment, PlanetEnvironment, SnowEnvironment } from "./AEnvironment.js";
 import { Player } from "./Player.js"
 
 const environment_button = document.getElementById("environment_button");
-const speedometer = document.getElementById("speedometer");
 const fullscreen_button = document.getElementById("fullscreen_button");
 const help_button = document.getElementById("help_button");
 const help = document.getElementById("help");
@@ -72,12 +71,15 @@ class Simulation {
 
   changeEnvironment() {
     console.log("click environment");
-    if (this.environment instanceof DesertEnvironment) {
+    if (this.environment instanceof PlanetEnvironment) {
       console.log("SNOW");
       this.environment = new SnowEnvironment(this.scene, this.camera, this.chunkManager, this.player);
     } else if (this.environment instanceof SnowEnvironment) {
       console.log("DESERT");
       this.environment = new DesertEnvironment(this.scene, this.camera, this.chunkManager, this.player);
+    } else if (this.environment instanceof DesertEnvironment) {
+      console.log("PLANET");
+      this.environment = new PlanetEnvironment(this.scene, this.camera, this.chunkManager, this.player);
     }
   }
 
@@ -103,16 +105,10 @@ class Simulation {
 
     const interval = setInterval(() => {
       this.environment.update();
-      this.updateHUD();
       // console.log(`Camera pos: [${Math.floor(this.camera.position.x)},${Math.floor(this.camera.position.z)}]`)
     }, 100);
 
     this.animate()
-  }
-
-  updateHUD() {
-    const speed = Math.floor(this.player.getSpeed() * 3.6); // m/s to km/h
-    document.getElementById("speedometer").textContent = speed + " km/h";
   }
 
   updateFPS(now) {

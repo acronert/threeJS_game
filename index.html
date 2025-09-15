@@ -1,23 +1,41 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
 	<meta charset="UTF-8">
 	<title>Test Three.js</title>
 	<style>
-		body { margin: 0; overflow: hidden; }
-		canvas { display: block; }
+		body {
+			margin: 0;
+			overflow: hidden;
+		}
+
+		canvas {
+			display: block;
+		}
 	</style>
 </head>
+
 <body>
 	<div id="fps_counter">FPS:</div>
 	<div id="speedometer">0 km/h</div>
+	<div id="altimeter">0 m</div>
+	<div id="thrust">
+		<div id="thrustTitle">Thrust Level</div>
+		<div id="thrustBar"></div>
+	</div>
+
 	<div id="pause_screen">Pause</div>
 	<button id="help_button">?</button>
 	<button id="environment_button">Change Environment</button>
 	<button id="fullscreen_button">Fullscreen</button>
 	<div id="help">
 		<strong>What is this?</strong><br><br>
-		This is an infinite, chunk-based desert environment generated with Perlin noise. You can explore it on foot or ride the rubber tire. It works especially well on mobile, where you can look around by moving your device. Built with Three.js as a learning project, without using a game engine or physics engine. September 2025.<br><br>
+		This is an infinite, chunk-based environment generated with Perlin noise.
+		You can explore it on foot, by riding the rubber tire, rolling the beach ball,
+		sliding the snow board or flying the deltaplane.
+		It works especially well on mobile, where you can look around and control the vehicules by moving your device.
+		Built with Three.js as a learning project, without using a game engine or physics engine. September 2025.<br><br>
 
 		<strong>Controls</strong><br><br>
 
@@ -32,94 +50,140 @@
 		- <strong>Swipe to edges</strong> → Turn around<br>
 		- <strong>Gyroscope</strong> → Look around<br>
 		- <strong>Double tap</strong> → Mount / Dismount the tire<br>
-		- <strong>Tilt phone</strong> → Control tire orientation
+		- <strong>Tilt phone</strong> → Control vehicule orientation
 
-	<p>
-		Thank you to <a href="https://ambientCG.com" target="_blank">ambientCG.com</a> for all the quality textures and the HDRI sky, licensed under the Creative Commons CC0 1.0 Universal License. <br><br>
-		<a href="https://github.com/acronert/threeJS_game" target="_blank">github.com/acronert/threeJS_game</a><br>
-		Alex CRÖNERT
-	</p>
+		<p>
+			Thank you to <a href="https://ambientCG.com" target="_blank">ambientCG.com</a> for all the quality textures
+			and the HDRI sky, licensed under the Creative Commons CC0 1.0 Universal License. <br><br>
+			<a href="https://github.com/acronert/threeJS_game" target="_blank">github.com/acronert/threeJS_game</a><br>
+			Alex CRÖNERT
+		</p>
 	</div>
 	<style>
-	#fps_counter {
-		position: absolute;
-		top: 20px;
-		right: 20px;
-		color: white;
-		font-size: 24px;
-		font-family: monospace;
-	}
-	#speedometer {
-		position: absolute;
-		top: 60px;
-		right: 20px;
-		color: white;
-		font-size: 24px;
-		font-family: monospace;
-	}
-	#pause_screen {
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%); /* center */
-		background-color: rgba(255, 255, 255, 0.8);
-		color: rgb(0, 0, 0);
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
-		padding: 20px 20px;
-		border-radius: 8px;
-		display: none;
-		font-size: 48px;
-	}
-	#fullscreen_button {
-		position: absolute;
-		top: 20px;
-		left: 60px;
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
-		padding: 5px 10px;
-		border-radius: 8px;
-		font-size: 18px;
-		cursor: pointer;
-	}
-	#environment_button {
-		position: absolute;
-		top: 60px;
-		left: 20px;
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
-		padding: 5px 10px;
-		border-radius: 8px;
-		font-size: 18px;
-		cursor: pointer;
-	}
-	#help_button {
-		position: absolute;
-		top: 20px;
-		left: 20px;
-		display: flex;
-		flex-direction: column;
-		gap: 10px;
-		padding: 5px 10px;
-		border-radius: 8px;
-		font-size: 18px;
-		cursor: pointer;
-	}
-	#help {
-		position: absolute;
-		top: 60px;
-		left: 20px;
-		width: 350px;
-		background-color: rgba(255, 255, 255, 0.8);
-		color: rgb(0, 0, 0);
-		padding: 15px;
-		border-radius: 8px;
-		display: none;
-		z-index: 10;
-	}
+		#fps_counter {
+			position: absolute;
+			top: 20px;
+			right: 20px;
+			color: white;
+			font-size: 24px;
+			font-family: monospace;
+		}
+
+		#speedometer {
+			position: absolute;
+			top: 60px;
+			right: 20px;
+			color: white;
+			font-size: 24px;
+			font-family: monospace;
+		}
+
+		#altimeter {
+			position: absolute;
+			top: 100px;
+			right: 20px;
+			color: white;
+			font-size: 24px;
+			font-family: monospace;
+		}
+
+		#thrust {
+			position: absolute;
+			bottom: 20px;
+			right: 20px;
+			width: 20px;
+			height: 200px;
+			border: 2px solid white;
+			background: rgba(255, 255, 255, 0.1);
+			overflow: hidden;
+			display: flex;
+			align-items: flex-end;
+		}
+
+		#thrustTitle {
+			position: absolute;
+			bottom: 20px;
+			right: 50px;
+			color: white;
+			font-size: 24px;
+			font-family: monospace;
+		}
+
+		#thrustBar {
+			width: 100%;
+			height: 0%;
+			background: limegreen;
+			transition: height 0.1s linear;
+		}
+
+		#pause_screen {
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			/* center */
+			background-color: rgba(255, 255, 255, 0.8);
+			color: rgb(0, 0, 0);
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+			padding: 20px 20px;
+			border-radius: 8px;
+			display: none;
+			font-size: 48px;
+		}
+
+		#fullscreen_button {
+			position: absolute;
+			top: 20px;
+			left: 60px;
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+			padding: 5px 10px;
+			border-radius: 8px;
+			font-size: 18px;
+			cursor: pointer;
+		}
+
+		#environment_button {
+			position: absolute;
+			top: 60px;
+			left: 20px;
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+			padding: 5px 10px;
+			border-radius: 8px;
+			font-size: 18px;
+			cursor: pointer;
+		}
+
+		#help_button {
+			position: absolute;
+			top: 20px;
+			left: 20px;
+			display: flex;
+			flex-direction: column;
+			gap: 10px;
+			padding: 5px 10px;
+			border-radius: 8px;
+			font-size: 18px;
+			cursor: pointer;
+		}
+
+		#help {
+			position: absolute;
+			top: 60px;
+			left: 20px;
+			width: 350px;
+			background-color: rgba(255, 255, 255, 0.8);
+			color: rgb(0, 0, 0);
+			padding: 15px;
+			border-radius: 8px;
+			display: none;
+			z-index: 10;
+		}
 	</style>
 	<script type="importmap">
 		{
@@ -131,4 +195,5 @@
 	</script>
 	<script type="module" src="src/main.js"></script>
 </body>
+
 </html>
