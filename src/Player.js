@@ -3,6 +3,8 @@ import { Rubber } from "./Rubber.js";
 import { Walker } from "./Walker.js";
 import { Wheel } from "./AVehicule.js";
 import { SnowBoard } from "./AVehicule.js";
+import { Ball } from "./AVehicule.js";
+import { Plane } from "./AVehicule.js";
 
 const distToMount = 4;
 const interactInterval = 1000; //ms
@@ -15,12 +17,15 @@ export class Player {
         this.walker = new Walker(this.camera, scene, chunkManager);
         this.vehicules = [
             new Wheel(this.camera, scene, chunkManager),
-            new SnowBoard(this.camera, scene, chunkManager)
+            new SnowBoard(this.camera, scene, chunkManager),
+            new Ball(this.camera, scene, chunkManager),
+            new Plane(this.camera, scene, chunkManager)
         ];
 
         this.lastInteractTime = 0;
 
-        this.current = this.walker; // default mode
+        this.current = this.vehicules[3]; // default mode
+        // this.current = this.walker; // default mode
     }
 
     updateTracksColor(colorMap) {

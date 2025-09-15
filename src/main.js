@@ -102,7 +102,7 @@ class Simulation {
     this.sky = createSkybox(this.scene);
 
     const interval = setInterval(() => {
-      this.environment.updateChunks();
+      this.environment.update();
       this.updateHUD();
       // console.log(`Camera pos: [${Math.floor(this.camera.position.x)},${Math.floor(this.camera.position.z)}]`)
     }, 100);

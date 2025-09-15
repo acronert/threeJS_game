@@ -9,7 +9,6 @@ export function createSkybox(scene) {
     texture.mapping = THREE.EquirectangularReflectionMapping;
 
     scene.background = texture;     // background texture
-    // scene.environment = null;    // HDRI lighting
     scene.environment = texture;    // HDRI lighting
 
   });

@@ -7,7 +7,7 @@ export class AEnvironment {
     this.player = player;
   }
 
-  updateChunks() {
+  update() {
     throw new Error("update() must be implemented in subclass");
   }
 }
@@ -27,7 +27,7 @@ export class DesertEnvironment extends AEnvironment {
     this.player.updateTracksColor(this.material.map);
   }
 
-  updateChunks() {
+  update() {
     this.chunkManager.update(this.camera.position);
     // this.chunkManager.updateCurvature(); // OPTIONAL
   }
@@ -48,7 +48,7 @@ export class SnowEnvironment extends AEnvironment {
     this.player.updateTracksColor(this.material.map);
   }
 
-  updateChunks() {
+  update() {
     this.chunkManager.update(this.camera.position);
     // this.chunkManager.updateCurvature(); // OPTIONAL
   }

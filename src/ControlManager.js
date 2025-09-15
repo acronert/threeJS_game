@@ -4,6 +4,7 @@ export class ControlManager {
   constructor(domElement) {
     this.input = this.createInput(domElement);
     this.controls = {
+      isMobile: this.input.isMobile,
       forward: this.input.forward,
       backward: this.input.backward,
       left: this.input.left,
@@ -40,6 +41,7 @@ export class ControlManager {
 
   createInput(domElement) {
     const input = {
+      isMobile: false,
       forward: false, backward: false,
       left: false, right: false,
       up: false, down: false,
@@ -55,6 +57,7 @@ export class ControlManager {
     var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     if (isMobile) {
+      input.isMobile = true;
 
       //////////// MOBILE ////////////
       // Touch
@@ -119,6 +122,7 @@ export class ControlManager {
       });
 
     } else {
+      input.isMobile = false;
       //////////// DESKTOP ////////////
       // Keyboard
       document.addEventListener('keydown', e => {
