@@ -5,12 +5,17 @@ A desert simulation built with **Three.js**, featuring infinite chunk-based terr
 - Rework tiretracks with decalGeometry: very laggy
 - - actually not possible to preallocate decalGeometries, because I cant change the mesh on which to apply it. A solution would be for the chunk Manager to return an invisible "big Mesh" (2x2 chunksize), that is moved but not recreated, in order to always apply decals to it
 
-- Create class Vehicule, a base for creating the "snowboard" and "deltaplane" classes
 
 - Frontend:
 - - Menu
 - - Switch vehicule button
 - - cleaner look
 
-- Controls
-- - better controls on mobile
+plane sim:
+- dynamically calculate AoA depending on speed vector and forward dir
+AoA (alpha) affects drag and lift
+
+- replace the arrows in the hud
+- add alpha to the HUD
+- add vertical velocity to the HUD
+- value box for altitude and speed
