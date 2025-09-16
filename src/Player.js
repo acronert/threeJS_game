@@ -13,7 +13,6 @@ const speedometer = document.getElementById("speedometer");
 const altimeter = document.getElementById("altimeter");
 const thrustBar = document.getElementById("thrustBar");
 
-
 export class Player {
     constructor(camera, scene, chunkManager) {
         this.camera = camera;
@@ -29,7 +28,9 @@ export class Player {
 
         this.lastInteractTime = 0;
 
-        this.current = this.vehicules[3]; // plane mode
+        this.current = this.vehicules[3];
+        this.current.hud.activate();
+
         // this.current = this.walker; // default mode
     }
 
@@ -45,7 +46,6 @@ export class Player {
             altimeter.textContent = altitude + " m";
 
             const percent = Math.floor(this.current.getThrustLevel() * 100);
-            console.log("percent", percent);
             thrustBar.style.height = percent + "%";
         }
     }
@@ -60,9 +60,13 @@ export class Player {
 
     getOnVehicule(vehicule) {
         this.current = vehicule;
+        if (this.current instanceof Plane)
+            this.current.hud.activate();
     }
 
     getOffVehicule(vehicule) {
+        if (this.current instanceof Plane)
+            this.current.hud.deactivate();
         const pos = vehicule.getPosition();
         this.walker.setPosition(pos.x, pos.z, pos.y);
         this.current = this.walker;

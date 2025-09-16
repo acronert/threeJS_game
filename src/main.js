@@ -33,7 +33,6 @@ help_button.addEventListener("click", () => {
     help.style.display = "block"
 });
 
-
 class Simulation {
   constructor() {
     this.scene = new THREE.Scene();

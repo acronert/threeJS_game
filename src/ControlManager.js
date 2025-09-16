@@ -54,7 +54,7 @@ export class ControlManager {
     };
 
     // Check if the user is accessing the page on a mobile device
-    var isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
     if (isMobile) {
       input.isMobile = true;
