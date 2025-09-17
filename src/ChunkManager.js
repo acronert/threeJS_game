@@ -26,7 +26,7 @@ import { Chunk } from "./Chunk.js";
 
 const chunkDepth = {
   VERY_LOW: {
-    depth: 16,
+    depth: 24,
     res: 8,
   },
   LOW: {
@@ -258,7 +258,7 @@ export class ChunkManager {
   getChunkSize(altitude) {
     const MAX_SIZE = 16384;
 
-    let ceiling = 64;
+    let ceiling = 31;
     let size = 32;
     while (ceiling <= MAX_SIZE) {
       if (altitude < ceiling) {
@@ -309,6 +309,7 @@ export class ChunkManager {
     }
     this.#removeOldChunks(needed);
 
+    console.log("altitude =", position.y,"chunsize = ", this.size, "m, horizon is at", this.size * chunkDepth.VERY_LOW.depth, "meters");
 
   }
 

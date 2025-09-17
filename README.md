@@ -15,7 +15,5 @@ plane sim:
 - dynamically calculate AoA depending on speed vector and forward dir
 AoA (alpha) affects drag and lift
 
-- replace the arrows in the hud
-- add alpha to the HUD
 - add vertical velocity to the HUD
 - value box for altitude and speed

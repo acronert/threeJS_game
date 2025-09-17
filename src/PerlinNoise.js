@@ -88,25 +88,48 @@ export function getNormalAt(x, y, resolution, heightFunction) {
     return normal;
 }
 
-
 export function getPlanetHeightAt(x, y) {
-    let continent = perlin_get(x * 0.00005, y * 0.00005); // large continents
+    let continent = perlin_get(x * 0.000005, y * 0.000005); // large continents
+    
+    let continent1 = perlin_get(x * 0.00001, y * 0.00001);
+    if (continent + continent1 < -0.001) return 0;
+    
+    let continent2 = perlin_get(x * 0.00005, y * 0.00005);
+    
+    let continent3 = perlin_get(x * 0.0001, y * 0.0001);
+    continent3 = Math.pow(Math.abs(continent3), 1.5);
+
+    let fat_mountains = perlin_get(x * 0.0001, y * 0.0001);
+    fat_mountains = Math.pow(Math.abs(fat_mountains), 3.0); // sharper peaks
 
     let mountains = perlin_get(x * 0.0005, y * 0.0005);
-    mountains = Math.pow(Math.abs(mountains), 4.0); // sharper peaks
+    mountains = Math.pow(Math.abs(mountains), 3.5); // sharper peaks
 
-    let hills = perlin_get(x * 0.001, y * 0.001);
-    hills = Math.pow(Math.abs(hills), 1.5);
+    let valley = perlin_get(x * 0.0001, y * 0.0001);
+    valley = Math.abs(valley) - 0.2;
 
-    let detail = perlin_get(x * 0.05, y * 0.05);
-    detail = detail * 0.1; // small variation
+    let hills = perlin_get(x * 0.0001, y * 0.0001);
 
-    let height = continent * 600       // continents base height (~km)
-               + mountains * 1500       // mountain ranges
-               + hills * 300           // hills
-               + detail * 10;          // micro-detail
+    let hills2 = perlin_get(x * 0.0005, y * 0.0005);
 
-    return Math.max(100, height) - 100;
+    let detail = perlin_get(x * 0.005, y * 0.005);
+    detail = Math.abs(detail); // sharper peaks
+
+    let detail2 = perlin_get(x * 0.01, y * 0.01);
+
+    let height = continent * 800       // continents base height (~km)
+                + Math.abs(continent1) * 1500
+                + continent2 * 1500
+                + Math.abs(continent3) * 1500
+                + fat_mountains * 6000       // mountain ranges
+                + mountains * 6000       // mountain ranges
+                + valley * 2000       // mountain ranges
+               + hills * 200           // hills
+               + hills2 * 200           // hills
+               + detail * 5;          // micro-detail
+               + detail2 * 2;          // micro-detail
+
+    return Math.max(0, height);
 }
 
 
@@ -144,3 +167,4 @@ export function getSnowHeightAt(x, y) {
     return height;
 }
 
+0

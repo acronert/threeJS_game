@@ -313,10 +313,6 @@ export class SnowBoard extends AVehicule {
 
     // this.tiretracks = new Tiretracks(this.scene, this.chunkManager);
   }
-
-
-
-
 }
 
 
@@ -328,14 +324,14 @@ export class Plane extends AVehicule {
   constructor(camera, scene, chunkManager) {
     super(camera, scene, chunkManager);
     this.rotationSpeed = 1.0; // in rad/sec
-    this.acc = 10.0; // acceleration
+    this.acc = 20.0; // acceleration
     this.friction = 0.990;
     this.driftFactor = 0.6;
     this.bounceFactor = 0.0;
 
     this.meshHeight = 2;
     this.mesh = createDeltaPlaneMesh();
-    this.mesh.position.set(5, 500, 5);
+    this.mesh.position.set(5, 2000, 5);
     this.position = this.mesh.position;
     this.scene.add(this.mesh);
 
@@ -379,42 +375,51 @@ export class Plane extends AVehicule {
     // this.thrustForce = this.thrust / this.mass;
 
     // MEDIUM PLANE
+    // this.rho = 1.225;  // Air density (kg/m**3) : 1.225  at sea level;
+    // this.S = 15.0;     // Wing area (m**2)
+    // this.C_L = 0.2;    // Lift coefficent (dimensionless): 0.5->1.5 depending on area of attack
+    // this.mass = 500;   // (kg)
+
+    // this.liftCoef = 0.5 * this.rho * this.S * this.C_L / this.mass;
+
+    // this.A = 1.0;     // Reference area 
+    // this.C_D = 0.05;  // Drag coefficient
+
+    // this.dragCoef = 0.5 * this.rho * this.C_D * this.A / this.mass;
+
+    // this.thrust = 20.0; // m/s**2
+    // this.thrustLevel = 0.0;
+    // this.thrustPerSec = 0.5;
+    // this.thrustForce = this.thrust / this.mass;
+
+    // // JET FIGHTER
     this.rho = 1.225;  // Air density (kg/m**3) : 1.225  at sea level;
-    this.S = 15.0;     // Wing area (m**2)
+    this.S = 28.0;     // Wing area (m**2)
     this.C_L = 0.2;    // Lift coefficent (dimensionless): 0.5->1.5 depending on area of attack
-    this.mass = 500;   // (kg)
+    this.mass = 11600;   // (kg)
     this.liftCoef = 0.5 * this.rho * this.S * this.C_L / this.mass;
 
     this.A = 1.0;     // Reference area 
     this.C_D = 0.05;  // Drag coefficient
     this.dragCoef = 0.5 * this.rho * this.C_D * this.A / this.mass;
 
-    this.thrust = 20.0; // m/s**2
+    this.thrust = 200.0; // m/s**2
     this.thrustLevel = 0.0;
-    this.thrustPerSec = 0.5;
+    this.thrustPerSec = 0.3;
     this.thrustForce = this.thrust / this.mass;
 
-    // // JET FIGHTER
-    // this.rho = 1.225;  // Air density (kg/m**3) : 1.225  at sea level;
-    // this.S = 28.0;     // Wing area (m**2)
-    // this.C_L = 0.2;    // Lift coefficent (dimensionless): 0.5->1.5 depending on area of attack
-    // this.mass = 11600;   // (kg)
-    // this.liftCoef = 0.5 * this.rho * this.S * this.C_L / this.mass;
+    this.alpha = 0; // angle bwtween forward direction and velocity vector
 
-    // this.A = 1.0;     // Reference area 
-    // this.C_D = 0.05;  // Drag coefficient
-    // this.dragCoef = 0.5 * this.rho * this.C_D * this.A / this.mass;
-
-    // this.thrust = 70.0; // m/s**2
-    // this.thrustLevel = 0.0;
-    // this.thrustPerSec = 0.5;
-    // this.thrustForce = this.thrust / this.mass;
   }
 
   getEuler() {
-    const euler  = new THREE.Euler();
+    const euler = new THREE.Euler();
     euler.setFromQuaternion(this.orientation, "YXZ")
     return euler;
+  }
+
+  getVerticalSpeed() {
+    return this.speed.y;
   }
 
   getAcceleration() {
@@ -427,6 +432,10 @@ export class Plane extends AVehicule {
 
   getThrustLevel() {
     return this.thrustLevel;
+  }
+
+  getAlpha() {
+    return this.alpha;
   }
 
   getAirInputRotations(delta, controls) {
@@ -455,7 +464,6 @@ export class Plane extends AVehicule {
       const currentEuler = new THREE.Euler().setFromQuaternion(this.orientation, 'YXZ');
       currentEuler.x = -euler.x; // pitch from mouse
       currentEuler.z = -euler.y; // roll from mouse
-      console.log("euler.y = ", euler.y);
       currentEuler.y += euler.y / Math.PI * this.rotationSpeed * delta; // yaw from mouse (roll affect yaw)
       this.orientation.setFromEuler(currentEuler);
 
@@ -504,7 +512,7 @@ export class Plane extends AVehicule {
 
     this.acceleration.copy(this.gravity);
 
-    // Thrust
+    // THRUST
     if (controls?.forward) {
       this.thrustLevel += this.thrustPerSec * delta;
     }
@@ -516,12 +524,13 @@ export class Plane extends AVehicule {
     const thrustForce = forward.clone().multiplyScalar(this.thrust * this.thrustLevel);
     this.acceleration.add(thrustForce);
 
-    // Drag
+    // DRAG
     const v = this.speed.length();
     const dragAccel = this.speed.clone().multiplyScalar(-this.dragCoef * v * Math.abs(v));
+    // Apply Drag
     this.acceleration.add(dragAccel);
 
-    // Lift
+    // LIFT
     const vForward = Math.max(0, this.speed.dot(forward));
     const liftAccel = this.liftCoef * vForward ** 2;
     const up = this.worldUp.clone().applyQuaternion(this.orientation).normalize();
@@ -568,6 +577,7 @@ export class Plane extends AVehicule {
 
     this.yawPlane();
   }
+
 
   // block position
   // updateMesh(nextPos) {

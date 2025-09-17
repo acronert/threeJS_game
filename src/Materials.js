@@ -168,14 +168,21 @@ export function createPlanetMaterial(size = 32) {
     roughness: 0.8,
     metalness: 0.2,
   });
-
+  
   material.onBeforeCompile = (shader) => {
     // Add our custom varying to pass height to fragment shader
+    shader.uniforms.cameraPos = { value: new THREE.Vector3() };
+    // shader.uniforms.curvatureRadius = { value: 100000.0 };
+    shader.uniforms.curvatureRadius = { value: 2000000.0 }; // earth radius
+
     shader.vertexShader = shader.vertexShader.replace(
       '#include <common>',
       `
       #include <common>
       varying float vHeight;
+
+      uniform vec3 cameraPos;
+      uniform float curvatureRadius;
       `
     );
 
@@ -185,7 +192,15 @@ export function createPlanetMaterial(size = 32) {
       `
       #include <begin_vertex>
       vHeight = position.z;
-      `
+
+      // Apply curvature effect
+      vec3 worldPos = (modelMatrix * vec4(transformed, 1.0)).xyz;
+      vec2 offset = worldPos.xz - cameraPos.xz;
+      float dist2 = dot(offset, offset);
+      
+      // Apply curvature by modifying the transformed position
+      transformed.z -= dist2 / (2.0 * curvatureRadius);
+    `
     );
 
     // Add varying to fragment shader
@@ -203,24 +218,57 @@ export function createPlanetMaterial(size = 32) {
       `
       #include <color_fragment>
       
-      // Height-based coloring
-      vec3 heightColor;
-      if (vHeight <= 0.0) {
-        heightColor = vec3(0.0, 0.05, 0.3); // water
-      } else if (vHeight < 5.0) {
-       heightColor = vec3(0.9, 0.85, 0.5); // sand
-      } else if (vHeight < 200.0) {
-        heightColor = vec3(0.1, 0.5, 0.1); // grass
-      } else if (vHeight < 300.0) {
-        heightColor = vec3(0.3, 0.3, 0.3); // rock
-      } else {
-        heightColor = vec3(1.0, 1.0, 1.0); // snow
+            // Height-based coloring
+      vec3 baseColor;
+          
+      // Water
+      if (vHeight <= 0.5) {
+          baseColor = vec3(0.0, 0.05, 0.3);
       }
-      
+      // Sand → light vegetation
+      else if (vHeight < 15.0) {
+          float t = smoothstep(0.5, 15.0, vHeight);
+          vec3 sandColor = vec3(0.9, 0.85, 0.5);
+          vec3 lightGrass = vec3(0.3, 0.6, 0.2);
+          baseColor = mix(sandColor, lightGrass, t);
+      }
+      // Low-mid grass → dark forest
+      else if (vHeight < 200.0) {
+          float t = smoothstep(15.0, 200.0, vHeight);
+          vec3 lightGrass = vec3(0.3, 0.6, 0.2);
+          vec3 midGrass = vec3(0.1, 0.5, 0.1);
+          baseColor = mix(lightGrass, midGrass, t);
+      }
+      // Mid → high elevation rocky transition
+      else if (vHeight < 1500.0) {
+          float t = smoothstep(200.0, 1500.0, vHeight);
+          vec3 midGrass = vec3(0.1, 0.5, 0.1);
+          vec3 rockColor = vec3(0.3, 0.3, 0.3);
+          baseColor = mix(midGrass, rockColor, t);
+      }
+      // Rocky → snow
+      else if (vHeight < 2000.0) {
+          float t = smoothstep(1500.0, 2000.0, vHeight);
+          vec3 rockColor = vec3(0.3, 0.3, 0.3);
+          vec3 snowColor = vec3(1.0, 1.0, 1.0);
+          baseColor = mix(rockColor, snowColor, t);
+      }
+      // Snow caps
+      else {
+          baseColor = vec3(1.0, 1.0, 1.0);
+      }
+
+
+
+
       // Apply our height-based color
-      diffuseColor.rgb = heightColor;
+      diffuseColor.rgb = baseColor;
       `
     );
+    // Store update function
+    material.userData.update = (camera) => {
+      shader.uniforms.cameraPos.value.copy(camera.position);
+    };
   };
 
   return material;

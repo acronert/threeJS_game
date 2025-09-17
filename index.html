@@ -18,13 +18,6 @@
 
 <body>
 	<div id="fps_counter">FPS:</div>
-	<div id="speedometer">0 km/h</div>
-	<div id="altimeter">0 m</div>
-	<div id="thrust">
-		<div id="thrustTitle">Thrust Level</div>
-		<div id="thrustBar"></div>
-	</div>
-
 	<div id="pause_screen">Pause</div>
 	<button id="help_button">?</button>
 	<button id="environment_button">Change Environment</button>
@@ -67,53 +60,6 @@
 			color: white;
 			font-size: 24px;
 			font-family: monospace;
-		}
-
-		#speedometer {
-			position: absolute;
-			top: 60px;
-			right: 20px;
-			color: white;
-			font-size: 24px;
-			font-family: monospace;
-		}
-
-		#altimeter {
-			position: absolute;
-			top: 100px;
-			right: 20px;
-			color: white;
-			font-size: 24px;
-			font-family: monospace;
-		}
-
-		#thrust {
-			position: absolute;
-			bottom: 20px;
-			right: 20px;
-			width: 20px;
-			height: 200px;
-			border: 2px solid white;
-			background: rgba(255, 255, 255, 0.1);
-			overflow: hidden;
-			display: flex;
-			align-items: flex-end;
-		}
-
-		#thrustTitle {
-			position: absolute;
-			bottom: 20px;
-			right: 50px;
-			color: white;
-			font-size: 24px;
-			font-family: monospace;
-		}
-
-		#thrustBar {
-			width: 100%;
-			height: 0%;
-			background: limegreen;
-			transition: height 0.1s linear;
 		}
 
 		#pause_screen {

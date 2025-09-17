@@ -15,7 +15,7 @@ export class HUD {
         this.decoCanvas.style.position = "absolute";
         this.dctx = this.decoCanvas.getContext("2d");
         this.decoCanvas.style.pointerEvents = "none";
-        
+
         // create pitch ladder canvas
         this.ladderCanvas = document.createElement("canvas");
         this.ladderCanvas.style.position = "absolute";
@@ -191,6 +191,7 @@ export class HUD {
         // Speedometer (left side)
         {
             const { width, height, x, y, fontSize } = this.speedo;
+
             // Contour
             this.dctx.beginPath();
             this.dctx.moveTo(x, y);
@@ -198,11 +199,20 @@ export class HUD {
             this.dctx.lineTo(x + width, y + height);
             this.dctx.lineTo(x, y + height);
             this.dctx.stroke();
-            // Arrow
+
+            //Speedbox
             this.dctx.beginPath();
-            this.dctx.moveTo(width + this.lineWidth / 2 + x + this.size * 0.01, this.size * 0.49);
-            this.dctx.lineTo(width + this.lineWidth / 2 + x, this.size * 0.50);
-            this.dctx.lineTo(width + this.lineWidth / 2 + x + this.size * 0.01, this.size * 0.51);
+            this.dctx.moveTo(x, y + height * 0.45);
+            this.dctx.lineTo(x + width * 0.8, y + height * 0.45);
+            this.dctx.lineTo(x + width * 0.8, y + height * 0.49);
+            this.dctx.lineTo(x + width, y + height * 0.51);
+            this.dctx.lineTo(x + width * 1.3, y + height * 0.51);
+            this.dctx.lineTo(x + width * 1.3, y + height * 0.49);
+            this.dctx.lineTo(x + width, y + height * 0.49);
+            this.dctx.lineTo(x + width * 0.8, y + height * 0.51);
+            this.dctx.lineTo(x + width * 0.8, y + height * 0.55);
+            this.dctx.lineTo(x, y + height * 0.55);
+            this.dctx.lineTo(x, y + height * 0.45);
             this.dctx.stroke();
         }
         // Altimeter (right side)
@@ -215,11 +225,19 @@ export class HUD {
             this.dctx.lineTo(x, y + height);
             this.dctx.lineTo(x + width, y + height);
             this.dctx.stroke();
-            // Arrow
+            //Altimeterbox
             this.dctx.beginPath();
-            this.dctx.moveTo(-this.lineWidth / 2 + x - this.size * 0.01, this.size * 0.49);
-            this.dctx.lineTo(-this.lineWidth / 2 + x, this.size * 0.50);
-            this.dctx.lineTo(-this.lineWidth / 2 + x - this.size * 0.01, this.size * 0.51);
+            this.dctx.moveTo(x + width, y + height * 0.45);
+            this.dctx.lineTo(x + width * 0.2, y + height * 0.45);
+            this.dctx.lineTo(x + width * 0.2, y + height * 0.49);
+            this.dctx.lineTo(x, y + height * 0.51);
+            this.dctx.lineTo(x - width * 0.3, y + height * 0.51);
+            this.dctx.lineTo(x - width * 0.3, y + height * 0.49);
+            this.dctx.lineTo(x, y + height * 0.49);
+            this.dctx.lineTo(x + width * 0.2, y + height * 0.51);
+            this.dctx.lineTo(x + width * 0.2, y + height * 0.55);
+            this.dctx.lineTo(x + width, y + height * 0.55);
+            this.dctx.lineTo(x + width, y + height * 0.45);
             this.dctx.stroke();
         }
         // Compas
@@ -240,6 +258,63 @@ export class HUD {
             this.dctx.stroke();
 
         }
+    }
+
+
+    altimeterBox(altitude) {
+        const width = this.altim.width * 0.8;
+        const height = this.altim.height * 0.1;
+        const x = this.altim.x + this.altim.width * 0.2;
+        const y = this.altim.y + this.altim.height / 2 - height / 2;
+        const fontSize = this.altim.fontSize * 1.1;
+
+        this.hctx.strokeStyle = "rgba(0, 255, 0, 0.7)";
+        this.hctx.lineWidth = this.lineWidth;
+        this.hctx.fillStyle = "rgba(0, 255, 0, 0.7)";
+        this.hctx.font = `${fontSize}px 'Courier New', monospace`;
+        this.hctx.textAlign = "left";
+        this.hctx.textBaseline = "middle";
+
+        this.hctx.clearRect(x, y, width, height);
+        // this.hctx.fillRect(x, y, width, height);
+
+
+        this.hctx.save();
+
+        // Define clipping rectangle
+        this.hctx.beginPath();
+        this.hctx.rect(x, y, width, height);
+        this.hctx.clip();
+
+        const nDigit = 5;
+        const digitHeight = height / 2.5;
+        const digitWidth = width * 0.98 / nDigit;
+
+        let mask = 10;
+        // for all digits, from smaller to higher
+        for (let d = 0; d < nDigit - 1; d++) {
+            const digitVal = Math.floor(altitude / mask); // unit
+            let frac = (altitude / mask) - digitVal; // 0 → 1 progress
+            if (d != 0) {
+                if (frac > 0.9)
+                    frac = frac * 10 - 9;
+                else
+                    frac = 0;
+            }
+            for (let i = -1; i <= 2; i++) {
+                const digit = (digitVal + i + 10) % 10; // wrap 0-9
+                const offsetY = (i - frac) * (digitHeight + (d ? digitHeight : 0));
+                // if (d == 0) {
+                // this.hctx.fillText(digit.toString() + `0`, x + width - width * d / (nDigit+1), y + height / 2 - offsetY);
+                // }
+                const value = d ? digit.toString() : digit.toString() + `0`;
+                // this.hctx.fillText(value, x + width - width * d / (nDigit+1), y + height / 2 - offsetY);
+                this.hctx.fillText(value, x + width * 1.01 - digitWidth * (d + 2), y + height / 2 - offsetY);
+            }
+            mask *= 10;
+        }
+
+        this.hctx.restore();
     }
 
     updateAltimeter(altitude) {
@@ -271,6 +346,54 @@ export class HUD {
             if (tickValue % unitPerLabel === 0)
                 this.hctx.fillText(tickValue.toString(), x + fontSize, tickY);
         }
+        this.altimeterBox(altitude);
+    }
+
+    speedometerBox(speed) {
+        const width = this.speedo.width * 0.8;
+        const height = this.speedo.height * 0.1;
+        const x = this.speedo.x;
+        const y = this.speedo.y + this.speedo.height / 2 - height / 2;
+        const fontSize = this.speedo.fontSize * 1.3;
+
+        this.hctx.strokeStyle = "rgba(0, 255, 0, 0.7)";
+        this.hctx.lineWidth = this.lineWidth;
+        this.hctx.fillStyle = "rgba(0, 255, 0, 0.7)";
+        this.hctx.font = `${fontSize}px 'Courier New', monospace`;
+        this.hctx.textAlign = "right";
+        this.hctx.textBaseline = "middle";
+
+        this.hctx.clearRect(x, y, width, height);
+
+        this.hctx.save();
+
+        // Define clipping rectangle
+        this.hctx.beginPath();
+        this.hctx.rect(x, y, width, height);
+        this.hctx.clip();
+        const nDigit = 4;
+        const digitHeight = height / 2;
+
+        let mask = 1;
+        // for all digits, from smaller to higher
+        for (let d = 0; d < nDigit; d++) {
+            const digitVal = Math.floor(speed / mask); // unit
+            let frac = (speed / mask) - digitVal; // 0 → 1 progress
+            if (d != 0) {
+                if (frac > 0.9)
+                    frac = frac * 10 - 9;
+                else
+                    frac = 0;
+            }
+            for (let i = -1; i <= 1; i++) {
+                const digit = (digitVal + i + 10) % 10; // wrap 0-9
+                const offsetY = (i - frac) * (digitHeight + (d ? digitHeight : 0));
+                this.hctx.fillText(digit.toString(), x + width - width * d / nDigit, y + height / 2 - offsetY);
+            }
+            mask *= 10;
+        }
+
+        this.hctx.restore();
     }
 
     updateSpeedometer(speed) {
@@ -278,6 +401,7 @@ export class HUD {
         const tickSpacing = this.size / 15; // pixels between minor ticks
         const unitsPerTick = 10; // altitude units per tick
         const unitPerLabel = 20;
+
 
         // Ruler
         this.hctx.strokeStyle = "rgba(0, 255, 0, 0.7)";
@@ -302,6 +426,8 @@ export class HUD {
             if (tickValue % unitPerLabel === 0)
                 this.hctx.fillText(tickValue.toString(), x + width - fontSize, tickY);
         }
+
+        this.speedometerBox(speed);
     }
 
     getYawValue(angle) {
@@ -351,12 +477,17 @@ export class HUD {
             this.hctx.lineTo(xCenter - cos * outerRadius, yCenter - sin * outerRadius);
             this.hctx.stroke();
 
-            // let labelDeg = Math.round((tickDeg - offset + 360) % 360);
             let tickValue = Math.floor(yawDeg / unitsPerTick) * unitsPerTick - i * unitsPerTick;
             tickValue = 360 - (tickValue % 360); // because why not ?
             // Label
-            if (tickValue % unitPerLabel == 0) {
-                this.hctx.fillText(this.getYawValue(tickValue), xCenter - cos * labelRadius, yCenter - sin * labelRadius);
+            if (tickValue % unitPerLabel === 0) {
+                this.hctx.save();
+                this.hctx.translate(xCenter - cos * labelRadius, yCenter - sin * labelRadius);
+                this.hctx.rotate(tickRad - Math.PI / 2);
+                this.hctx.textAlign = "center";
+                this.hctx.textBaseline = "middle";
+                this.hctx.fillText(this.getYawValue(tickValue), 0, 0);
+                this.hctx.restore();
             }
         }
 
@@ -374,17 +505,25 @@ export class HUD {
         this.hctx.fillText(Math.round(thrustLevel * 100) + "%", x + width, y + height / 3);
     }
 
-    updateSpeedInfo(speed) {
+    updateSpeedInfo(speed, alpha) {
         const { width, height, x, y, fontSize } = this.speedInfo;
 
         this.hctx.font = `${fontSize}px 'Courier New', monospace`;
         this.hctx.textAlign = "left";
         this.hctx.textBaseline = "top";
 
+        // this.hctx.fillStyle = "rgba(100, 0.0, 0.0, 0.3)";
+        // this.hctx.fillRect(x, y, width, height);
+
+
         // Mach
         const soundSpeed = 1235.6; // km/h at 20 celsius
         const mach = speed / soundSpeed;
         this.hctx.fillText("M " + mach.toFixed(2), x, y);
+
+        // alpha
+        this.hctx.fillText("α " + Math.floor(alpha), x, y + height / 3);
+
     }
 
     updateRoll(pitch, roll) {
@@ -419,6 +558,17 @@ export class HUD {
         this.hctx.restore();
     }
 
+    updateVSI(verticalSpeed) {
+        const { width, height, x, y, fontsize } = this.altim;
+
+        this.hctx.font = `${ this.size / 35}px 'Courier New', monospace`;
+        this.hctx.textAlign = "right";
+        this.hctx.textBaseline = "top";
+
+        this.hctx.fillText("VSI", x + width, y - height * 0.10);
+        this.hctx.fillText(verticalSpeed.toFixed(1), x + width, y - height * 0.05);
+    }
+
     deactivate() {
         this.activated = false;
         this.hctx.clearRect(0, 0, this.size, this.size);
@@ -440,14 +590,17 @@ export class HUD {
         this.hctx.clearRect(0, 0, this.size, this.size);
 
         const speed = this.plane.getSpeed() * 3.6;
+        const alpha = this.plane.getAlpha() * 180 / Math.PI;
         this.updateSpeedometer(speed);
-        this.updateSpeedInfo(speed);
+        this.updateSpeedInfo(speed, alpha);
         const thrustLevel = this.plane.getThrustLevel();
         this.updateThrust(thrustLevel);
         this.updateAltimeter(this.plane.getAltitude());
         const euler = this.plane.getEuler();
         this.updateCompas(euler.y);
         this.updateRoll(euler.x, euler.z);
+        const verticalSpeed = this.plane.getVerticalSpeed()
+        this.updateVSI(verticalSpeed);   // VerticalSpeedIndicator
 
         this.hctx.save();
 

@@ -9,10 +9,6 @@ import { Plane } from "./AVehicule.js";
 const distToMount = 4;
 const interactInterval = 1000; //ms
 
-const speedometer = document.getElementById("speedometer");
-const altimeter = document.getElementById("altimeter");
-const thrustBar = document.getElementById("thrustBar");
-
 export class Player {
     constructor(camera, scene, chunkManager) {
         this.camera = camera;
@@ -34,21 +30,6 @@ export class Player {
         // this.current = this.walker; // default mode
     }
 
-    updateHUD() {
-        if (this.current instanceof Walker)
-            return;
-
-        const speed = Math.floor(this.current.getSpeed() * 3.6); // m/s to km/h
-        speedometer.textContent = speed + " km/h";
-        
-        if (this.current instanceof Plane) {
-            const altitude = Math.floor(this.current.getAltitude());
-            altimeter.textContent = altitude + " m";
-
-            const percent = Math.floor(this.current.getThrustLevel() * 100);
-            thrustBar.style.height = percent + "%";
-        }
-    }
 
     updateTracksColor(colorMap) {
         this.walker.footprints.updateMaterialColor(colorMap);
@@ -100,8 +81,6 @@ export class Player {
                 vehicule.update(delta, null);
         }
         this.current.update(delta, controls);
-
-        this.updateHUD();
 
         if (controls.interact && performance.now() - this.lastInteractTime > interactInterval) {
             if (this.current instanceof Walker) {
