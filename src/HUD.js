@@ -49,7 +49,7 @@ export class HUD {
 
         // Recalculate ladder canvas
         this.ladderCanvas.width = this.size;
-        this.ladderCanvas.height = this.size * 9;
+        this.ladderCanvas.height = this.size * 7;
         this.ladderCanvas.style.top = `${Math.floor((window.innerHeight - this.ladderCanvas.height) / 2)}px`;
         this.ladderCanvas.style.left = `${Math.floor((window.innerWidth - this.size) / 2)}px`;
 
@@ -573,7 +573,7 @@ export class HUD {
         this.activated = false;
         this.hctx.clearRect(0, 0, this.size, this.size);
         this.dctx.clearRect(0, 0, this.size, this.size);
-        this.lctx.clearRect(0, 0, this.size, this.size * 9);
+        this.lctx.clearRect(0, 0, this.size, this.size * 7);
     }
 
     activate() {

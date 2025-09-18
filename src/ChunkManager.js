@@ -1,29 +1,6 @@
 import { MeshStandardMaterial, TextureLoader } from "three";
 import { Chunk } from "./Chunk.js";
 
-// const chunkDepth = {
-//   VERY_LOW: {
-//     depth: 32,
-//     res: 8,
-//   },
-//   LOW: {
-//     depth: 16,
-//     res: 16,
-//   },
-//   MID: {
-//     depth: 8,
-//     res: 32,
-//   },
-//   HIGH: {
-//     depth: 4,
-//     res: 64
-//   },
-//   VERY_HIGH: {
-//     depth: 2,
-//     res: 128
-//   }
-// }
-
 const chunkDepth = {
   VERY_LOW: {
     depth: 24,
@@ -80,7 +57,6 @@ export class ChunkManager {
     this.material = material;
     this.getHeightAt = heightFunction;
     this.terrainType = terrainType;
-    console.log("ChunkManager changed to type:", this.terrainType);
   }
 
   // remove children (recursivly) + check if in requested list -> add to remove list
@@ -258,7 +234,7 @@ export class ChunkManager {
   getChunkSize(altitude) {
     const MAX_SIZE = 16384;
 
-    let ceiling = 31;
+    let ceiling = 32;
     let size = 32;
     while (ceiling <= MAX_SIZE) {
       if (altitude < ceiling) {
@@ -309,8 +285,8 @@ export class ChunkManager {
     }
     this.#removeOldChunks(needed);
 
-    console.log("altitude =", position.y,"chunsize = ", this.size, "m, horizon is at", this.size * chunkDepth.VERY_LOW.depth, "meters");
-
+    // console.log("altitude =", position.y,"chunsize = ", this.size, "m, horizon is at", this.size * chunkDepth.VERY_LOW.depth, "meters");
+    // console.log("position=", position);
   }
 
   // disposeChunks() {

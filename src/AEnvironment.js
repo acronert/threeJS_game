@@ -1,10 +1,9 @@
 
 export class AEnvironment {
-  constructor(scene, camera, chunkManager, player) {
+  constructor(scene, camera, chunkManager) {
     this.scene = scene;
     this.camera = camera;
     this.chunkManager = chunkManager;
-    this.player = player;
   }
 
   update() {
@@ -24,7 +23,7 @@ export class DesertEnvironment extends AEnvironment {
     this.material = createSandMaterial();
 
     this.chunkManager.init(this.material, this.heightFunction, "DESERT");
-    this.player.updateTracksColor(this.material.map);
+    // this.player.updateTracksColor(this.material.map);
   }
 
   update() {
@@ -37,15 +36,15 @@ import { getSnowHeightAt } from "./PerlinNoise.js";
 import { createSnowMaterial } from "./Materials.js";
 
 export class SnowEnvironment extends AEnvironment {
-  constructor(scene, camera, chunkManager, player) {
-    super(scene, camera, chunkManager, player);
+  constructor(scene, camera, chunkManager) {
+    super(scene, camera, chunkManager);
 
     console.log("SnowEnvironment constructor");
     this.heightFunction = getSnowHeightAt;
     this.material = createSnowMaterial();
 
     this.chunkManager.init(this.material, this.heightFunction, "SNOW");
-    this.player.updateTracksColor(this.material.map);
+    // this.player.updateTracksColor(this.material.map);
   }
 
   update() {
@@ -59,16 +58,17 @@ import { getPlanetHeightAt } from "./PerlinNoise.js";
 import { createPlanetMaterial } from "./Materials.js";
 
 export class PlanetEnvironment extends AEnvironment {
-  constructor(scene, camera, chunkManager, player) {
-    super(scene, camera, chunkManager, player);
+  constructor(scene, camera, chunkManager) {
+    super(scene, camera, chunkManager);
 
     console.log("SnowEnvironment constructor");
     this.heightFunction = getPlanetHeightAt;
     this.material = createPlanetMaterial();
 
     this.chunkManager.init(this.material, this.heightFunction, "PLANET");
-    this.player.updateTracksColor(this.material.map);
+    // this.player.updateTracksColor(this.material.map);
   }
+
 
   update() {
     this.chunkManager.update(this.camera.position);

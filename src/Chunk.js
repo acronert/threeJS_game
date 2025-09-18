@@ -26,6 +26,7 @@ export class Chunk {
     this.mesh.receiveShadow = true;
   }
 
+
   getChildrenChunksKeys() {
     if (this.size == 32)
       return [];

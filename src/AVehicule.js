@@ -18,10 +18,10 @@ function getRollRelativeToForward(quat) {
 }
 
 export class AVehicule {
-  constructor(camera, scene, chunkManager) {
+  constructor(camera, scene, world) {
     this.camera = camera;
     this.scene = scene;
-    this.chunkManager = chunkManager;
+    this.world = world;
 
     this.mesh = null;
 
@@ -61,7 +61,7 @@ export class AVehicule {
   }
 
   getGroundNormal() {
-    const n = getNormalAt(this.position.x, this.position.z, 0.25, this.chunkManager.getHeightAt);
+    const n = getNormalAt(this.position.x, this.position.z, 0.25, this.world.getHeightAt);
     return new THREE.Vector3(n.x, n.z, n.y); // invert z and y to put y up
   }
 
@@ -194,7 +194,7 @@ export class AVehicule {
 
     // Get terrain infos
     const nextPos = this.position.clone().addScaledVector(this.speed, delta);
-    const groundHeight = this.chunkManager.getHeightAt(this.position.x, this.position.z) + (this.meshHeight / 2);
+    const groundHeight = this.world.getHeightAt(this.position.x, this.position.z) + (this.meshHeight / 2);
     const groundNormal = this.getGroundNormal();
 
     this.isOnGround = (nextPos.y <= groundHeight + 0.01);
@@ -212,7 +212,14 @@ export class AVehicule {
 
     if (controls)
       this.updateCamera(controls);
+
+    // if (this instanceof Wheel && this.isOnGround){
+    //           const euler = new THREE.Euler();
+    //           euler.setFromQuaternion(this.camera.quaternion, "YXZ");
+    //   this.decals.update(this.mesh.position.x, this.mesh.position.z, euler.y);
+    // }
   }
+
 
 }
 
@@ -221,8 +228,8 @@ import { Tiretracks } from "./ATerrainDecal.js";
 import { createRubberMesh } from "./RubberMesh.js";
 
 export class Wheel extends AVehicule {
-  constructor(camera, scene, chunkManager) {
-    super(camera, scene, chunkManager);
+  constructor(camera, scene, world) {
+    super(camera, scene, world);
     this.rotationSpeed = 3.0; // in rad/sec
     this.acc = 15.0; // acceleration
     this.friction = 0.990;
@@ -235,7 +242,7 @@ export class Wheel extends AVehicule {
     this.position = this.mesh.position;
     this.scene.add(this.mesh);
 
-    this.decals = new Tiretracks(this.scene, this.chunkManager);
+    this.decals = new Tiretracks(this.scene, this.world);
   }
 
   spinMesh(delta) {
@@ -253,8 +260,8 @@ export class Wheel extends AVehicule {
 import { createBeachBallMesh } from "./BeachBallMesh.js";
 
 export class Ball extends AVehicule {
-  constructor(camera, scene, chunkManager) {
-    super(camera, scene, chunkManager);
+  constructor(camera, scene, world) {
+    super(camera, scene, world);
     this.rotationSpeed = 3.0; // in rad/sec
     this.acc = 8.0; // acceleration
     this.friction = 0.995;
@@ -269,7 +276,7 @@ export class Ball extends AVehicule {
     this.position = this.mesh.position;
     this.scene.add(this.mesh);
 
-    // this.decals = new Tiretracks(this.scene, this.chunkManager);
+    // this.decals = new Tiretracks(this.scene, this.world);
   }
 
   spinMesh(delta) {
@@ -296,8 +303,8 @@ import { createSnowBoardMesh } from "./SnowBoardMesh.js";
 import { HUD } from "./HUD.js";
 
 export class SnowBoard extends AVehicule {
-  constructor(camera, scene, chunkManager) {
-    super(camera, scene, chunkManager);
+  constructor(camera, scene, world) {
+    super(camera, scene, world);
     this.rotationSpeed = 3.0; // in rad/sec
     this.acc = 5.0; // acceleration
     this.friction = 0.995;
@@ -311,7 +318,7 @@ export class SnowBoard extends AVehicule {
     this.position = this.mesh.position;
     this.scene.add(this.mesh);
 
-    // this.tiretracks = new Tiretracks(this.scene, this.chunkManager);
+    // this.tiretracks = new Tiretracks(this.scene, this.world);
   }
 }
 
@@ -320,9 +327,16 @@ export class SnowBoard extends AVehicule {
 
 import { createDeltaPlaneMesh } from "./DeltaPlaneMesh.js";
 
+// Type	      mass(kg)	S (m²)	CL (typ)	CD (typ)	A (m²)	liftCoef (accel/m²)	dragCoef
+// Deltaplane	120	      15	    1.0	      0.05	    1.0	    0.0766	            0.000255
+// LightSport	300	      12	    1.0	      0.04	    1.0	    0.0245	            0.0000817
+// Smallprop	1000	    16	    1.0	      0.03	    1.5	    0.0098	            0.0000276
+
+// Plane specific
+
 export class Plane extends AVehicule {
-  constructor(camera, scene, chunkManager) {
-    super(camera, scene, chunkManager);
+  constructor(camera, scene, world) {
+    super(camera, scene, world);
     this.rotationSpeed = 1.0; // in rad/sec
     this.acc = 20.0; // acceleration
     this.friction = 0.990;
@@ -331,18 +345,11 @@ export class Plane extends AVehicule {
 
     this.meshHeight = 2;
     this.mesh = createDeltaPlaneMesh();
-    this.mesh.position.set(5, 2000, 5);
+    this.mesh.position.set(5, 10, 5);
     this.position = this.mesh.position;
     this.scene.add(this.mesh);
 
-    this.decals = new Tiretracks(this.scene, this.chunkManager);
-
-    // Type	      mass(kg)	S (m²)	CL (typ)	CD (typ)	A (m²)	liftCoef (accel/m²)	dragCoef
-    // Deltaplane	120	      15	    1.0	      0.05	    1.0	    0.0766	            0.000255
-    // LightSport	300	      12	    1.0	      0.04	    1.0	    0.0245	            0.0000817
-    // Smallprop	1000	    16	    1.0	      0.03	    1.5	    0.0098	            0.0000276
-
-    // Plane specific
+    this.decals = new Tiretracks(this.scene, this.world);
 
     // HUD
     this.hud = new HUD(this);
@@ -359,20 +366,20 @@ export class Plane extends AVehicule {
     // dragForce = 0.5 * airDensity * dragCoef * referenceArea / mass
 
     // DELTAPLANE
-    // this.rho = 1.225;  // Air density (kg/m**3) : 1.225  at sea level;
-    // this.S = 15.0;     // Wing area (m**2)
-    // this.C_L = 0.2;    // Lift coefficent (dimensionless): 0.5->1.5 depending on area of attack
-    // this.mass = 120;   // (kg)
-    // this.liftCoef = 0.5 * this.rho * this.S * this.C_L / this.mass;
+    this.rho = 1.225;  // Air density (kg/m**3) : 1.225  at sea level;
+    this.S = 15.0;     // Wing area (m**2)
+    this.C_L = 0.2;    // Lift coefficent (dimensionless): 0.5->1.5 depending on area of attack
+    this.mass = 120;   // (kg)
+    this.liftCoef = 0.5 * this.rho * this.S * this.C_L / this.mass;
 
-    // this.A = 1.0;     // Reference area 
-    // this.C_D = 0.05;  // Drag coefficient
-    // this.dragCoef = 0.5 * this.rho * this.C_D * this.A / this.mass;
+    this.A = 1.0;     // Reference area 
+    this.C_D = 0.05;  // Drag coefficient
+    this.dragCoef = 0.5 * this.rho * this.C_D * this.A / this.mass;
 
-    // this.thrust = 10.0; // m/s**2
-    // this.thrustLevel = 0.0;
-    // this.thrustPerSec = 0.5;
-    // this.thrustForce = this.thrust / this.mass;
+    this.thrust = 15.0; // m/s**2
+    this.thrustLevel = 0.0;
+    this.thrustPerSec = 0.5;
+    this.thrustForce = this.thrust / this.mass;
 
     // MEDIUM PLANE
     // this.rho = 1.225;  // Air density (kg/m**3) : 1.225  at sea level;
@@ -393,17 +400,19 @@ export class Plane extends AVehicule {
     // this.thrustForce = this.thrust / this.mass;
 
     // // JET FIGHTER
-    this.rho = 1.225;  // Air density (kg/m**3) : 1.225  at sea level;
-    this.S = 28.0;     // Wing area (m**2)
-    this.C_L = 0.2;    // Lift coefficent (dimensionless): 0.5->1.5 depending on area of attack
-    this.mass = 11600;   // (kg)
+    // this.rho = 1.225;  // Air density (kg/m**3) : 1.225  at sea level;
+    // this.S = 28.0;     // Wing area (m**2)
+    // this.C_L = 0.2;    // Lift coefficent (dimensionless): 0.5->1.5 depending on area of attack
+    // this.mass = 11600;   // (kg)
+
+    // this.A = 1.0;     // Reference area 
+    // this.C_D = 0.05;  // Drag coefficient
+
+    // this.thrust = 200.0; // m/s**2
+
+
     this.liftCoef = 0.5 * this.rho * this.S * this.C_L / this.mass;
-
-    this.A = 1.0;     // Reference area 
-    this.C_D = 0.05;  // Drag coefficient
     this.dragCoef = 0.5 * this.rho * this.C_D * this.A / this.mass;
-
-    this.thrust = 200.0; // m/s**2
     this.thrustLevel = 0.0;
     this.thrustPerSec = 0.3;
     this.thrustForce = this.thrust / this.mass;
@@ -411,6 +420,24 @@ export class Plane extends AVehicule {
     this.alpha = 0; // angle bwtween forward direction and velocity vector
 
   }
+
+  setPlaneAttributes(S, C_L, mass, A, C_D, thrust) {
+    this.S = S;     // Wing area (m**2)
+    this.C_L = C_L;    // Lift coefficent (dimensionless): 0.5->1.5 depending on area of attack
+    this.mass = mass;   // (kg)
+
+    this.A = A;     // Reference area 
+    this.C_D = C_D;  // Drag coefficient
+
+    this.thrust = thrust; // m/s**2
+
+
+    this.dragCoef = 0.5 * this.rho * this.C_D * this.A / this.mass;
+    this.liftCoef = 0.5 * this.rho * this.S * this.C_L / this.mass;
+    this.thrustForce = this.thrust / this.mass;
+
+  }
+
 
   getEuler() {
     const euler = new THREE.Euler();

@@ -17,10 +17,28 @@
 </head>
 
 <body>
+
+	<div id="menu">
+		<label for="map-select">Map:</label>
+		<select id="map-select">
+			<option value="DESERT">Desert</option>
+			<option value="SNOW">Snow</option>
+			<option value="PLANET">planet</option>
+		</select>
+		<label for="vehicule-select">Vehicule:</label>
+		<select id="vehicule-select">
+			<option value="WALKER">None (walk)</option>
+			<option value="WHEEL">Rubber Tire</option>
+			<option value="BALL">Beach Ball</option>
+			<option value="SNOWBOARD">Snowboard</option>
+			<option value="JETPLANE">Jet plane</option>
+			<option value="DELTAPLANE">Deltaplane</option>
+		</select>
+	</div>
+
 	<div id="fps_counter">FPS:</div>
 	<div id="pause_screen">Pause</div>
 	<button id="help_button">?</button>
-	<button id="environment_button">Change Environment</button>
 	<button id="fullscreen_button">Fullscreen</button>
 	<div id="help">
 		<strong>What is this?</strong><br><br>
@@ -28,7 +46,8 @@
 		You can explore it on foot, by riding the rubber tire, rolling the beach ball,
 		sliding the snow board or flying the deltaplane.
 		It works especially well on mobile, where you can look around and control the vehicules by moving your device.
-		Built with Three.js as a learning project, without using a game engine or physics engine. September 2025.<br><br>
+		Built with Three.js as a learning project, without using a game engine or physics engine. September
+		2025.<br><br>
 
 		<strong>Controls</strong><br><br>
 
@@ -51,84 +70,93 @@
 			<a href="https://github.com/acronert/threeJS_game" target="_blank">github.com/acronert/threeJS_game</a><br>
 			Alex CRÖNERT
 		</p>
+
 	</div>
 	<style>
+		body,
+		html {
+			margin: 0;
+			padding: 0;
+			width: 100%;
+			height: 100%;
+			overflow: hidden;
+			font-family: system-ui, sans-serif;
+		}
+
 		#fps_counter {
 			position: absolute;
-			top: 20px;
-			right: 20px;
+			top: 1rem;
+			right: 1rem;
 			color: white;
-			font-size: 24px;
+			font-size: clamp(14px, 2vw, 24px);
 			font-family: monospace;
+			background: rgba(0, 0, 0, 0.4);
+			padding: 0.25em 0.5em;
+			border-radius: 6px;
 		}
 
 		#pause_screen {
 			position: absolute;
-			top: 50%;
-			left: 50%;
-			transform: translate(-50%, -50%);
-			/* center */
-			background-color: rgba(255, 255, 255, 0.8);
-			color: rgb(0, 0, 0);
-			display: flex;
-			flex-direction: column;
-			gap: 10px;
-			padding: 20px 20px;
-			border-radius: 8px;
+			inset: 0;
+			/* fills screen */
 			display: none;
-			font-size: 48px;
+			align-items: center;
+			justify-content: center;
+			background: rgba(255, 255, 255, 0.85);
+			color: black;
+			font-size: clamp(32px, 6vw, 48px);
+			font-weight: bold;
+			text-align: center;
 		}
 
+		#help_button,
 		#fullscreen_button {
 			position: absolute;
-			top: 20px;
-			left: 60px;
-			display: flex;
-			flex-direction: column;
-			gap: 10px;
-			padding: 5px 10px;
+			top: 1rem;
+			padding: 0.5em 0.75em;
 			border-radius: 8px;
-			font-size: 18px;
+			font-size: clamp(14px, 2vw, 18px);
 			cursor: pointer;
-		}
-
-		#environment_button {
-			position: absolute;
-			top: 60px;
-			left: 20px;
-			display: flex;
-			flex-direction: column;
-			gap: 10px;
-			padding: 5px 10px;
-			border-radius: 8px;
-			font-size: 18px;
-			cursor: pointer;
+			background: rgba(255, 255, 255, 0.8);
+			border: none;
 		}
 
 		#help_button {
+			left: 1rem;
+		}
+
+		#fullscreen_button {
+			left: 4rem;
+		}
+
+		#menu {
 			position: absolute;
-			top: 20px;
-			left: 20px;
+			top: 4rem;
+			right: 1rem;
 			display: flex;
 			flex-direction: column;
-			gap: 10px;
-			padding: 5px 10px;
+			gap: 0.75rem;
+			padding: 1rem;
 			border-radius: 8px;
-			font-size: 18px;
-			cursor: pointer;
+			font-size: clamp(14px, 2vw, 18px);
+			background: rgba(255, 255, 255, 0.8);
+			backdrop-filter: blur(6px);
 		}
 
 		#help {
 			position: absolute;
-			top: 60px;
-			left: 20px;
-			width: 350px;
-			background-color: rgba(255, 255, 255, 0.8);
-			color: rgb(0, 0, 0);
-			padding: 15px;
+			top: 4rem;
+			left: 1rem;
+			width: min(90%, 400px);
+			max-height: 70vh;
+			overflow-y: auto;
+			background: rgba(255, 255, 255, 0.9);
+			padding: 1rem;
 			border-radius: 8px;
 			display: none;
 			z-index: 10;
+			font-size: clamp(12px, 2vw, 16px);
+			line-height: 1.4;
 		}
 	</style>
 	<script type="importmap">

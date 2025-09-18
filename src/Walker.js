@@ -37,7 +37,7 @@ export class Walker {
         if (controls.up)   this.position.addScaledVector(up, speed * delta);
         if (controls.down)  this.position.addScaledVector(up, -speed * delta);
 
-        // this.position.y = this.chunkManager.getHeightAt(this.position.x, this.position.z) + 1.7;
+        this.position.y = this.chunkManager.getHeightAt(this.position.x, this.position.z) + 1.7;
 
         // Apply rotation and movement
         this.camera.position.copy(this.position);
