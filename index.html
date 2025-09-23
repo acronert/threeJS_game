@@ -98,7 +98,6 @@
 		#pause_screen {
 			position: absolute;
 			inset: 0;
-			/* fills screen */
 			display: none;
 			align-items: center;
 			justify-content: center;
@@ -109,24 +108,28 @@
 			text-align: center;
 		}
 
-		#help_button,
 		#fullscreen_button {
 			position: absolute;
 			top: 1rem;
 			padding: 0.5em 0.75em;
 			border-radius: 8px;
-			font-size: clamp(14px, 2vw, 18px);
+			font-size: clamp(16px, 2vw, 20px);
 			cursor: pointer;
 			background: rgba(255, 255, 255, 0.8);
 			border: none;
+			left: 4rem;
 		}
 
 		#help_button {
 			left: 1rem;
-		}
-
-		#fullscreen_button {
-			left: 4rem;
+			position: absolute;
+			top: 1rem;
+			padding: 0.5em 0.75em;
+			border-radius: 8px;
+			font-size: clamp(16px, 2vw, 20px);
+			cursor: pointer;
+			background: rgba(255, 255, 255, 0.8);
+			border: none;
 		}
 
 		#menu {
@@ -138,10 +141,16 @@
 			gap: 0.75rem;
 			padding: 1rem;
 			border-radius: 8px;
-			font-size: clamp(14px, 2vw, 18px);
+			font-size: clamp(16px, 2vw, 20px);
 			background: rgba(255, 255, 255, 0.8);
 			backdrop-filter: blur(6px);
 		}
+
+		#map-select,
+		#vehicule-select {
+			font-size: clamp(16px, 2vw, 20px);
+		}
+
 
 		#help {
 			position: absolute;

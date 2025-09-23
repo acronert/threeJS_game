@@ -345,7 +345,7 @@ export class Plane extends AVehicule {
 
     this.meshHeight = 2;
     this.mesh = createDeltaPlaneMesh();
-    this.mesh.position.set(5, 10, 5);
+    this.mesh.position.set(5, 5, 5);
     this.position = this.mesh.position;
     this.scene.add(this.mesh);
 
@@ -486,13 +486,13 @@ export class Plane extends AVehicule {
         this.orientation.multiply(q);
       }
       // Mouse
-      const mouseQuat = controls.orientationQuat.clone();
-      const euler = new THREE.Euler().setFromQuaternion(mouseQuat, 'YXZ');
-      const currentEuler = new THREE.Euler().setFromQuaternion(this.orientation, 'YXZ');
-      currentEuler.x = -euler.x; // pitch from mouse
-      currentEuler.z = -euler.y; // roll from mouse
-      currentEuler.y += euler.y / Math.PI * this.rotationSpeed * delta; // yaw from mouse (roll affect yaw)
-      this.orientation.setFromEuler(currentEuler);
+      // const mouseQuat = controls.orientationQuat.clone();
+      // const euler = new THREE.Euler().setFromQuaternion(mouseQuat, 'YXZ');
+      // const currentEuler = new THREE.Euler().setFromQuaternion(this.orientation, 'YXZ');
+      // currentEuler.x = -euler.x; // pitch from mouse
+      // currentEuler.z = -euler.y; // roll from mouse
+      // currentEuler.y += euler.y / Math.PI * this.rotationSpeed * delta; // yaw from mouse (roll affect yaw)
+      // this.orientation.setFromEuler(currentEuler);
 
     }
     // MOBILE
@@ -604,12 +604,27 @@ export class Plane extends AVehicule {
 
     this.yawPlane();
   }
+  
+  handleGroundPhysics(delta, controls, groundNormal) {
+    this.alignRotationToNormal(groundNormal);
+    this.applyGroundAcceleration(groundNormal, controls);
+    this.speed.addScaledVector(this.acceleration, delta); // update speed from acceleration
+    this.applyDrift(delta);
+    this.applyFriction();
+    this.applyBounce(groundNormal);
+    this.applyAirAcceleration(delta, controls);
+  }
 
+  // applyGroundAcceleration(groundNormal, controls) {
+  //   // Gravity (projected on terrain)
+  //   this.acceleration.copy(this.gravity).projectOnPlane(groundNormal);
 
-  // block position
-  // updateMesh(nextPos) {
-  //   this.mesh.quaternion.copy(this.orientation);
+  //   // Input
+  //   const forward = this.worldForward.clone().applyQuaternion(this.orientation);
+  //   if (controls?.forward)
+  //     this.acceleration.add(forward.multiplyScalar(this.acc));
+  //   if (controls?.backward)
+  //     this.acceleration.add(forward.multiplyScalar(-this.acc));
   // }
-
 
 }
